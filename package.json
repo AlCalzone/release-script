@@ -1,0 +1,45 @@
+{
+  "name": "release-script",
+  "version": "1.0.0-beta.0",
+  "description": "Release script to automatically increment version numbers and push git tags of Node.js projects",
+  "main": "build/release.js",
+  "bin": "build/release.js",
+  "files": [
+    "/build"
+  ],
+  "author": {
+    "name": "AlCalzone",
+    "email": "d.griesel@gmx.net"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlCalzone/release-script.git"
+  },
+  "keywords": [
+    "release",
+    "automation",
+    "semver"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AlCalzone/release-script/issues"
+  },
+  "homepage": "https://github.com/AlCalzone/release-script#readme",
+  "devDependencies": {
+    "@types/node": "^12.12.6",
+    "@types/semver": "^6.2.0",
+    "@types/yargs": "^13.0.3",
+    "typescript": "^3.7.2"
+  },
+  "dependencies": {
+    "alcalzone-shared": "^2.0.0",
+    "colors": "^1.4.0",
+    "semver": "^6.3.0",
+    "yargs": "^14.2.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "watch": "npm run build -- --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
