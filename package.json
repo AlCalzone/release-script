@@ -1,9 +1,9 @@
 {
   "name": "release-script",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "description": "Release script to automatically increment version numbers and push git tags of Node.js projects",
   "main": "build/release.js",
-  "bin": "build/release.js",
+  "bin": "bin/release.js",
   "files": [
     "/build"
   ],
