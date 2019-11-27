@@ -48,7 +48,7 @@ if (!pack?.version) {
 const ioPackPath = path.join(rootDir, "io-package.json");
 const hasIoPack = fs.existsSync(ioPackPath);
 const ioPack = hasIoPack ? require(ioPackPath) : undefined;
-if (hasIoPack && !ioPack?.commin?.version) {
+if (hasIoPack && !ioPack?.common?.version) {
 	fail("Missing property common.version from io-package.json!");
 }
 

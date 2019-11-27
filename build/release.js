@@ -52,7 +52,7 @@ if (!((_a = pack) === null || _a === void 0 ? void 0 : _a.version)) {
 const ioPackPath = path.join(rootDir, "io-package.json");
 const hasIoPack = fs.existsSync(ioPackPath);
 const ioPack = hasIoPack ? require(ioPackPath) : undefined;
-if (hasIoPack && !((_c = (_b = ioPack) === null || _b === void 0 ? void 0 : _b.commin) === null || _c === void 0 ? void 0 : _c.version)) {
+if (hasIoPack && !((_c = (_b = ioPack) === null || _b === void 0 ? void 0 : _b.common) === null || _c === void 0 ? void 0 : _c.version)) {
     fail("Missing property common.version from io-package.json!");
 }
 // Try to find the changelog
