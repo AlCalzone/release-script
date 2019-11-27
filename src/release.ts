@@ -47,7 +47,7 @@ if (!pack?.version) {
 // If this is an ioBroker project, also bump the io-package.json
 const ioPackPath = path.join(rootDir, "io-package.json");
 const hasIoPack = fs.existsSync(ioPackPath);
-const ioPack = hasIoPack ? require(packPath) : undefined;
+const ioPack = hasIoPack ? require(ioPackPath) : undefined;
 if (hasIoPack && !ioPack?.commin?.version) {
 	fail("Missing property common.version from io-package.json!");
 }
