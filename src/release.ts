@@ -40,11 +40,17 @@ if (!fs.existsSync(packPath)) {
 	fail("No package.json found in the current directory!");
 }
 const pack = require(packPath);
+if (!pack?.version) {
+	fail("Missing property version from package.json!");
+}
 
 // If this is an ioBroker project, also bump the io-package.json
 const ioPackPath = path.join(rootDir, "io-package.json");
 const hasIoPack = fs.existsSync(ioPackPath);
 const ioPack = hasIoPack ? require(packPath) : undefined;
+if (hasIoPack && !ioPack?.commin?.version) {
+	fail("Missing property common.version from io-package.json!");
+}
 
 // Try to find the changelog
 let isChangelogInReadme = false;
@@ -57,9 +63,7 @@ let changelogFilename: string;
 if (!fs.existsSync(changelogPath)) {
 	// The changelog might be in the readme
 	if (!fs.existsSync(readmePath)) {
-		fail(
-			"No CHANGELOG.md or README.md found in the current directory!",
-		);
+		fail("No CHANGELOG.md or README.md found in the current directory!");
 	}
 	isChangelogInReadme = true;
 	changelog = fs.readFileSync(readmePath, "utf8");
@@ -70,7 +74,8 @@ if (!fs.existsSync(changelogPath)) {
 	changelog = fs.readFileSync(changelogPath, "utf8");
 	changelogFilename = path.basename(changelogPath);
 }
-const CHANGELOG_PLACEHOLDER = CHANGELOG_PLACEHOLDER_PREFIX + " __WORK IN PROGRESS__";
+const CHANGELOG_PLACEHOLDER =
+	CHANGELOG_PLACEHOLDER_PREFIX + " __WORK IN PROGRESS__";
 const CHANGELOG_PLACEHOLDER_REGEX = new RegExp(
 	"^" + CHANGELOG_PLACEHOLDER + "$",
 	"gm",
@@ -215,7 +220,7 @@ if (argv.dry) {
 	pack.version = newVersion;
 	fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
 
-	console.log(`updating CHANGELOG.md`);
+	console.log(`updating ${changelogFilename}`);
 	const d = new Date();
 	changelog = changelog.replace(
 		CHANGELOG_PLACEHOLDER_REGEX,
@@ -225,7 +230,11 @@ if (argv.dry) {
 			"0",
 		)}-${padStart("" + d.getDate(), 2, "0")})`,
 	);
-	fs.writeFileSync(changelogPath, changelog, "utf8");
+	fs.writeFileSync(
+		isChangelogInReadme ? readmePath : changelogPath,
+		changelog,
+		"utf8",
+	);
 
 	if (hasIoPack) {
 		console.log(

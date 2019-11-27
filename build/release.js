@@ -23,6 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable @typescript-eslint/no-var-requires */
 const strings_1 = require("alcalzone-shared/strings");
@@ -44,10 +45,16 @@ if (!fs.existsSync(packPath)) {
     fail("No package.json found in the current directory!");
 }
 const pack = require(packPath);
+if (!((_a = pack) === null || _a === void 0 ? void 0 : _a.version)) {
+    fail("Missing property version from package.json!");
+}
 // If this is an ioBroker project, also bump the io-package.json
 const ioPackPath = path.join(rootDir, "io-package.json");
 const hasIoPack = fs.existsSync(ioPackPath);
 const ioPack = hasIoPack ? require(packPath) : undefined;
+if (hasIoPack && !((_c = (_b = ioPack) === null || _b === void 0 ? void 0 : _b.commin) === null || _c === void 0 ? void 0 : _c.version)) {
+    fail("Missing property common.version from io-package.json!");
+}
 // Try to find the changelog
 let isChangelogInReadme = false;
 let CHANGELOG_PLACEHOLDER_PREFIX = "##";
@@ -165,10 +172,10 @@ else {
     console.log(`updating package.json from ${colors.blue(pack.version)} to ${colors.green(newVersion)}`);
     pack.version = newVersion;
     fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
-    console.log(`updating CHANGELOG.md`);
+    console.log(`updating ${changelogFilename}`);
     const d = new Date();
     changelog = changelog.replace(CHANGELOG_PLACEHOLDER_REGEX, `${CHANGELOG_PLACEHOLDER_PREFIX} ${newVersion} (${d.getFullYear()}-${strings_1.padStart("" + (d.getMonth() + 1), 2, "0")}-${strings_1.padStart("" + d.getDate(), 2, "0")})`);
-    fs.writeFileSync(changelogPath, changelog, "utf8");
+    fs.writeFileSync(isChangelogInReadme ? readmePath : changelogPath, changelog, "utf8");
     if (hasIoPack) {
         console.log(`updating io-package.json from ${colors.blue(ioPack.common.version)} to ${colors.green(newVersion)}`);
         ioPack.common.version = newVersion;
