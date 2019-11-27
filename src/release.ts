@@ -27,6 +27,7 @@ import { argv } from "yargs";
 const colors = require("colors/safe");
 
 const rootDir = process.cwd();
+const isDryRun = argv.dry || argv._.includes("--dry");
 
 function fail(reason: string): never {
 	console.error("");
@@ -104,7 +105,7 @@ switch ((changelog.match(CHANGELOG_PLACEHOLDER_REGEX) || []).length) {
 // check if there are untracked changes
 const gitStatus = execSync("git status", { cwd: rootDir, encoding: "utf8" });
 if (/have diverged/.test(gitStatus)) {
-	if (!argv.dry) {
+	if (!isDryRun) {
 		fail(
 			colors.red(
 				"Cannot continue, the local branch has diverged from the git repo!",
@@ -118,7 +119,7 @@ if (/have diverged/.test(gitStatus)) {
 		);
 	}
 } else if (!/working tree clean/.test(gitStatus)) {
-	if (!argv.dry)
+	if (!isDryRun)
 		fail(
 			colors.red(
 				"Cannot continue, the local branch has uncommited changes!",
@@ -131,7 +132,7 @@ if (/have diverged/.test(gitStatus)) {
 			),
 		);
 } else if (/Your branch is behind/.test(gitStatus)) {
-	if (!argv.dry) {
+	if (!isDryRun) {
 		fail(
 			colors.red(
 				"Cannot continue, the local branch is behind the remote changes!",
@@ -163,6 +164,9 @@ const releaseTypes = [
 ];
 
 const releaseType = argv._[0] || "patch";
+if (releaseType.startsWith("--")) {
+	fail(`Invalid release type ${releaseType}. If you meant to pass hyphenated args, try again without the single "--".`);
+}
 let newVersion: string | null = releaseType;
 // Find the highest current version
 let oldVersion = pack.version as string;
@@ -209,7 +213,7 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 	);
 }
 
-if (argv.dry) {
+if (isDryRun) {
 	console.log(colors.yellow("dry run:") + " not updating package files");
 } else {
 	console.log(
@@ -255,7 +259,7 @@ const gitCommands = [
 	`git push`,
 	`git push --tags`,
 ];
-if (argv.dry) {
+if (isDryRun) {
 	console.log(colors.yellow("dry run:") + " I would execute this:");
 	for (const command of gitCommands) {
 		console.log("  " + command);

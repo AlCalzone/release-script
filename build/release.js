@@ -34,6 +34,7 @@ const semver = __importStar(require("semver"));
 const yargs_1 = require("yargs");
 const colors = require("colors/safe");
 const rootDir = process.cwd();
+const isDryRun = yargs_1.argv.dry || yargs_1.argv._.includes("--dry");
 function fail(reason) {
     console.error("");
     console.error(colors.red("ERROR: " + reason));
@@ -94,7 +95,7 @@ switch ((changelog.match(CHANGELOG_PLACEHOLDER_REGEX) || []).length) {
 // check if there are untracked changes
 const gitStatus = child_process_1.execSync("git status", { cwd: rootDir, encoding: "utf8" });
 if (/have diverged/.test(gitStatus)) {
-    if (!yargs_1.argv.dry) {
+    if (!isDryRun) {
         fail(colors.red("Cannot continue, the local branch has diverged from the git repo!"));
     }
     else {
@@ -102,13 +103,13 @@ if (/have diverged/.test(gitStatus)) {
     }
 }
 else if (!/working tree clean/.test(gitStatus)) {
-    if (!yargs_1.argv.dry)
+    if (!isDryRun)
         fail(colors.red("Cannot continue, the local branch has uncommited changes!"));
     else
         console.log(colors.red("This is a dry run. The full run would fail due to uncommited changes\n"));
 }
 else if (/Your branch is behind/.test(gitStatus)) {
-    if (!yargs_1.argv.dry) {
+    if (!isDryRun) {
         fail(colors.red("Cannot continue, the local branch is behind the remote changes!"));
     }
     else {
@@ -130,6 +131,9 @@ const releaseTypes = [
     "prerelease",
 ];
 const releaseType = yargs_1.argv._[0] || "patch";
+if (releaseType.startsWith("--")) {
+    fail(`Invalid release type ${releaseType}. If you meant to pass hyphenated args, try again without the single "--".`);
+}
 let newVersion = releaseType;
 // Find the highest current version
 let oldVersion = pack.version;
@@ -165,7 +169,7 @@ else {
     }
     console.log(`bumping version ${oldVersion} to specific version ${newVersion}`);
 }
-if (yargs_1.argv.dry) {
+if (isDryRun) {
     console.log(colors.yellow("dry run:") + " not updating package files");
 }
 else {
@@ -190,7 +194,7 @@ const gitCommands = [
     `git push`,
     `git push --tags`,
 ];
-if (yargs_1.argv.dry) {
+if (isDryRun) {
     console.log(colors.yellow("dry run:") + " I would execute this:");
     for (const command of gitCommands) {
         console.log("  " + command);
