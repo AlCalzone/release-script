@@ -8,8 +8,11 @@
 	or
 	npx AlCalzone/release-script#v1.0.0 -- <version> [--dry]
 
-	PLACEHOLDER for next version in changelog:
+	PLACEHOLDER for next version in CHANGELOG.md:
 	## __WORK IN PROGRESS__
+
+	PLACEHOLDER for next version in README.md:
+	### __WORK IN PROGRESS__
 
 */
 
@@ -43,12 +46,31 @@ const ioPackPath = path.join(rootDir, "io-package.json");
 const hasIoPack = fs.existsSync(ioPackPath);
 const ioPack = hasIoPack ? require(packPath) : undefined;
 
+// Try to find the changelog
+let isChangelogInReadme = false;
+let CHANGELOG_PLACEHOLDER_PREFIX = "##";
 const changelogPath = path.join(rootDir, "CHANGELOG.md");
+const readmePath = path.join(rootDir, "README.md");
+/** Can also be the readme! */
+let changelog: string;
+let changelogFilename: string;
 if (!fs.existsSync(changelogPath)) {
-	fail("No CHANGELOG.md found in the current directory!");
+	// The changelog might be in the readme
+	if (!fs.existsSync(readmePath)) {
+		fail(
+			"No CHANGELOG.md or README.md found in the current directory!",
+		);
+	}
+	isChangelogInReadme = true;
+	changelog = fs.readFileSync(readmePath, "utf8");
+	changelogFilename = path.basename(readmePath);
+	// The changelog is indented one more level in the readme
+	CHANGELOG_PLACEHOLDER_PREFIX += "#";
+} else {
+	changelog = fs.readFileSync(changelogPath, "utf8");
+	changelogFilename = path.basename(changelogPath);
 }
-let changelog = fs.readFileSync(changelogPath, "utf8");
-const CHANGELOG_PLACEHOLDER = "## __WORK IN PROGRESS__";
+const CHANGELOG_PLACEHOLDER = CHANGELOG_PLACEHOLDER_PREFIX + " __WORK IN PROGRESS__";
 const CHANGELOG_PLACEHOLDER_REGEX = new RegExp(
 	"^" + CHANGELOG_PLACEHOLDER + "$",
 	"gm",
@@ -59,7 +81,7 @@ switch ((changelog.match(CHANGELOG_PLACEHOLDER_REGEX) || []).length) {
 	case 0:
 		fail(
 			colors.red(
-				"Cannot continue, the changelog placeholder is missing from CHANGELOG.md!\n" +
+				`Cannot continue, the changelog placeholder is missing from ${changelogFilename}!\n` +
 					"Please add the following line to your changelog:\n" +
 					CHANGELOG_PLACEHOLDER,
 			),
@@ -69,7 +91,7 @@ switch ((changelog.match(CHANGELOG_PLACEHOLDER_REGEX) || []).length) {
 	default:
 		fail(
 			colors.red(
-				"Cannot continue, there is more than one changelog placeholder in CHANGELOG.md!",
+				`Cannot continue, there is more than one changelog placeholder in ${changelogFilename}!`,
 			),
 		);
 }
@@ -197,7 +219,7 @@ if (argv.dry) {
 	const d = new Date();
 	changelog = changelog.replace(
 		CHANGELOG_PLACEHOLDER_REGEX,
-		`## ${newVersion} (${d.getFullYear()}-${padStart(
+		`${CHANGELOG_PLACEHOLDER_PREFIX} ${newVersion} (${d.getFullYear()}-${padStart(
 			"" + (d.getMonth() + 1),
 			2,
 			"0",
@@ -206,7 +228,11 @@ if (argv.dry) {
 	fs.writeFileSync(changelogPath, changelog, "utf8");
 
 	if (hasIoPack) {
-		console.log(`updating io-package.json from ${colors.blue(ioPack.common.version)} to ${colors.green(newVersion)}`);
+		console.log(
+			`updating io-package.json from ${colors.blue(
+				ioPack.common.version,
+			)} to ${colors.green(newVersion)}`,
+		);
 		ioPack.common.version = newVersion;
 		fs.writeFileSync(ioPackPath, JSON.stringify(ioPack, null, 4));
 	}
