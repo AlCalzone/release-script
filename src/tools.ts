@@ -11,7 +11,8 @@ export function extractCurrentChangelog(
 	const start = match.index + match[0].length;
 
 	let end: number | undefined = changelogText.indexOf(
-		versionHeaderPrefix,
+		// Avoid matching sub-headlines
+		versionHeaderPrefix + " ",
 		start,
 	);
 	if (end === -1) end = undefined;

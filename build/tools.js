@@ -7,7 +7,9 @@ function extractCurrentChangelog(changelogText, versionHeaderPrefix, nextVersion
     if (!match)
         return;
     const start = match.index + match[0].length;
-    let end = changelogText.indexOf(versionHeaderPrefix, start);
+    let end = changelogText.indexOf(
+    // Avoid matching sub-headlines
+    versionHeaderPrefix + " ", start);
     if (end === -1)
         end = undefined;
     return changelogText.substring(start, end).trim();
