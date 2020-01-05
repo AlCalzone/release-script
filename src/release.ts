@@ -19,11 +19,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { padStart } from "alcalzone-shared/strings";
+import { isObject } from "alcalzone-shared/typeguards";
 import { execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as semver from "semver";
 import { argv } from "yargs";
+import { extractCurrentChangelog, prependKey } from "./tools";
+import { translateText } from "./translate";
 const colors = require("colors/safe");
 
 const rootDir = process.cwd();
@@ -102,6 +105,20 @@ switch ((changelog.match(CHANGELOG_PLACEHOLDER_REGEX) || []).length) {
 		);
 }
 
+// Check if there is a changelog for the current version
+const currentChangelog = extractCurrentChangelog(
+	changelog,
+	CHANGELOG_PLACEHOLDER_PREFIX,
+	CHANGELOG_PLACEHOLDER_REGEX,
+);
+if (!currentChangelog) {
+	fail(
+		colors.red(
+			"Cannot continue, the changelog for the next version is empty!",
+		),
+	);
+}
+
 // check if there are untracked changes
 const gitStatus = execSync("git status", { cwd: rootDir, encoding: "utf8" });
 if (/have diverged/.test(gitStatus)) {
@@ -165,7 +182,9 @@ const releaseTypes = [
 
 const releaseType = argv._[0] || "patch";
 if (releaseType.startsWith("--")) {
-	fail(`Invalid release type ${releaseType}. If you meant to pass hyphenated args, try again without the single "--".`);
+	fail(
+		`Invalid release type ${releaseType}. If you meant to pass hyphenated args, try again without the single "--".`,
+	);
 }
 let newVersion: string | null = releaseType;
 // Find the highest current version
@@ -213,66 +232,99 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 	);
 }
 
-if (isDryRun) {
-	console.log(colors.yellow("dry run:") + " not updating package files");
-} else {
-	console.log(
-		`updating package.json from ${colors.blue(
-			pack.version,
-		)} to ${colors.green(newVersion)}`,
-	);
-	pack.version = newVersion;
-	fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
-
-	console.log(`updating ${changelogFilename}`);
-	const d = new Date();
-	changelog = changelog.replace(
-		CHANGELOG_PLACEHOLDER_REGEX,
-		`${CHANGELOG_PLACEHOLDER_PREFIX} ${newVersion} (${d.getFullYear()}-${padStart(
-			"" + (d.getMonth() + 1),
-			2,
-			"0",
-		)}-${padStart("" + d.getDate(), 2, "0")})`,
-	);
-	fs.writeFileSync(
-		isChangelogInReadme ? readmePath : changelogPath,
-		changelog,
-		"utf8",
-	);
-
-	if (hasIoPack) {
+(async () => {
+	if (isDryRun) {
+		console.log(colors.yellow("dry run:") + " not updating package files");
+	} else {
 		console.log(
-			`updating io-package.json from ${colors.blue(
-				ioPack.common.version,
+			`updating package.json from ${colors.blue(
+				pack.version,
 			)} to ${colors.green(newVersion)}`,
 		);
-		ioPack.common.version = newVersion;
-		fs.writeFileSync(ioPackPath, JSON.stringify(ioPack, null, 4));
-	}
-}
+		pack.version = newVersion;
+		fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
 
-const gitCommands = [
-	`npm install`,
-	`git add -A`,
-	`git commit -m "chore: release v${newVersion}"`,
-	`git tag v${newVersion}`,
-	`git push`,
-	`git push --tags`,
-];
-if (isDryRun) {
-	console.log(colors.yellow("dry run:") + " I would execute this:");
-	for (const command of gitCommands) {
-		console.log("  " + command);
-	}
-} else {
-	for (const command of gitCommands) {
-		console.log(`executing "${colors.blue(command)}" ...`);
-		execSync(command, { cwd: rootDir });
-	}
-}
+		console.log(`updating ${changelogFilename}`);
+		const d = new Date();
+		changelog = changelog.replace(
+			CHANGELOG_PLACEHOLDER_REGEX,
+			`${CHANGELOG_PLACEHOLDER_PREFIX} ${newVersion} (${d.getFullYear()}-${padStart(
+				"" + (d.getMonth() + 1),
+				2,
+				"0",
+			)}-${padStart("" + d.getDate(), 2, "0")})`,
+		);
+		fs.writeFileSync(
+			isChangelogInReadme ? readmePath : changelogPath,
+			changelog,
+			"utf8",
+		);
 
-console.log("");
-console.log(colors.green("done!"));
-console.log("");
+		if (hasIoPack) {
+			console.log(
+				`updating io-package.json from ${colors.blue(
+					ioPack.common.version,
+				)} to ${colors.green(newVersion)}`,
+			);
+			ioPack.common.version = newVersion;
 
-process.exit(0);
+			if (newVersion! in ioPack.common.news) {
+				console.log(`current news is already in io-package.json`);
+			} else if (isObject(ioPack.common.news.NEXT)) {
+				console.log(
+					`replacing version number for current news io-package.json...`,
+				);
+				ioPack.common.news = prependKey(
+					ioPack.common.news,
+					newVersion!,
+					ioPack.common.news.NEXT,
+				);
+				delete ioPack.common.news.NEXT;
+			} else {
+				console.log(`adding new news to io-package.json...`);
+				try {
+					const translated = await translateText(currentChangelog);
+					ioPack.common.news = prependKey(
+						ioPack.common.news,
+						newVersion!,
+						translated,
+					);
+				} catch (e) {
+					fail(`could not translate the news: ${e}`);
+				}
+				// If someone left this in here, also delete it
+				delete ioPack.common.news.NEXT;
+			}
+			fs.writeFileSync(ioPackPath, JSON.stringify(ioPack, null, 4));
+		}
+	}
+
+	const gitCommands = [
+		`npm install`,
+		`git add -A`,
+		`git commit -m "chore: release v${newVersion}"`,
+		`git tag v${newVersion}`,
+		`git push`,
+		`git push --tags`,
+	];
+	if (isDryRun) {
+		console.log(colors.yellow("dry run:") + " I would execute this:");
+		for (const command of gitCommands) {
+			console.log("  " + command);
+		}
+	} else {
+		for (const command of gitCommands) {
+			console.log(`executing "${colors.blue(command)}" ...`);
+			execSync(command, { cwd: rootDir });
+		}
+	}
+
+	console.log("");
+	console.log(colors.green("done!"));
+	console.log("");
+
+	process.exit(0);
+})().catch(e => {
+	console.error(e);
+	process.exit(1);
+});
