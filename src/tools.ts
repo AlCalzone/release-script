@@ -31,3 +31,14 @@ export function prependKey<T>(
 	}
 	return ret;
 }
+
+export function limitKeys<T>(
+	obj: Record<string, T>,
+	count: number,
+): Record<string, T> {
+	const ret: Record<string, T> = {};
+	for (const [k, v] of entries(obj).slice(0, count)) {
+		ret[k] = v;
+	}
+	return ret;
+}

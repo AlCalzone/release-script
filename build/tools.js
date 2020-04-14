@@ -23,3 +23,11 @@ function prependKey(obj, newKey, value) {
     return ret;
 }
 exports.prependKey = prependKey;
+function limitKeys(obj, count) {
+    const ret = {};
+    for (const [k, v] of objects_1.entries(obj).slice(0, count)) {
+        ret[k] = v;
+    }
+    return ret;
+}
+exports.limitKeys = limitKeys;

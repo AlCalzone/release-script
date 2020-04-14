@@ -221,6 +221,10 @@ else {
                 // If someone left this in here, also delete it
                 delete ioPack.common.news.NEXT;
             }
+            // Make sure we don't have too many keys
+            if (Object.keys(ioPack.common.news).length > 20) {
+                ioPack.common.news = tools_1.limitKeys(ioPack.common.news, 20);
+            }
             fs.writeFileSync(ioPackPath, JSON.stringify(ioPack, null, 4));
         }
     }
@@ -248,7 +252,7 @@ else {
     console.log(colors.green("done!"));
     console.log("");
     process.exit(0);
-}))().catch(e => {
+}))().catch((e) => {
     console.error(e);
     process.exit(1);
 });

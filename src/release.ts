@@ -25,7 +25,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as semver from "semver";
 import { argv } from "yargs";
-import { extractCurrentChangelog, prependKey } from "./tools";
+import { extractCurrentChangelog, prependKey, limitKeys } from "./tools";
 import { translateText } from "./translate";
 const colors = require("colors/safe");
 
@@ -295,6 +295,10 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 				// If someone left this in here, also delete it
 				delete ioPack.common.news.NEXT;
 			}
+			// Make sure we don't have too many keys
+			if (Object.keys(ioPack.common.news).length > 20) {
+				ioPack.common.news = limitKeys(ioPack.common.news, 20);
+			}
 			fs.writeFileSync(ioPackPath, JSON.stringify(ioPack, null, 4));
 		}
 	}
@@ -324,7 +328,7 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 	console.log("");
 
 	process.exit(0);
-})().catch(e => {
+})().catch((e) => {
 	console.error(e);
 	process.exit(1);
 });
