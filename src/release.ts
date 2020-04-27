@@ -25,7 +25,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as semver from "semver";
 import { argv } from "yargs";
-import { extractCurrentChangelog, prependKey, limitKeys } from "./tools";
+import { extractCurrentChangelog, prependKey, limitKeys, cleanChangelogForNews } from "./tools";
 import { translateText } from "./translate";
 const colors = require("colors/safe");
 
@@ -297,7 +297,8 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 			} else {
 				console.log(`adding new news to io-package.json...`);
 				try {
-					const translated = await translateText(currentChangelog);
+					const newChangelog = cleanChangelogForNews(currentChangelog);
+					const translated = await translateText(newChangelog);
 					ioPack.common.news = prependKey(
 						ioPack.common.news,
 						newVersion!,

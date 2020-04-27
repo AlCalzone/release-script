@@ -42,3 +42,22 @@ export function limitKeys<T>(
 	}
 	return ret;
 }
+
+const changelogAuthorRegex = /^[ \t]*[\*\-][ \t]*\([a-z0-9\-_]+\)[ \t]*/mgi;
+const changelogBulletPointTestRegex = /^[ \t]*[\*\-][ \t]*/;
+const changelogBulletPointReplaceRegex = new RegExp(changelogBulletPointTestRegex, "mg");
+
+export function cleanChangelogForNews(changelog: string): string {
+	// Remove leading "* (Author) " from changelog entries
+	changelog = changelog
+	.trim()
+		.replace(/\r\n/g, "\n")
+		.replace(/\r/g, "\n")
+		.replace(changelogAuthorRegex, "* ");
+	// If all changelog entries are either empty or start with a bullet point, remove that too
+	const lines = changelog.split("\n");
+	if (lines.every(line => !line || changelogBulletPointTestRegex.test(line))) {
+		changelog = changelog.replace(changelogBulletPointReplaceRegex, "");
+	}
+	return changelog;
+}

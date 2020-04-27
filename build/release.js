@@ -224,7 +224,8 @@ else {
             else {
                 console.log(`adding new news to io-package.json...`);
                 try {
-                    const translated = yield translate_1.translateText(currentChangelog);
+                    const newChangelog = tools_1.cleanChangelogForNews(currentChangelog);
+                    const translated = yield translate_1.translateText(newChangelog);
                     ioPack.common.news = tools_1.prependKey(ioPack.common.news, newVersion, translated);
                 }
                 catch (e) {
