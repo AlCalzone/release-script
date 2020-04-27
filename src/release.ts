@@ -31,6 +31,7 @@ const colors = require("colors/safe");
 
 const rootDir = process.cwd();
 const isDryRun = argv.dry || argv._.includes("--dry");
+const allChanges = argv.all || argv._.includes("--all");
 
 function fail(reason: string): never {
 	console.error("");
@@ -136,18 +137,31 @@ if (/have diverged/.test(gitStatus)) {
 		);
 	}
 } else if (!/working tree clean/.test(gitStatus)) {
-	if (!isDryRun)
+	if (!isDryRun && !allChanges) {
 		fail(
 			colors.red(
-				"Cannot continue, the local branch has uncommited changes!",
+				`Cannot continue, the local branch has uncommitted changes! Add them to a separate commit first or add the "--all" option to include them in the release commit.`,
 			),
 		);
-	else
-		console.log(
-			colors.red(
-				"This is a dry run. The full run would fail due to uncommited changes\n",
-			),
-		);
+	} else {
+		if (allChanges) {
+			console.warn(
+				colors.yellow(
+					`Your branch has uncommitted changes that will be included in the release commit!
+Consider adding them to a separate commit first.
+`,
+				),
+			);
+		} else {
+			console.log(
+				colors.red(
+					`This is a dry run. The full run would fail due to uncommitted changes.
+Add them to a separate commit first or add the "--all" option to include them in the release commit.
+`,
+				),
+			);
+		}
+	}
 } else if (/Your branch is behind/.test(gitStatus)) {
 	if (!isDryRun) {
 		fail(
@@ -317,10 +331,10 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 			console.log("  " + command);
 		}
 	} else {
-		for (const command of gitCommands) {
-			console.log(`executing "${colors.blue(command)}" ...`);
-			execSync(command, { cwd: rootDir });
-		}
+		// for (const command of gitCommands) {
+		// 	console.log(`executing "${colors.blue(command)}" ...`);
+		// 	execSync(command, { cwd: rootDir });
+		// }
 	}
 
 	console.log("");

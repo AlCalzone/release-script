@@ -32,7 +32,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-var _a, _b, _c;
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable @typescript-eslint/no-var-requires */
 const strings_1 = require("alcalzone-shared/strings");
@@ -47,6 +47,7 @@ const translate_1 = require("./translate");
 const colors = require("colors/safe");
 const rootDir = process.cwd();
 const isDryRun = yargs_1.argv.dry || yargs_1.argv._.includes("--dry");
+const allChanges = yargs_1.argv.all || yargs_1.argv._.includes("--all");
 function fail(reason) {
     console.error("");
     console.error(colors.red("ERROR: " + reason));
@@ -58,14 +59,14 @@ if (!fs.existsSync(packPath)) {
     fail("No package.json found in the current directory!");
 }
 const pack = require(packPath);
-if (!((_a = pack) === null || _a === void 0 ? void 0 : _a.version)) {
+if (!(pack === null || pack === void 0 ? void 0 : pack.version)) {
     fail("Missing property version from package.json!");
 }
 // If this is an ioBroker project, also bump the io-package.json
 const ioPackPath = path.join(rootDir, "io-package.json");
 const hasIoPack = fs.existsSync(ioPackPath);
 const ioPack = hasIoPack ? require(ioPackPath) : undefined;
-if (hasIoPack && !((_c = (_b = ioPack) === null || _b === void 0 ? void 0 : _b.common) === null || _c === void 0 ? void 0 : _c.version)) {
+if (hasIoPack && !((_a = ioPack === null || ioPack === void 0 ? void 0 : ioPack.common) === null || _a === void 0 ? void 0 : _a.version)) {
     fail("Missing property common.version from io-package.json!");
 }
 // Try to find the changelog
@@ -120,10 +121,21 @@ if (/have diverged/.test(gitStatus)) {
     }
 }
 else if (!/working tree clean/.test(gitStatus)) {
-    if (!isDryRun)
-        fail(colors.red("Cannot continue, the local branch has uncommited changes!"));
-    else
-        console.log(colors.red("This is a dry run. The full run would fail due to uncommited changes\n"));
+    if (!isDryRun && !allChanges) {
+        fail(colors.red(`Cannot continue, the local branch has uncommitted changes! Add them to a separate commit first or add the "--all" option to include them in the release commit.`));
+    }
+    else {
+        if (allChanges) {
+            console.warn(colors.yellow(`Your branch has uncommitted changes that will be included in the release commit!
+Consider adding them to a separate commit first.
+`));
+        }
+        else {
+            console.log(colors.red(`This is a dry run. The full run would fail due to uncommitted changes.
+Add them to a separate commit first or add the "--all" option to include them in the release commit.
+`));
+        }
+    }
 }
 else if (/Your branch is behind/.test(gitStatus)) {
     if (!isDryRun) {
@@ -243,10 +255,10 @@ else {
         }
     }
     else {
-        for (const command of gitCommands) {
-            console.log(`executing "${colors.blue(command)}" ...`);
-            child_process_1.execSync(command, { cwd: rootDir });
-        }
+        // for (const command of gitCommands) {
+        // 	console.log(`executing "${colors.blue(command)}" ...`);
+        // 	execSync(command, { cwd: rootDir });
+        // }
     }
     console.log("");
     console.log(colors.green("done!"));
