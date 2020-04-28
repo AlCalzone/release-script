@@ -256,10 +256,10 @@ else {
         }
     }
     else {
-        // for (const command of gitCommands) {
-        // 	console.log(`executing "${colors.blue(command)}" ...`);
-        // 	execSync(command, { cwd: rootDir });
-        // }
+        for (const command of gitCommands) {
+            console.log(`executing "${colors.blue(command)}" ...`);
+            child_process_1.execSync(command, { cwd: rootDir });
+        }
     }
     console.log("");
     console.log(colors.green("done!"));
