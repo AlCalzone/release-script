@@ -331,10 +331,10 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 			console.log("  " + command);
 		}
 	} else {
-		// for (const command of gitCommands) {
-		// 	console.log(`executing "${colors.blue(command)}" ...`);
-		// 	execSync(command, { cwd: rootDir });
-		// }
+		for (const command of gitCommands) {
+			console.log(`executing "${colors.blue(command)}" ...`);
+			execSync(command, { cwd: rootDir });
+		}
 	}
 
 	console.log("");
