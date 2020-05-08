@@ -25,7 +25,12 @@ import * as fs from "fs";
 import * as path from "path";
 import * as semver from "semver";
 import { argv } from "yargs";
-import { extractCurrentChangelog, prependKey, limitKeys, cleanChangelogForNews } from "./tools";
+import {
+	extractCurrentChangelog,
+	prependKey,
+	limitKeys,
+	cleanChangelogForNews,
+} from "./tools";
 import { translateText } from "./translate";
 const colors = require("colors/safe");
 
@@ -274,6 +279,17 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 			"utf8",
 		);
 
+		// Prepare the changelog so it can be put into io-package.json news and the commit message
+		const newChangelog = cleanChangelogForNews(currentChangelog);
+
+		// Prepare the commit message
+		fs.writeFileSync(
+			path.join(rootDir, ".commitmessage"),
+			`chore: release v${newVersion}
+
+${newChangelog}`,
+		);
+
 		if (hasIoPack) {
 			console.log(
 				`updating io-package.json from ${colors.blue(
@@ -297,7 +313,6 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 			} else {
 				console.log(`adding new news to io-package.json...`);
 				try {
-					const newChangelog = cleanChangelogForNews(currentChangelog);
 					const translated = await translateText(newChangelog);
 					ioPack.common.news = prependKey(
 						ioPack.common.news,
@@ -321,7 +336,7 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 	const gitCommands = [
 		`npm install`,
 		`git add -A`,
-		`git commit -m "chore: release v${newVersion}"`,
+		`git commit -F ".commitmessage"`,
 		`git tag v${newVersion}`,
 		`git push`,
 		`git push --tags`,
@@ -336,6 +351,11 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 			console.log(`executing "${colors.blue(command)}" ...`);
 			execSync(command, { cwd: rootDir });
 		}
+
+		// Delete the commit message file again
+		try {
+			fs.unlinkSync(path.join(rootDir, ".commitmessage"));
+		} catch (e) { /* ignore */ }
 	}
 
 	console.log("");

@@ -210,6 +210,12 @@ else {
         const d = new Date();
         changelog = changelog.replace(CHANGELOG_PLACEHOLDER_REGEX, `${CHANGELOG_PLACEHOLDER_PREFIX} ${newVersion} (${d.getFullYear()}-${strings_1.padStart("" + (d.getMonth() + 1), 2, "0")}-${strings_1.padStart("" + d.getDate(), 2, "0")})`);
         fs.writeFileSync(isChangelogInReadme ? readmePath : changelogPath, changelog, "utf8");
+        // Prepare the changelog so it can be put into io-package.json news and the commit message
+        const newChangelog = tools_1.cleanChangelogForNews(currentChangelog);
+        // Prepare the commit message
+        fs.writeFileSync(path.join(rootDir, ".commitmessage"), `chore: release v${newVersion}
+
+${newChangelog}`);
         if (hasIoPack) {
             console.log(`updating io-package.json from ${colors.blue(ioPack.common.version)} to ${colors.green(newVersion)}`);
             ioPack.common.version = newVersion;
@@ -224,7 +230,6 @@ else {
             else {
                 console.log(`adding new news to io-package.json...`);
                 try {
-                    const newChangelog = tools_1.cleanChangelogForNews(currentChangelog);
                     const translated = yield translate_1.translateText(newChangelog);
                     ioPack.common.news = tools_1.prependKey(ioPack.common.news, newVersion, translated);
                 }
@@ -244,7 +249,7 @@ else {
     const gitCommands = [
         `npm install`,
         `git add -A`,
-        `git commit -m "chore: release v${newVersion}"`,
+        `git commit -F ".commitmessage"`,
         `git tag v${newVersion}`,
         `git push`,
         `git push --tags`,
@@ -260,6 +265,11 @@ else {
             console.log(`executing "${colors.blue(command)}" ...`);
             child_process_1.execSync(command, { cwd: rootDir });
         }
+        // Delete the commit message file again
+        try {
+            fs.unlinkSync(path.join(rootDir, ".commitmessage"));
+        }
+        catch (e) { /* ignore */ }
     }
     console.log("");
     console.log(colors.green("done!"));
