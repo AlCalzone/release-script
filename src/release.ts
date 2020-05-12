@@ -335,7 +335,7 @@ ${newChangelog}`,
 
 	const gitCommands = [
 		`npm install`,
-		`git add -A`,
+		`git add -A -- ":(exclude).commitmessage"`,
 		`git commit -F ".commitmessage"`,
 		`git tag v${newVersion}`,
 		`git push`,
