@@ -33,7 +33,7 @@ Together with the corresponding **Github Actions** workflow (more on that below)
     -->
     ```
 
-    or `CHANGELOG.md` if you are preferring to have a separate changelog (notice that there is one less `#`):
+    or `CHANGELOG.md` if you prefer to have a separate changelog (notice that there is one less `#`):
     ```md
     # Changelog
     <!--
@@ -71,12 +71,12 @@ The available release types are:
 | Release type | Description / when to use | Example |
 |---|---|---|
 | `major` | Breaking changes are introduced. This may include new features and bugfixes. | `0.9.8` -> `1.0.0` |
-| `premajor` | Like `major`, but to provide test versions before the final release. Using this multiple times increases the major version each time. | `0.9.8` -> `1.0.0-0` -> `2.0.0-0` |
+| `premajor` | Like `major`, but to provide test versions before the final release. **WARNING:** Using this multiple times increases the major version each time. | `0.9.8` -> `1.0.0-0` -> `2.0.0-0` |
 | `minor` | A new feature was added **without** breaking things. This may include bugfixes. | `0.9.8` -> `0.10.0` |
-| `preminor` | Like `minor`, but to provide test versions before the final release. Using this multiple times increases the minor version each time. | `0.9.8` -> `0.10.0-0` -> `0.11.0-0` |
+| `preminor` | Like `minor`, but to provide test versions before the final release. **WARNING:** Using this multiple times increases the minor version each time. | `0.9.8` -> `0.10.0-0` -> `0.11.0-0` |
 | `patch` | A bug was fixed without adding new functionality. | `0.9.8` -> `0.9.9` |
-| `prepatch` | Like `patch`, but to provide test versions before the final release. Using this multiple times increases the patch version each time. | `0.9.8` -> `0.9.9-0` -> `0.9.10-0` |
-| `prerelease` | Increases only the prerelease suffix. If the current version is not a prerelease, this behaves like `prepatch`. Use this to create multiple test versions (e.g. multiple `premajor` versions) | `0.9.8` -> `0.9.9-0` -> `0.9.9-1` |
+| `prepatch` | Like `patch`, but to provide test versions before the final release. **WARNING:** Using this multiple times increases the patch version each time. | `0.9.8` -> `0.9.9-0` -> `0.9.10-0` |
+| `prerelease` | Increases only the prerelease suffix. If the current version is not a prerelease, this behaves like `prepatch`. You might want to use this to create multiple test versions (e.g. multiple `premajor` versions) | `0.9.8` -> `0.9.9-0` -> `0.9.9-1` |
 
 For the `pre*` release types, you can optioinally provide a custom postfix, e.g. `beta`. For example, `npm run release prepatch beta` would result in the following bump: `0.9.8 -> 0.9.9-beta.0`.
 
