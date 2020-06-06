@@ -32,6 +32,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable @typescript-eslint/no-var-requires */
@@ -44,13 +47,13 @@ const semver = __importStar(require("semver"));
 const yargs_1 = require("yargs");
 const tools_1 = require("./tools");
 const translate_1 = require("./translate");
-const colors = require("colors/safe");
+const safe_1 = __importDefault(require("colors/safe"));
 const rootDir = process.cwd();
 const isDryRun = yargs_1.argv.dry || yargs_1.argv._.includes("--dry");
 const allChanges = yargs_1.argv.all || yargs_1.argv._.includes("--all");
 function fail(reason) {
     console.error("");
-    console.error(colors.red("ERROR: " + reason));
+    console.error(safe_1.default.red("ERROR: " + reason));
     console.error("");
     process.exit(1);
 }
@@ -92,46 +95,49 @@ else {
     changelog = fs.readFileSync(changelogPath, "utf8");
     changelogFilename = path.basename(changelogPath);
 }
+// CHANGELOG_OLD is only used if the main changelog is in the readme
+const changelogOldPath = path.join(rootDir, "CHANGELOG_OLD.md");
+const hasChangelogOld = isChangelogInReadme && fs.existsSync(changelogOldPath);
 const CHANGELOG_PLACEHOLDER = CHANGELOG_PLACEHOLDER_PREFIX + " __WORK IN PROGRESS__";
 const CHANGELOG_PLACEHOLDER_REGEX = new RegExp("^" + CHANGELOG_PLACEHOLDER + "$", "gm");
 // check if the changelog contains exactly 1 occurence of the changelog placeholder
 switch ((changelog.match(CHANGELOG_PLACEHOLDER_REGEX) || []).length) {
     case 0:
-        fail(colors.red(`Cannot continue, the changelog placeholder is missing from ${changelogFilename}!\n` +
+        fail(safe_1.default.red(`Cannot continue, the changelog placeholder is missing from ${changelogFilename}!\n` +
             "Please add the following line to your changelog:\n" +
             CHANGELOG_PLACEHOLDER));
     case 1:
         break; // all good
     default:
-        fail(colors.red(`Cannot continue, there is more than one changelog placeholder in ${changelogFilename}!`));
+        fail(safe_1.default.red(`Cannot continue, there is more than one changelog placeholder in ${changelogFilename}!`));
 }
 // Check if there is a changelog for the current version
 const currentChangelog = tools_1.extractCurrentChangelog(changelog, CHANGELOG_PLACEHOLDER_PREFIX, CHANGELOG_PLACEHOLDER_REGEX);
 if (!currentChangelog) {
-    fail(colors.red("Cannot continue, the changelog for the next version is empty!"));
+    fail(safe_1.default.red("Cannot continue, the changelog for the next version is empty!"));
 }
 // check if there are untracked changes
 const gitStatus = child_process_1.execSync("git status", { cwd: rootDir, encoding: "utf8" });
 if (/have diverged/.test(gitStatus)) {
     if (!isDryRun) {
-        fail(colors.red("Cannot continue, the local branch has diverged from the git repo!"));
+        fail(safe_1.default.red("Cannot continue, the local branch has diverged from the git repo!"));
     }
     else {
-        console.log(colors.red("This is a dry run. The full run would fail due to a diverged branch\n"));
+        console.log(safe_1.default.red("This is a dry run. The full run would fail due to a diverged branch\n"));
     }
 }
 else if (!/working tree clean/.test(gitStatus)) {
     if (!isDryRun && !allChanges) {
-        fail(colors.red(`Cannot continue, the local branch has uncommitted changes! Add them to a separate commit first or add the "--all" option to include them in the release commit.`));
+        fail(safe_1.default.red(`Cannot continue, the local branch has uncommitted changes! Add them to a separate commit first or add the "--all" option to include them in the release commit.`));
     }
     else {
         if (allChanges) {
-            console.warn(colors.yellow(`Your branch has uncommitted changes that will be included in the release commit!
+            console.warn(safe_1.default.yellow(`Your branch has uncommitted changes that will be included in the release commit!
 Consider adding them to a separate commit first.
 `));
         }
         else {
-            console.log(colors.red(`This is a dry run. The full run would fail due to uncommitted changes.
+            console.log(safe_1.default.red(`This is a dry run. The full run would fail due to uncommitted changes.
 Add them to a separate commit first or add the "--all" option to include them in the release commit.
 `));
         }
@@ -139,16 +145,16 @@ Add them to a separate commit first or add the "--all" option to include them in
 }
 else if (/Your branch is behind/.test(gitStatus)) {
     if (!isDryRun) {
-        fail(colors.red("Cannot continue, the local branch is behind the remote changes!"));
+        fail(safe_1.default.red("Cannot continue, the local branch is behind the remote changes!"));
     }
     else {
-        console.log(colors.red("This is a dry run. The full run would fail due to the local branch being behind\n"));
+        console.log(safe_1.default.red("This is a dry run. The full run would fail due to the local branch being behind\n"));
     }
 }
 else if (/Your branch is up\-to\-date/.test(gitStatus) ||
     /Your branch is ahead/.test(gitStatus)) {
     // all good
-    console.log(colors.green("git status is good - I can continue..."));
+    console.log(safe_1.default.green("git status is good - I can continue..."));
 }
 const releaseTypes = [
     "major",
@@ -179,7 +185,7 @@ if (releaseTypes.indexOf(releaseType) > -1) {
     else {
         newVersion = semver.inc(oldVersion, releaseType);
     }
-    console.log(`bumping version ${colors.blue(oldVersion)} to ${colors.gray(releaseType)} version ${colors.green(newVersion)}\n`);
+    console.log(`bumping version ${safe_1.default.blue(oldVersion)} to ${safe_1.default.gray(releaseType)} version ${safe_1.default.green(newVersion)}\n`);
 }
 else {
     // increment to specific version
@@ -200,16 +206,30 @@ else {
 }
 (() => __awaiter(void 0, void 0, void 0, function* () {
     if (isDryRun) {
-        console.log(colors.yellow("dry run:") + " not updating package files");
+        console.log(safe_1.default.yellow("dry run:") + " not updating package files");
     }
     else {
-        console.log(`updating package.json from ${colors.blue(pack.version)} to ${colors.green(newVersion)}`);
+        console.log(`updating package.json from ${safe_1.default.blue(pack.version)} to ${safe_1.default.green(newVersion)}`);
         pack.version = newVersion;
         fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
-        console.log(`updating ${changelogFilename}`);
         const d = new Date();
         changelog = changelog.replace(CHANGELOG_PLACEHOLDER_REGEX, `${CHANGELOG_PLACEHOLDER_PREFIX} ${newVersion} (${d.getFullYear()}-${strings_1.padStart("" + (d.getMonth() + 1), 2, "0")}-${strings_1.padStart("" + d.getDate(), 2, "0")})`);
-        fs.writeFileSync(isChangelogInReadme ? readmePath : changelogPath, changelog, "utf8");
+        // If there's a CHANGELOG_OLD.md, we need to split the changelog
+        if (hasChangelogOld) {
+            const { newChangelog, oldChangelog } = tools_1.splitChangelog(changelog, CHANGELOG_PLACEHOLDER_PREFIX, 5);
+            console.log(`updating ${changelogFilename}`);
+            fs.writeFileSync(isChangelogInReadme ? readmePath : changelogPath, newChangelog, "utf8");
+            if (oldChangelog) {
+                console.log(`moving old changelog entries to CHANGELOG_OLD.md`);
+                let oldChangelogFileContent = fs.readFileSync(changelogOldPath, "utf8");
+                oldChangelogFileContent = tools_1.insertIntoChangelog(oldChangelogFileContent, oldChangelog, CHANGELOG_PLACEHOLDER_PREFIX.slice(1));
+                fs.writeFileSync(changelogOldPath, oldChangelogFileContent, "utf8");
+            }
+        }
+        else {
+            console.log(`updating ${changelogFilename}`);
+            fs.writeFileSync(isChangelogInReadme ? readmePath : changelogPath, changelog, "utf8");
+        }
         // Prepare the changelog so it can be put into io-package.json news and the commit message
         const newChangelog = tools_1.cleanChangelogForNews(currentChangelog);
         // Prepare the commit message
@@ -217,7 +237,7 @@ else {
 
 ${newChangelog}`);
         if (hasIoPack) {
-            console.log(`updating io-package.json from ${colors.blue(ioPack.common.version)} to ${colors.green(newVersion)}`);
+            console.log(`updating io-package.json from ${safe_1.default.blue(ioPack.common.version)} to ${safe_1.default.green(newVersion)}`);
             ioPack.common.version = newVersion;
             if (newVersion in ioPack.common.news) {
                 console.log(`current news is already in io-package.json`);
@@ -255,24 +275,26 @@ ${newChangelog}`);
         `git push --tags`,
     ];
     if (isDryRun) {
-        console.log(colors.yellow("dry run:") + " I would execute this:");
+        console.log(safe_1.default.yellow("dry run:") + " I would execute this:");
         for (const command of gitCommands) {
             console.log("  " + command);
         }
     }
     else {
         for (const command of gitCommands) {
-            console.log(`executing "${colors.blue(command)}" ...`);
+            console.log(`executing "${safe_1.default.blue(command)}" ...`);
             child_process_1.execSync(command, { cwd: rootDir });
         }
         // Delete the commit message file again
         try {
             fs.unlinkSync(path.join(rootDir, ".commitmessage"));
         }
-        catch (e) { /* ignore */ }
+        catch (e) {
+            /* ignore */
+        }
     }
     console.log("");
-    console.log(colors.green("done!"));
+    console.log(safe_1.default.green("done!"));
     console.log("");
     process.exit(0);
 }))().catch((e) => {

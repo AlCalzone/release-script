@@ -30,9 +30,11 @@ import {
 	prependKey,
 	limitKeys,
 	cleanChangelogForNews,
+	splitChangelog,
+	insertIntoChangelog,
 } from "./tools";
 import { translateText } from "./translate";
-const colors = require("colors/safe");
+import colors from "colors/safe";
 
 const rootDir = process.cwd();
 const isDryRun = argv.dry || argv._.includes("--dry");
@@ -84,6 +86,10 @@ if (!fs.existsSync(changelogPath)) {
 	changelog = fs.readFileSync(changelogPath, "utf8");
 	changelogFilename = path.basename(changelogPath);
 }
+// CHANGELOG_OLD is only used if the main changelog is in the readme
+const changelogOldPath = path.join(rootDir, "CHANGELOG_OLD.md");
+const hasChangelogOld = isChangelogInReadme && fs.existsSync(changelogOldPath);
+
 const CHANGELOG_PLACEHOLDER =
 	CHANGELOG_PLACEHOLDER_PREFIX + " __WORK IN PROGRESS__";
 const CHANGELOG_PLACEHOLDER_REGEX = new RegExp(
@@ -219,9 +225,9 @@ if (
 if (releaseTypes.indexOf(releaseType) > -1) {
 	if (releaseType.startsWith("pre") && argv._.length >= 2) {
 		// increment to pre-release with an additional prerelease string
-		newVersion = semver.inc(oldVersion, releaseType as any, argv._[1]);
+		newVersion = semver.inc(oldVersion, releaseType as any, argv._[1])!;
 	} else {
-		newVersion = semver.inc(oldVersion, releaseType as any);
+		newVersion = semver.inc(oldVersion, releaseType as any)!;
 	}
 	console.log(
 		`bumping version ${colors.blue(oldVersion)} to ${colors.gray(
@@ -263,7 +269,6 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 		pack.version = newVersion;
 		fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
 
-		console.log(`updating ${changelogFilename}`);
 		const d = new Date();
 		changelog = changelog.replace(
 			CHANGELOG_PLACEHOLDER_REGEX,
@@ -273,11 +278,47 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 				"0",
 			)}-${padStart("" + d.getDate(), 2, "0")})`,
 		);
-		fs.writeFileSync(
-			isChangelogInReadme ? readmePath : changelogPath,
-			changelog,
-			"utf8",
-		);
+
+		// If there's a CHANGELOG_OLD.md, we need to split the changelog
+		if (hasChangelogOld) {
+			const { newChangelog, oldChangelog } = splitChangelog(
+				changelog,
+				CHANGELOG_PLACEHOLDER_PREFIX,
+				5,
+			);
+
+			console.log(`updating ${changelogFilename}`);
+			fs.writeFileSync(
+				isChangelogInReadme ? readmePath : changelogPath,
+				newChangelog,
+				"utf8",
+			);
+
+			if (oldChangelog) {
+				console.log(`moving old changelog entries to CHANGELOG_OLD.md`);
+				let oldChangelogFileContent = fs.readFileSync(
+					changelogOldPath,
+					"utf8",
+				);
+				oldChangelogFileContent = insertIntoChangelog(
+					oldChangelogFileContent,
+					oldChangelog,
+					CHANGELOG_PLACEHOLDER_PREFIX.slice(1),
+				);
+				fs.writeFileSync(
+					changelogOldPath,
+					oldChangelogFileContent,
+					"utf8",
+				);	
+			}
+		} else {
+			console.log(`updating ${changelogFilename}`);
+			fs.writeFileSync(
+				isChangelogInReadme ? readmePath : changelogPath,
+				changelog,
+				"utf8",
+			);
+		}
 
 		// Prepare the changelog so it can be put into io-package.json news and the commit message
 		const newChangelog = cleanChangelogForNews(currentChangelog);
@@ -355,7 +396,9 @@ ${newChangelog}`,
 		// Delete the commit message file again
 		try {
 			fs.unlinkSync(path.join(rootDir, ".commitmessage"));
-		} catch (e) { /* ignore */ }
+		} catch (e) {
+			/* ignore */
+		}
 	}
 
 	console.log("");

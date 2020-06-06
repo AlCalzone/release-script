@@ -59,6 +59,13 @@ In order to use this script, you need to maintain the changelog in either `READM
 Initial release
 ```
 
+### Separate changelog for old entries
+
+If you are using `README.md`, the script can automatically move old changelog entries to `CHANGELOG_OLD.md` if that exists. The most recent 5 entries are kept in `README.md`. To use this feature, simply create a `CHANGELOG_OLD.md` and give it a headline you like, e.g.
+```md
+# Older changes
+```
+
 ### Command line
 
 Once you are ready to release the changes, commit everything so the working tree is clean. Also make sure that you are on the `master` branch. Now you can create a release by executing:
