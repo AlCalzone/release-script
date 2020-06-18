@@ -9,15 +9,15 @@ export function extractCurrentChangelog(
 	const match = nextVersionPlaceholderRegex.exec(changelogText);
 	if (!match) return;
 	const start = match.index + match[0].length;
+	let entry = changelogText.slice(start);
 
-	let end: number | undefined = changelogText.indexOf(
-		// Avoid matching sub-headlines
-		versionHeaderPrefix + " ",
-		start,
-	);
-	if (end === -1) end = undefined;
+	const nextHeadlineRegex = new RegExp(`^${versionHeaderPrefix} `, "gm");
+	const matchEnd = nextHeadlineRegex.exec(entry);
+	if (matchEnd) {
+		entry = entry.slice(0, matchEnd.index);
+	}
 
-	return changelogText.substring(start, end).trim();
+	return entry.trim();
 }
 
 export function prependKey<T>(
