@@ -21,21 +21,20 @@
 import { padStart } from "alcalzone-shared/strings";
 import { isObject } from "alcalzone-shared/typeguards";
 import { execSync } from "child_process";
+import colors from "colors/safe";
 import * as fs from "fs";
 import * as path from "path";
 import * as semver from "semver";
 import { argv } from "yargs";
 import {
-	extractCurrentChangelog,
-	prependKey,
-	limitKeys,
 	cleanChangelogForNews,
-	splitChangelog,
+	extractCurrentChangelog,
 	insertIntoChangelog,
+	limitKeys,
+	prependKey,
+	splitChangelog,
 } from "./tools";
 import { translateText } from "./translate";
-import colors from "colors/safe";
-import { ResolveOptions } from "dns";
 
 const rootDir = process.cwd();
 // lerna mode offloads bumping the versions to lerna.

@@ -25,6 +25,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
@@ -32,27 +35,25 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable @typescript-eslint/no-var-requires */
 const strings_1 = require("alcalzone-shared/strings");
 const typeguards_1 = require("alcalzone-shared/typeguards");
 const child_process_1 = require("child_process");
+const safe_1 = __importDefault(require("colors/safe"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const semver = __importStar(require("semver"));
 const yargs_1 = require("yargs");
 const tools_1 = require("./tools");
 const translate_1 = require("./translate");
-const safe_1 = __importDefault(require("colors/safe"));
+console.dir(yargs_1.argv);
 const rootDir = process.cwd();
 // lerna mode offloads bumping the versions to lerna.
 // it implies --all, since that is what lerna does
-const lerna = yargs_1.argv.lerna || yargs_1.argv._.includes("--lerna");
 const lernaCheck = yargs_1.argv.lernaCheck || yargs_1.argv["lerna-check"] || yargs_1.argv._.includes("--lerna-check");
+const lerna = lernaCheck || yargs_1.argv.lerna || yargs_1.argv._.includes("--lerna");
 // in lerna mode, these have no effect
 const isDryRun = yargs_1.argv.dry || yargs_1.argv._.includes("--dry");
 const allChanges = yargs_1.argv.all || yargs_1.argv._.includes("--all");
@@ -171,7 +172,9 @@ else if (/Your branch is behind/.test(gitStatus)) {
 else if (/Your branch is up\-to\-date/.test(gitStatus) ||
     /Your branch is ahead/.test(gitStatus)) {
     // all good
-    console.log(safe_1.default.green("git status is good - I can continue..."));
+    if (!lerna) {
+        console.log(safe_1.default.green("git status is good - I can continue..."));
+    }
 }
 // All the necessary checks are done, exit
 if (lernaCheck)
@@ -293,17 +296,19 @@ ${newChangelog}`);
             fs.writeFileSync(ioPackPath, JSON.stringify(ioPack, null, 4));
         }
     }
-    const gitCommands = lerna ? [
-        `git add -A -- ":(exclude).commitmessage"`,
-        `git commit -F ".commitmessage"`,
-    ] : [
-        `npm install`,
-        `git add -A -- ":(exclude).commitmessage"`,
-        `git commit -F ".commitmessage"`,
-        `git tag v${newVersion}`,
-        `git push`,
-        `git push --tags`,
-    ];
+    const gitCommands = lerna
+        ? [
+            `git add -A -- ":(exclude).commitmessage"`,
+            `git commit -F ".commitmessage"`,
+        ]
+        : [
+            `npm install`,
+            `git add -A -- ":(exclude).commitmessage"`,
+            `git commit -F ".commitmessage"`,
+            `git tag v${newVersion}`,
+            `git push`,
+            `git push --tags`,
+        ];
     if (isDryRun) {
         console.log(safe_1.default.yellow("dry run:") + " I would execute this:");
         for (const command of gitCommands) {
