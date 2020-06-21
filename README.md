@@ -119,12 +119,13 @@ and use the following package scripts:
   // ...
   "scripts": {
     // ...
+    "release": "lerna version",
     "preversion": "release-script --lerna-check",
     "version": "release-script --lerna",
     "postversion": "git push && git push --tags"
   }
 }
-
+```
 
 ## Workflow file for automatic release
 When using Github Actions, you can enable automatic release on `npm` and `Github Releases` after a tagged build was successful. To do so, include the following job in your workflow definition file (e.g. `./github/workflows/test-and-release.yml`) and configure it to depend on the build jobs (here, they are called `unit-tests`).
