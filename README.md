@@ -98,6 +98,34 @@ Although the release commit should only include the changes relevant to the vers
 npm run release patch -- --all
 ```
 
+### lerna mode
+If you are managing a monorepo with lerna, two additional options are available starting with v1.6.0. `--lerna` puts the release-script into lerna mode, which offloads all version increases to lerna. `--lerna-check` runs some checks regarding the changelog and then exits before doing any actual work. `--lerna-check` implies `--lerna`. 
+For lerna mode to work, you need to configure lerna as follows
+```jsonc
+// lerna.json
+{
+	"version": "1.2.3", // must be fixed versioning, independent does not work!
+	"command": {
+		"version": {
+			"amend": true // required, otherwise release-script cannot put the changelog into the commit body
+		}
+	}
+}
+```
+and use the following package scripts:
+```jsonc
+// package.json
+{
+  // ...
+  "scripts": {
+    // ...
+    "preversion": "release-script --lerna-check",
+    "version": "release-script --lerna",
+    "postversion": "git push && git push --tags"
+  }
+}
+
+
 ## Workflow file for automatic release
 When using Github Actions, you can enable automatic release on `npm` and `Github Releases` after a tagged build was successful. To do so, include the following job in your workflow definition file (e.g. `./github/workflows/test-and-release.yml`) and configure it to depend on the build jobs (here, they are called `unit-tests`).
 The workflow must be configured to run when tags are pushed.

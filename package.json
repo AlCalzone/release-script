@@ -1,6 +1,6 @@
 {
   "name": "@alcalzone/release-script",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "Release script to automatically increment version numbers and push git tags of Node.js projects",
   "main": "build/release.js",
   "bin": "bin/release.js",

@@ -35,8 +35,16 @@ import {
 } from "./tools";
 import { translateText } from "./translate";
 import colors from "colors/safe";
+import { ResolveOptions } from "dns";
 
 const rootDir = process.cwd();
+// lerna mode offloads bumping the versions to lerna.
+// it implies --all, since that is what lerna does
+const lernaCheck =
+	argv.lernaCheck || argv["lerna-check"] || argv._.includes("--lerna-check");
+const lerna = lernaCheck || argv.lerna || argv._.includes("--lerna");
+
+// in lerna mode, these have no effect
 const isDryRun = argv.dry || argv._.includes("--dry");
 const allChanges = argv.all || argv._.includes("--all");
 
@@ -47,20 +55,33 @@ function fail(reason: string): never {
 	process.exit(1);
 }
 
+// ensure that package.json exists and has a version (in lerna mode)
 const packPath = path.join(rootDir, "package.json");
 if (!fs.existsSync(packPath)) {
 	fail("No package.json found in the current directory!");
 }
 const pack = require(packPath);
-if (!pack?.version) {
+if (!lerna && !pack?.version) {
 	fail("Missing property version from package.json!");
+}
+
+const lernaPath = path.join(rootDir, "lerna.json");
+if (lerna && !fs.existsSync(lernaPath)) {
+	fail("No lerna.json found in the current directory!");
+}
+let lernaJson: Record<string, any> | undefined;
+if (lerna) {
+	lernaJson = require(lernaPath);
+	if (!lernaJson!.version) {
+		fail("Missing property version from lerna.json!");
+	}
 }
 
 // If this is an ioBroker project, also bump the io-package.json
 const ioPackPath = path.join(rootDir, "io-package.json");
 const hasIoPack = fs.existsSync(ioPackPath);
 const ioPack = hasIoPack ? require(ioPackPath) : undefined;
-if (hasIoPack && !ioPack?.common?.version) {
+if (!lerna && hasIoPack && !ioPack?.common?.version) {
 	fail("Missing property common.version from io-package.json!");
 }
 
@@ -147,7 +168,7 @@ if (/have diverged/.test(gitStatus)) {
 			),
 		);
 	}
-} else if (!/working tree clean/.test(gitStatus)) {
+} else if (!lerna && !/working tree clean/.test(gitStatus)) {
 	if (!isDryRun && !allChanges) {
 		fail(
 			colors.red(
@@ -192,8 +213,13 @@ Add them to a separate commit first or add the "--all" option to include them in
 	/Your branch is ahead/.test(gitStatus)
 ) {
 	// all good
-	console.log(colors.green("git status is good - I can continue..."));
+	if (!lerna) {
+		console.log(colors.green("git status is good - I can continue..."));
+	}
 }
+
+// All the necessary checks are done, exit
+if (lernaCheck) process.exit(0);
 
 const releaseTypes = [
 	"major",
@@ -206,68 +232,74 @@ const releaseTypes = [
 ];
 
 const releaseType = argv._[0] || "patch";
-if (releaseType.startsWith("--")) {
+if (!lerna && releaseType.startsWith("--")) {
 	fail(
 		`Invalid release type ${releaseType}. If you meant to pass hyphenated args, try again without the single "--".`,
 	);
 }
-let newVersion: string | null = releaseType;
-// Find the highest current version
-let oldVersion = pack.version as string;
-if (
-	hasIoPack &&
-	semver.valid(ioPack.common.version) &&
-	semver.gt(ioPack.common.version, oldVersion)
-) {
-	oldVersion = ioPack.common.version;
-}
-
-if (releaseTypes.indexOf(releaseType) > -1) {
-	if (releaseType.startsWith("pre") && argv._.length >= 2) {
-		// increment to pre-release with an additional prerelease string
-		newVersion = semver.inc(oldVersion, releaseType as any, argv._[1])!;
-	} else {
-		newVersion = semver.inc(oldVersion, releaseType as any)!;
-	}
-	console.log(
-		`bumping version ${colors.blue(oldVersion)} to ${colors.gray(
-			releaseType,
-		)} version ${colors.green(newVersion)}\n`,
-	);
+let newVersion: string | null;
+if (lerna) {
+	newVersion = lernaJson!.version;
 } else {
-	// increment to specific version
-	newVersion = semver.clean(newVersion);
-	if (newVersion == null) {
-		fail(`invalid version string "${newVersion}"`);
-	} else {
-		// valid version string => check if its actually newer
-		if (!semver.gt(newVersion, pack.version)) {
-			fail(
-				`new version ${newVersion} is NOT > than package.json version ${pack.version}`,
-			);
-		}
-		if (hasIoPack && !semver.gt(newVersion, ioPack.common.version)) {
-			fail(
-				`new version ${newVersion} is NOT > than io-package.json version ${ioPack.common.version}`,
-			);
-		}
+	// Find the highest current version
+	let oldVersion = pack.version as string;
+	if (
+		hasIoPack &&
+		semver.valid(ioPack.common.version) &&
+		semver.gt(ioPack.common.version, oldVersion)
+	) {
+		oldVersion = ioPack.common.version;
 	}
-	console.log(
-		`bumping version ${oldVersion} to specific version ${newVersion}`,
-	);
+
+	if (releaseTypes.indexOf(releaseType) > -1) {
+		if (releaseType.startsWith("pre") && argv._.length >= 2) {
+			// increment to pre-release with an additional prerelease string
+			newVersion = semver.inc(oldVersion, releaseType as any, argv._[1])!;
+		} else {
+			newVersion = semver.inc(oldVersion, releaseType as any)!;
+		}
+		console.log(
+			`bumping version ${colors.blue(oldVersion)} to ${colors.gray(
+				releaseType,
+			)} version ${colors.green(newVersion)}\n`,
+		);
+	} else {
+		// increment to specific version
+		newVersion = semver.clean(releaseType);
+		if (newVersion == null) {
+			fail(`invalid version string "${newVersion}"`);
+		} else {
+			// valid version string => check if its actually newer
+			if (!semver.gt(newVersion, pack.version)) {
+				fail(
+					`new version ${newVersion} is NOT > than package.json version ${pack.version}`,
+				);
+			}
+			if (hasIoPack && !semver.gt(newVersion, ioPack.common.version)) {
+				fail(
+					`new version ${newVersion} is NOT > than io-package.json version ${ioPack.common.version}`,
+				);
+			}
+		}
+		console.log(
+			`bumping version ${oldVersion} to specific version ${newVersion}`,
+		);
+	}
 }
 
 (async () => {
 	if (isDryRun) {
 		console.log(colors.yellow("dry run:") + " not updating package files");
 	} else {
-		console.log(
-			`updating package.json from ${colors.blue(
-				pack.version,
-			)} to ${colors.green(newVersion)}`,
-		);
-		pack.version = newVersion;
-		fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
+		if (!lerna) {
+			console.log(
+				`updating package.json from ${colors.blue(
+					pack.version,
+				)} to ${colors.green(newVersion!)}`,
+			);
+			pack.version = newVersion;
+			fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
+		}
 
 		const d = new Date();
 		changelog = changelog.replace(
@@ -309,7 +341,7 @@ if (releaseTypes.indexOf(releaseType) > -1) {
 					changelogOldPath,
 					oldChangelogFileContent,
 					"utf8",
-				);	
+				);
 			}
 		} else {
 			console.log(`updating ${changelogFilename}`);
@@ -335,7 +367,7 @@ ${newChangelog}`,
 			console.log(
 				`updating io-package.json from ${colors.blue(
 					ioPack.common.version,
-				)} to ${colors.green(newVersion)}`,
+				)} to ${colors.green(newVersion!)}`,
 			);
 			ioPack.common.version = newVersion;
 
@@ -374,14 +406,20 @@ ${newChangelog}`,
 		}
 	}
 
-	const gitCommands = [
-		`npm install`,
-		`git add -A -- ":(exclude).commitmessage"`,
-		`git commit -F ".commitmessage"`,
-		`git tag v${newVersion}`,
-		`git push`,
-		`git push --tags`,
-	];
+	const gitCommands = lerna
+		? [
+				`git add -A -- ":(exclude).commitmessage"`,
+				`git commit -F ".commitmessage"`,
+				// lerna does the rest for us
+		  ]
+		: [
+				`npm install`,
+				`git add -A -- ":(exclude).commitmessage"`,
+				`git commit -F ".commitmessage"`,
+				`git tag v${newVersion}`,
+				`git push`,
+				`git push --tags`,
+		  ];
 	if (isDryRun) {
 		console.log(colors.yellow("dry run:") + " I would execute this:");
 		for (const command of gitCommands) {
