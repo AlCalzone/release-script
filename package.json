@@ -1,6 +1,6 @@
 {
   "name": "@alcalzone/release-script",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Release script to automatically increment version numbers and push git tags of Node.js projects",
   "main": "build/release.js",
   "bin": "bin/release.js",
@@ -33,11 +33,11 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "alcalzone-shared": "^2.0.0",
-    "axios": "^0.19.0",
+    "alcalzone-shared": "^3.0.0",
+    "axios": "^0.20.0",
     "colors": "^1.4.0",
-    "semver": "^6.3.0",
-    "yargs": "^15.0.2"
+    "semver": "^7.3.2",
+    "yargs": "^15.4.1"
   },
   "scripts": {
     "build": "tsc",

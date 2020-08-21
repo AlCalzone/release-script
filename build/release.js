@@ -48,7 +48,6 @@ const semver = __importStar(require("semver"));
 const yargs_1 = require("yargs");
 const tools_1 = require("./tools");
 const translate_1 = require("./translate");
-console.dir(yargs_1.argv);
 const rootDir = process.cwd();
 // lerna mode offloads bumping the versions to lerna.
 // it implies --all, since that is what lerna does
@@ -294,6 +293,11 @@ ${newChangelog}`);
                 ioPack.common.news = tools_1.limitKeys(ioPack.common.news, 20);
             }
             fs.writeFileSync(ioPackPath, JSON.stringify(ioPack, null, 4));
+        }
+        // if build script exists, call it
+        if (pack.scripts && pack.scripts.build) {
+            console.log(`Build project "${safe_1.default.blue('npm run build')}" ...`);
+            child_process_1.execSync('npm run build', { cwd: rootDir });
         }
     }
     const gitCommands = lerna

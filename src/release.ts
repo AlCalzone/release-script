@@ -403,6 +403,12 @@ ${newChangelog}`,
 			}
 			fs.writeFileSync(ioPackPath, JSON.stringify(ioPack, null, 4));
 		}
+
+		// if build script exists, call it
+		if (pack.scripts && pack.scripts.build) {
+			console.log(`Build project "${colors.blue('npm run build')}" ...`);
+			execSync('npm run build', { cwd: rootDir });
+		}
 	}
 
 	const gitCommands = lerna

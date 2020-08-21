@@ -23,8 +23,15 @@ Together with the corresponding **Github Actions** workflow (more on that below)
         "release": "release-script"
     }
     ```
+3. Add build script if required. It will be called after the version is updated:
+    ```json
+    "scripts": {
+        ... other scripts ...
+        "build": "gulp for example"
+    }
+    ```
 
-3. Add a placeholder to `README.md` (for your own convenience)
+4. Add a placeholder to `README.md` (for your own convenience)
     ```md
     ## Changelog
     <!--
