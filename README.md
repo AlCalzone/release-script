@@ -127,6 +127,34 @@ and use the following package scripts:
 }
 ```
 
+### Configuration with a config file
+Instead of manually providing all options, you can configure the release process with a configuration file. By default, the script looks for a `.releaseconfig.json` in the current working directory. To change the filename, you can use the `-c` flag (after the double dashes!), e.g. `release-script -- -c my-super-duper-config.json`.
+
+If an option is configured in this file, it will have precedence over CLI arguments. Here's a list of the supported options (they are all optional):
+```jsonc
+{
+  "all": true, // Always include all changes in the release commit
+  "lerna": true, // Enable lerna mode
+
+  // Run custom scripts as part of the release process
+  "scripts": {
+    "beforePush": "npm run build", // runs after bumping the versions etc. but before pushing to git
+  }
+}
+```
+
+To execute multiple commands in sequence, you can also use an array of strings:
+```jsonc
+{
+  "scripts": {
+    "beforePush": [
+      "echo 'this script is so cool'",
+      "npm run build",
+    ]
+  }
+}
+```
+
 ## Workflow file for automatic release
 When using Github Actions, you can enable automatic release on `npm` and `Github Releases` after a tagged build was successful. To do so, include the following job in your workflow definition file (e.g. `./github/workflows/test-and-release.yml`) and configure it to depend on the build jobs (here, they are called `unit-tests`).
 The workflow must be configured to run when tags are pushed.

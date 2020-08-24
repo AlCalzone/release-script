@@ -19,7 +19,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { padStart } from "alcalzone-shared/strings";
-import { isObject } from "alcalzone-shared/typeguards";
+import { isObject, isArray } from "alcalzone-shared/typeguards";
 import { execSync } from "child_process";
 import colors from "colors/safe";
 import * as fs from "fs";
@@ -35,17 +35,15 @@ import {
 	splitChangelog,
 } from "./tools";
 import { translateText } from "./translate";
+import {
+	allChanges,
+	isDryRun,
+	lerna,
+	lernaCheck,
+	scripts as userScripts,
+} from "./parseArgs";
 
 const rootDir = process.cwd();
-// lerna mode offloads bumping the versions to lerna.
-// it implies --all, since that is what lerna does
-const lernaCheck =
-	argv.lernaCheck || argv["lerna-check"] || argv._.includes("--lerna-check");
-const lerna = lernaCheck || argv.lerna || argv._.includes("--lerna");
-
-// in lerna mode, these have no effect
-const isDryRun = argv.dry || argv._.includes("--dry");
-const allChanges = argv.all || argv._.includes("--all");
 
 function fail(reason: string): never {
 	console.error("");
@@ -405,7 +403,7 @@ ${newChangelog}`,
 		}
 	}
 
-	const gitCommands = lerna
+	const execQueue = lerna
 		? [
 				`git add -A -- ":(exclude).commitmessage"`,
 				`git commit -F ".commitmessage"`,
@@ -419,13 +417,21 @@ ${newChangelog}`,
 				`git push`,
 				`git push --tags`,
 		  ];
+
+	// Execute user scripts before pushing
+	if (typeof userScripts.beforePush === "string") {
+		execQueue.unshift(userScripts.beforePush);
+	} else if (isArray(userScripts.beforePush)) {
+		execQueue.unshift(...userScripts.beforePush);
+	}
+
 	if (isDryRun) {
 		console.log(colors.yellow("dry run:") + " I would execute this:");
-		for (const command of gitCommands) {
+		for (const command of execQueue) {
 			console.log("  " + command);
 		}
 	} else {
-		for (const command of gitCommands) {
+		for (const command of execQueue) {
 			console.log(`executing "${colors.blue(command)}" ...`);
 			execSync(command, { cwd: rootDir });
 		}

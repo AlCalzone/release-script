@@ -48,15 +48,8 @@ const semver = __importStar(require("semver"));
 const yargs_1 = require("yargs");
 const tools_1 = require("./tools");
 const translate_1 = require("./translate");
-console.dir(yargs_1.argv);
+const parseArgs_1 = require("./parseArgs");
 const rootDir = process.cwd();
-// lerna mode offloads bumping the versions to lerna.
-// it implies --all, since that is what lerna does
-const lernaCheck = yargs_1.argv.lernaCheck || yargs_1.argv["lerna-check"] || yargs_1.argv._.includes("--lerna-check");
-const lerna = lernaCheck || yargs_1.argv.lerna || yargs_1.argv._.includes("--lerna");
-// in lerna mode, these have no effect
-const isDryRun = yargs_1.argv.dry || yargs_1.argv._.includes("--dry");
-const allChanges = yargs_1.argv.all || yargs_1.argv._.includes("--all");
 function fail(reason) {
     console.error("");
     console.error(safe_1.default.red("ERROR: " + reason));
@@ -69,15 +62,15 @@ if (!fs.existsSync(packPath)) {
     fail("No package.json found in the current directory!");
 }
 const pack = require(packPath);
-if (!lerna && !(pack === null || pack === void 0 ? void 0 : pack.version)) {
+if (!parseArgs_1.lerna && !(pack === null || pack === void 0 ? void 0 : pack.version)) {
     fail("Missing property version from package.json!");
 }
 const lernaPath = path.join(rootDir, "lerna.json");
-if (lerna && !fs.existsSync(lernaPath)) {
+if (parseArgs_1.lerna && !fs.existsSync(lernaPath)) {
     fail("No lerna.json found in the current directory!");
 }
 let lernaJson;
-if (lerna) {
+if (parseArgs_1.lerna) {
     lernaJson = require(lernaPath);
     if (!lernaJson.version) {
         fail("Missing property version from lerna.json!");
@@ -87,7 +80,7 @@ if (lerna) {
 const ioPackPath = path.join(rootDir, "io-package.json");
 const hasIoPack = fs.existsSync(ioPackPath);
 const ioPack = hasIoPack ? require(ioPackPath) : undefined;
-if (!lerna && hasIoPack && !((_a = ioPack === null || ioPack === void 0 ? void 0 : ioPack.common) === null || _a === void 0 ? void 0 : _a.version)) {
+if (!parseArgs_1.lerna && hasIoPack && !((_a = ioPack === null || ioPack === void 0 ? void 0 : ioPack.common) === null || _a === void 0 ? void 0 : _a.version)) {
     fail("Missing property common.version from io-package.json!");
 }
 // Try to find the changelog
@@ -137,19 +130,19 @@ if (!currentChangelog) {
 // check if there are untracked changes
 const gitStatus = child_process_1.execSync("git status", { cwd: rootDir, encoding: "utf8" });
 if (/have diverged/.test(gitStatus)) {
-    if (!isDryRun) {
+    if (!parseArgs_1.isDryRun) {
         fail(safe_1.default.red("Cannot continue, the local branch has diverged from the git repo!"));
     }
     else {
         console.log(safe_1.default.red("This is a dry run. The full run would fail due to a diverged branch\n"));
     }
 }
-else if (!lerna && !/working tree clean/.test(gitStatus)) {
-    if (!isDryRun && !allChanges) {
+else if (!parseArgs_1.lerna && !/working tree clean/.test(gitStatus)) {
+    if (!parseArgs_1.isDryRun && !parseArgs_1.allChanges) {
         fail(safe_1.default.red(`Cannot continue, the local branch has uncommitted changes! Add them to a separate commit first or add the "--all" option to include them in the release commit.`));
     }
     else {
-        if (allChanges) {
+        if (parseArgs_1.allChanges) {
             console.warn(safe_1.default.yellow(`Your branch has uncommitted changes that will be included in the release commit!
 Consider adding them to a separate commit first.
 `));
@@ -162,7 +155,7 @@ Add them to a separate commit first or add the "--all" option to include them in
     }
 }
 else if (/Your branch is behind/.test(gitStatus)) {
-    if (!isDryRun) {
+    if (!parseArgs_1.isDryRun) {
         fail(safe_1.default.red("Cannot continue, the local branch is behind the remote changes!"));
     }
     else {
@@ -172,12 +165,12 @@ else if (/Your branch is behind/.test(gitStatus)) {
 else if (/Your branch is up\-to\-date/.test(gitStatus) ||
     /Your branch is ahead/.test(gitStatus)) {
     // all good
-    if (!lerna) {
+    if (!parseArgs_1.lerna) {
         console.log(safe_1.default.green("git status is good - I can continue..."));
     }
 }
 // All the necessary checks are done, exit
-if (lernaCheck)
+if (parseArgs_1.lernaCheck)
     process.exit(0);
 const releaseTypes = [
     "major",
@@ -189,11 +182,11 @@ const releaseTypes = [
     "prerelease",
 ];
 const releaseType = yargs_1.argv._[0] || "patch";
-if (!lerna && releaseType.startsWith("--")) {
+if (!parseArgs_1.lerna && releaseType.startsWith("--")) {
     fail(`Invalid release type ${releaseType}. If you meant to pass hyphenated args, try again without the single "--".`);
 }
 let newVersion;
-if (lerna) {
+if (parseArgs_1.lerna) {
     newVersion = lernaJson.version;
 }
 else {
@@ -233,11 +226,11 @@ else {
     }
 }
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    if (isDryRun) {
+    if (parseArgs_1.isDryRun) {
         console.log(safe_1.default.yellow("dry run:") + " not updating package files");
     }
     else {
-        if (!lerna) {
+        if (!parseArgs_1.lerna) {
             console.log(`updating package.json from ${safe_1.default.blue(pack.version)} to ${safe_1.default.green(newVersion)}`);
             pack.version = newVersion;
             fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
@@ -296,7 +289,7 @@ ${newChangelog}`);
             fs.writeFileSync(ioPackPath, JSON.stringify(ioPack, null, 4));
         }
     }
-    const gitCommands = lerna
+    const execQueue = parseArgs_1.lerna
         ? [
             `git add -A -- ":(exclude).commitmessage"`,
             `git commit -F ".commitmessage"`,
@@ -309,14 +302,21 @@ ${newChangelog}`);
             `git push`,
             `git push --tags`,
         ];
-    if (isDryRun) {
+    // Execute user scripts before pushing
+    if (typeof parseArgs_1.scripts.beforePush === "string") {
+        execQueue.unshift(parseArgs_1.scripts.beforePush);
+    }
+    else if (typeguards_1.isArray(parseArgs_1.scripts.beforePush)) {
+        execQueue.unshift(...parseArgs_1.scripts.beforePush);
+    }
+    if (parseArgs_1.isDryRun) {
         console.log(safe_1.default.yellow("dry run:") + " I would execute this:");
-        for (const command of gitCommands) {
+        for (const command of execQueue) {
             console.log("  " + command);
         }
     }
     else {
-        for (const command of gitCommands) {
+        for (const command of execQueue) {
             console.log(`executing "${safe_1.default.blue(command)}" ...`);
             child_process_1.execSync(command, { cwd: rootDir });
         }
