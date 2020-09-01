@@ -42,7 +42,9 @@
   "scripts": {
     "build": "tsc",
     "watch": "npm run build -- --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "check": "npm run build -- --noEmit",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "npm run build && npx ."
   },
   "publishConfig": {
     "access": "public"
