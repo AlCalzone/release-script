@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.insertIntoChangelog = exports.splitChangelog = exports.cleanChangelogForNews = exports.limitKeys = exports.prependKey = exports.extractCurrentChangelog = void 0;
 const objects_1 = require("alcalzone-shared/objects");
 /** Extracts the current (work in progress) changelog from the complete changelog text */
 function extractCurrentChangelog(changelogText, versionHeaderPrefix, nextVersionPlaceholderRegex) {
