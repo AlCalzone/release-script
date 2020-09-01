@@ -4,7 +4,7 @@
     ## __WORK IN PROGRESS__
 -->
 
-## __WORK IN PROGRESS__
+## 1.7.1 (2020-09-01)
 * Fix: The git branch status is now detected using machine-readable commands instead of the (possibly localized) `git status`
 * The release-script now uses itself to create new releases
 
