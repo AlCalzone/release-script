@@ -4,7 +4,7 @@
     ## __WORK IN PROGRESS__
 -->
 
-## __WORK IN PROGRESS__ · 2020 Doomsday release :)
+## 1.8.0 (2020-09-01) · 2020 Doomsday release :)
 * The changelog headline may now contain free text after the placeholder
 
 ## 1.7.1 (2020-09-01)
