@@ -42,6 +42,7 @@ import {
 	lernaCheck,
 	scripts as userScripts,
 } from "./parseArgs";
+import { gitStatus } from "./gitStatus";
 
 const rootDir = process.cwd();
 
@@ -150,12 +151,12 @@ if (!currentChangelog) {
 }
 
 // check if there are untracked changes
-const gitStatus = execSync("git status", { cwd: rootDir, encoding: "utf8" });
-if (/have diverged/.test(gitStatus)) {
+const branchStatus = gitStatus(rootDir);
+if (branchStatus === "diverged") {
 	if (!isDryRun) {
 		fail(
 			colors.red(
-				"Cannot continue, the local branch has diverged from the git repo!",
+				"Cannot continue, both the remote and the local repo have different changes! Please merge the remote changes first.",
 			),
 		);
 	} else {
@@ -165,7 +166,26 @@ if (/have diverged/.test(gitStatus)) {
 			),
 		);
 	}
-} else if (!lerna && !/working tree clean/.test(gitStatus)) {
+} else if (branchStatus === "behind") {
+	if (!isDryRun) {
+		fail(
+			colors.red(
+				`Cannot continue, the local branch is behind the remote changes! Please include them first, e.g. with "git pull".`,
+			),
+		);
+	} else {
+		console.log(
+			colors.red(
+				"This is a dry run. The full run would fail due to the local branch being behind\n",
+			),
+		);
+	}
+} else if (branchStatus === "ahead" ||branchStatus==="up-to-date") {
+	// all good
+	if (!lerna) {
+		console.log(colors.green("git status is good - I can continue..."));
+	}
+} else if (branchStatus === "uncommitted" && !lerna) {
 	if (!isDryRun && !allChanges) {
 		fail(
 			colors.red(
@@ -190,28 +210,6 @@ Add them to a separate commit first or add the "--all" option to include them in
 				),
 			);
 		}
-	}
-} else if (/Your branch is behind/.test(gitStatus)) {
-	if (!isDryRun) {
-		fail(
-			colors.red(
-				"Cannot continue, the local branch is behind the remote changes!",
-			),
-		);
-	} else {
-		console.log(
-			colors.red(
-				"This is a dry run. The full run would fail due to the local branch being behind\n",
-			),
-		);
-	}
-} else if (
-	/Your branch is up\-to\-date/.test(gitStatus) ||
-	/Your branch is ahead/.test(gitStatus)
-) {
-	// all good
-	if (!lerna) {
-		console.log(colors.green("git status is good - I can continue..."));
 	}
 }
 
