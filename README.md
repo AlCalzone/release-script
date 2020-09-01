@@ -42,6 +42,8 @@ Together with the corresponding **Github Actions** workflow (more on that below)
     -->
     ```
 
+4. If necessary (e.g. for custom versioning steps) use a [config file](#configuration-with-a-config-file)
+
 ## Usage
 In order to use this script, you need to maintain the changelog in either `README.md` or `CHANGELOG.md`, because every release must have a changelog. To let the script know which changes are new, use the placeholder:
 ```md
