@@ -111,8 +111,10 @@ const hasChangelogOld = isChangelogInReadme && fs.existsSync(changelogOldPath);
 
 const CHANGELOG_PLACEHOLDER =
 	CHANGELOG_PLACEHOLDER_PREFIX + " __WORK IN PROGRESS__";
+// The regex for the placeholder includes an optional free text at the end, e.g.
+// ### __WORK IN PROGRESS__ "2020 Doomsday release"
 const CHANGELOG_PLACEHOLDER_REGEX = new RegExp(
-	"^" + CHANGELOG_PLACEHOLDER + "$",
+	"^" + CHANGELOG_PLACEHOLDER + "(.*?)$",
 	"gm",
 );
 
@@ -297,13 +299,14 @@ if (lerna) {
 		}
 
 		const d = new Date();
+		// Replace the changelog placeholder and keep the free text
 		changelog = changelog.replace(
 			CHANGELOG_PLACEHOLDER_REGEX,
 			`${CHANGELOG_PLACEHOLDER_PREFIX} ${newVersion} (${d.getFullYear()}-${padStart(
 				"" + (d.getMonth() + 1),
 				2,
 				"0",
-			)}-${padStart("" + d.getDate(), 2, "0")})`,
+			)}-${padStart("" + d.getDate(), 2, "0")})$1`,
 		);
 
 		// If there's a CHANGELOG_OLD.md, we need to split the changelog

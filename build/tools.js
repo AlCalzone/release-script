@@ -53,7 +53,9 @@ function cleanChangelogForNews(changelog) {
 exports.cleanChangelogForNews = cleanChangelogForNews;
 /** Splits a complete changelog into the most recent 5 entries plus the rest */
 function splitChangelog(changelog, entryPrefix, numEntriesNew = 5) {
-    const changelogEntryRegex = new RegExp(`^${entryPrefix} \\d+\\.\\d+\\.\\d+(.+?\\(\\d{4}\\-\\d{2}\\-\\d{2}\\))?$`, "gm");
+    const changelogEntryRegex = new RegExp(
+    // match changelog headline with optional free text at the end
+    `^${entryPrefix} v?\\d+\\.\\d+\\.\\d+(.+?\\(\\d{4}\\-\\d{2}\\-\\d{2}\\))?.*?$`, "gm");
     let matchStart;
     let firstStartIndex;
     let lastEndIndex;
@@ -95,8 +97,11 @@ exports.splitChangelog = splitChangelog;
 /** Inserts new entries at the start of a changelog */
 function insertIntoChangelog(changelog, newEntries, entryPrefix) {
     const firstEntryIndex = changelog.indexOf(entryPrefix);
-    if (firstEntryIndex === -1)
+    if (firstEntryIndex === -1) {
+        if (!changelog.endsWith("\n"))
+            changelog += "\n";
         return changelog + newEntries;
+    }
     return (changelog.slice(0, firstEntryIndex) +
         newEntries +
         changelog.slice(firstEntryIndex));

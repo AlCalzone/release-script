@@ -68,6 +68,17 @@ If you are using `README.md`, the script can automatically move old changelog en
 # Older changes
 ```
 
+### Add free text in the changelog entry headline
+Starting with `v1.8.0`, you can add free text after the placeholder:
+```md
+## __WORK IN PROGRESS__ - 2020 Doomsday release
+```
+will be turned into
+```md
+## 1.2.3 (2020-02-02) - 2020 Doomsday release
+```
+for example.
+
 ### Command line
 
 Once you are ready to release the changes, commit everything so the working tree is clean. Also make sure that you are on the `master` branch. Now you can create a release by executing:
