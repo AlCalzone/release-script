@@ -6,6 +6,7 @@
 
 ## __WORK IN PROGRESS__
 * Fix: The git branch status is now detected using machine-readable commands instead of the (possibly localized) `git status`
+* The release-script now uses itself to create new releases
 
 ## v1.7.0 (2020-08-24)
 * It is now possible to configure some of the settings with a config file
