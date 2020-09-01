@@ -84,7 +84,7 @@ jobs:
       github.event.base_ref == 'refs/heads/master' &&
       startsWith(github.ref, 'refs/tags/v')
 
-    needs: [unit-tests]
+    needs: [check-and-lint]
 
     runs-on: ubuntu-latest
     strategy:
