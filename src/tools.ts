@@ -74,7 +74,8 @@ export function splitChangelog(
 	numEntriesNew: number = 5,
 ): { newChangelog: string; oldChangelog?: string } {
 	const changelogEntryRegex = new RegExp(
-		`^${entryPrefix} \\d+\\.\\d+\\.\\d+(.+?\\(\\d{4}\\-\\d{2}\\-\\d{2}\\))?$`,
+		// match changelog headline with optional free text at the end
+		`^${entryPrefix} v?\\d+\\.\\d+\\.\\d+(.+?\\(\\d{4}\\-\\d{2}\\-\\d{2}\\))?.*?$`,
 		"gm",
 	);
 	let matchStart: RegExpExecArray | null;
@@ -126,7 +127,10 @@ export function insertIntoChangelog(
 	entryPrefix: string,
 ): string {
 	const firstEntryIndex = changelog.indexOf(entryPrefix);
-	if (firstEntryIndex === -1) return changelog + newEntries;
+	if (firstEntryIndex === -1) {
+		if (!changelog.endsWith("\n")) changelog += "\n";
+		return changelog + newEntries;
+	}
 	return (
 		changelog.slice(0, firstEntryIndex) +
 		newEntries +

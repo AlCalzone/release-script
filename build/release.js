@@ -123,7 +123,9 @@ else {
 const changelogOldPath = path.join(rootDir, "CHANGELOG_OLD.md");
 const hasChangelogOld = isChangelogInReadme && fs.existsSync(changelogOldPath);
 const CHANGELOG_PLACEHOLDER = CHANGELOG_PLACEHOLDER_PREFIX + " __WORK IN PROGRESS__";
-const CHANGELOG_PLACEHOLDER_REGEX = new RegExp("^" + CHANGELOG_PLACEHOLDER + "$", "gm");
+// The regex for the placeholder includes an optional free text at the end, e.g.
+// ### __WORK IN PROGRESS__ "2020 Doomsday release"
+const CHANGELOG_PLACEHOLDER_REGEX = new RegExp("^" + CHANGELOG_PLACEHOLDER + "(.*?)$", "gm");
 // check if the changelog contains exactly 1 occurence of the changelog placeholder
 switch ((changelog.match(CHANGELOG_PLACEHOLDER_REGEX) || []).length) {
     case 0:
@@ -248,7 +250,8 @@ else {
             fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
         }
         const d = new Date();
-        changelog = changelog.replace(CHANGELOG_PLACEHOLDER_REGEX, `${CHANGELOG_PLACEHOLDER_PREFIX} ${newVersion} (${d.getFullYear()}-${strings_1.padStart("" + (d.getMonth() + 1), 2, "0")}-${strings_1.padStart("" + d.getDate(), 2, "0")})`);
+        // Replace the changelog placeholder and keep the free text
+        changelog = changelog.replace(CHANGELOG_PLACEHOLDER_REGEX, `${CHANGELOG_PLACEHOLDER_PREFIX} ${newVersion} (${d.getFullYear()}-${strings_1.padStart("" + (d.getMonth() + 1), 2, "0")}-${strings_1.padStart("" + d.getDate(), 2, "0")})$1`);
         // If there's a CHANGELOG_OLD.md, we need to split the changelog
         if (hasChangelogOld) {
             const { newChangelog, oldChangelog } = tools_1.splitChangelog(changelog, CHANGELOG_PLACEHOLDER_PREFIX, 5);
