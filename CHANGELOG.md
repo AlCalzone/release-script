@@ -4,7 +4,7 @@
     ## __WORK IN PROGRESS__
 -->
 
-## __WORK IN PROGRESS__
+## 1.8.1 (2020-09-15)
 * Add `--no-verify` to `git commit` command when using lerna. Otherwise, cleaning up becomes a royal PITA.
 
 ## 1.8.0 (2020-09-01) · 2020 Doomsday release :)
