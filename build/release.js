@@ -307,7 +307,7 @@ ${newChangelog}`);
     const execQueue = parseArgs_1.lerna
         ? [
             `git add -A -- ":(exclude).commitmessage"`,
-            `git commit -F ".commitmessage"`,
+            `git commit -F ".commitmessage" --no-verify`,
         ]
         : [
             `npm install`,

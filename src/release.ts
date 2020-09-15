@@ -407,7 +407,7 @@ ${newChangelog}`,
 	const execQueue = lerna
 		? [
 				`git add -A -- ":(exclude).commitmessage"`,
-				`git commit -F ".commitmessage"`,
+				`git commit -F ".commitmessage" --no-verify`,
 				// lerna does the rest for us
 		  ]
 		: [
