@@ -47,7 +47,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable @typescript-eslint/no-var-requires */
 const strings_1 = require("alcalzone-shared/strings");
@@ -195,7 +195,7 @@ const releaseTypes = [
     "prepatch",
     "prerelease",
 ];
-const releaseType = yargs_1.argv._[0] || "patch";
+const releaseType = (yargs_1.argv._[0] || "patch").toString();
 if (!parseArgs_1.lerna && releaseType.startsWith("--")) {
     fail(`Invalid release type ${releaseType}. If you meant to pass hyphenated args, try again without the single "--".`);
 }
@@ -214,7 +214,7 @@ else {
     if (releaseTypes.indexOf(releaseType) > -1) {
         if (releaseType.startsWith("pre") && yargs_1.argv._.length >= 2) {
             // increment to pre-release with an additional prerelease string
-            newVersion = semver.inc(oldVersion, releaseType, yargs_1.argv._[1]);
+            newVersion = semver.inc(oldVersion, releaseType, (_b = yargs_1.argv._[1]) === null || _b === void 0 ? void 0 : _b.toString());
         }
         else {
             newVersion = semver.inc(oldVersion, releaseType);
