@@ -228,7 +228,7 @@ const releaseTypes = [
 	"prerelease",
 ];
 
-const releaseType = argv._[0] || "patch";
+const releaseType = (argv._[0] || "patch").toString();
 if (!lerna && releaseType.startsWith("--")) {
 	fail(
 		`Invalid release type ${releaseType}. If you meant to pass hyphenated args, try again without the single "--".`,
@@ -251,7 +251,7 @@ if (lerna) {
 	if (releaseTypes.indexOf(releaseType) > -1) {
 		if (releaseType.startsWith("pre") && argv._.length >= 2) {
 			// increment to pre-release with an additional prerelease string
-			newVersion = semver.inc(oldVersion, releaseType as any, argv._[1])!;
+			newVersion = semver.inc(oldVersion, releaseType as any, argv._[1]?.toString())!;
 		} else {
 			newVersion = semver.inc(oldVersion, releaseType as any)!;
 		}
