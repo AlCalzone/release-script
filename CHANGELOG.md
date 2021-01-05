@@ -4,7 +4,7 @@
     ## __WORK IN PROGRESS__
 -->
 
-## 1.8.2 (2021-01-05)
+## __WORK IN PROGRESS__
 * Updated dependencies
 
 ## 1.8.1 (2020-09-15)
