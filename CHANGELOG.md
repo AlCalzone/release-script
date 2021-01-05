@@ -4,6 +4,9 @@
     ## __WORK IN PROGRESS__
 -->
 
+## 1.8.2 (2021-01-05)
+* Updated dependencies
+
 ## 1.8.1 (2020-09-15)
 * Add `--no-verify` to `git commit` command when using lerna. Otherwise, cleaning up becomes a royal PITA.
 
