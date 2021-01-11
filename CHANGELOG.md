@@ -4,6 +4,9 @@
     ## __WORK IN PROGRESS__
 -->
 
+## 1.8.3 (2021-01-11)
+* Changelog entries like `* (Author 1, Author 2) Whazaaaap!` are now correctly handled when creating the `io-package.json` news entries.
+
 ## 1.8.2 (2021-01-05)
 * Updated dependencies
 
