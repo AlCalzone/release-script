@@ -43,7 +43,7 @@ export function limitKeys<T>(
 	return ret;
 }
 
-const changelogAuthorRegex = /^[ \t]*[\*\-][ \t]*\([a-z0-9\-_]+\)[ \t]*/gim;
+const changelogAuthorRegex = /^[ \t]*[\*\-][ \t]*\([a-z0-9\-_,;&\+ ]+\)[ \t]*/gim;
 const changelogBulletPointTestRegex = /^[ \t]*[\*\-][ \t]*/;
 const changelogBulletPointReplaceRegex = new RegExp(
 	changelogBulletPointTestRegex,

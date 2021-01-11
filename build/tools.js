@@ -33,7 +33,7 @@ function limitKeys(obj, count) {
     return ret;
 }
 exports.limitKeys = limitKeys;
-const changelogAuthorRegex = /^[ \t]*[\*\-][ \t]*\([a-z0-9\-_]+\)[ \t]*/gim;
+const changelogAuthorRegex = /^[ \t]*[\*\-][ \t]*\([a-z0-9\-_,;&\+ ]+\)[ \t]*/gim;
 const changelogBulletPointTestRegex = /^[ \t]*[\*\-][ \t]*/;
 const changelogBulletPointReplaceRegex = new RegExp(changelogBulletPointTestRegex, "mg");
 function cleanChangelogForNews(changelog) {
