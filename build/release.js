@@ -308,13 +308,14 @@ ${newChangelog}`);
         ? [
             `git add -A -- ":(exclude).commitmessage"`,
             `git commit -F ".commitmessage" --no-verify`,
+            // lerna does the rest for us
         ]
         : [
             `npm install`,
             `git add -A -- ":(exclude).commitmessage"`,
             `git commit -F ".commitmessage"`,
             `git tag v${newVersion}`,
-            `git push`,
+            `git push${parseArgs_1.remote ? ` ${parseArgs_1.remote.split('/').join(' ')}` : ''}`,
             `git push --tags`,
         ];
     // Execute user scripts before pushing

@@ -148,7 +148,7 @@ If an option is configured in this file, it will have precedence over CLI argume
 {
   "all": true, // Always include all changes in the release commit
   "lerna": true, // Enable lerna mode
-
+  "remote": "upstream/master", // configure remote, if the repository differs from origin
   // Run custom scripts as part of the release process
   "scripts": {
     "beforePush": "npm run build", // runs after bumping the versions etc. but before pushing to git

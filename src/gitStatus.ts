@@ -1,4 +1,5 @@
 import { execSync, ExecOptions } from "child_process";
+import { remote } from "./parseArgs";
 
 type GitStatus = "diverged" | "uncommitted" | "behind" | "ahead" | "up-to-date";
 
@@ -14,8 +15,9 @@ function getUpstream(cwd: string): string {
 }
 
 function getCommitDifferences(cwd: string): [local: number, remote: number] {
+	// if upstream hard configured we use it
 	const output = execSync(
-		`git rev-list --left-right --count HEAD...${getUpstream(cwd)}`,
+		`git rev-list --left-right --count HEAD...${remote || getUpstream(cwd)}`,
 		getExecOptions(cwd),
 	).trim();
 	// something like "1\t0"

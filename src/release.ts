@@ -41,6 +41,7 @@ import {
 	lerna,
 	lernaCheck,
 	scripts as userScripts,
+	remote
 } from "./parseArgs";
 import { gitStatus } from "./gitStatus";
 
@@ -415,8 +416,8 @@ ${newChangelog}`,
 				`git add -A -- ":(exclude).commitmessage"`,
 				`git commit -F ".commitmessage"`,
 				`git tag v${newVersion}`,
-				`git push`,
-				`git push --tags`,
+				`git push${remote ? ` ${remote.split('/').join(' ')}` : ''}`,
+				`git push${remote ? ` ${remote.split('/').join(' ')}` : ''} --tags`,
 		  ];
 
 	// Execute user scripts before pushing

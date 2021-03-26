@@ -26,8 +26,11 @@ const lernaCheck: boolean =
 const lerna: boolean =
 	lernaCheck || (rcFile?.lerna ?? argv.lerna ?? argv._.includes("--lerna"));
 
+// remote repo, can be set in config file only - default is origin
+const remote: string = rcFile?.remote;
+
 // in lerna mode, these have no effect
 const isDryRun: boolean = (argv.dry as any) ?? argv._.includes("--dry");
 const allChanges: boolean = rcFile?.all ?? argv.all ?? argv._.includes("--all");
 
-export { lernaCheck, lerna, isDryRun, allChanges, scripts };
+export { lernaCheck, lerna, isDryRun, allChanges, scripts, remote };
