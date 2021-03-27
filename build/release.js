@@ -308,7 +308,6 @@ ${newChangelog}`);
         ? [
             `git add -A -- ":(exclude).commitmessage"`,
             `git commit -F ".commitmessage" --no-verify`,
-            // lerna does the rest for us
         ]
         : [
             `npm install`,

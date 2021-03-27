@@ -46,7 +46,6 @@ exports.lernaCheck = lernaCheck;
 const lerna = lernaCheck || ((_f = (_e = rcFile === null || rcFile === void 0 ? void 0 : rcFile.lerna) !== null && _e !== void 0 ? _e : yargs_1.argv.lerna) !== null && _f !== void 0 ? _f : yargs_1.argv._.includes("--lerna"));
 exports.lerna = lerna;
 // remote repo, can be set by remote flag - else we let it be falsy
-console.log(yargs_1.argv);
 const remote = yargs_1.argv.r;
 exports.remote = remote;
 // in lerna mode, these have no effect
