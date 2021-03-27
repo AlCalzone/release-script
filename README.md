@@ -111,6 +111,14 @@ Although the release commit should only include the changes relevant to the vers
 npm run release patch -- --all
 ```
 
+### Using a different remote than `origin`
+If the remote you want to push to is not called `origin`, you can use the `r` flag to specify a different one (after the double dashes!)  
+Make sure to use the complete remote branch name:
+
+```bash
+npm run release patch -- -r upstream/master
+```
+
 ### lerna mode
 If you are managing a monorepo with lerna, two additional options are available starting with v1.6.0. `--lerna` puts the release-script into lerna mode, which offloads all version increases to lerna. `--lerna-check` runs some checks regarding the changelog and then exits before doing any actual work. `--lerna-check` implies `--lerna`. 
 For lerna mode to work, you need to configure lerna as follows
@@ -148,7 +156,6 @@ If an option is configured in this file, it will have precedence over CLI argume
 {
   "all": true, // Always include all changes in the release commit
   "lerna": true, // Enable lerna mode
-
   // Run custom scripts as part of the release process
   "scripts": {
     "beforePush": "npm run build", // runs after bumping the versions etc. but before pushing to git

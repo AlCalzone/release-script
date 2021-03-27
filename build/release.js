@@ -314,8 +314,8 @@ ${newChangelog}`);
             `git add -A -- ":(exclude).commitmessage"`,
             `git commit -F ".commitmessage"`,
             `git tag v${newVersion}`,
-            `git push`,
-            `git push --tags`,
+            `git push${parseArgs_1.remote ? ` ${parseArgs_1.remote.split('/').join(' ')}` : ''}`,
+            `git push${parseArgs_1.remote ? ` ${parseArgs_1.remote.split('/').join(' ')}` : ''} --tags`,
         ];
     // Execute user scripts before pushing
     if (typeof parseArgs_1.scripts.beforePush === "string") {

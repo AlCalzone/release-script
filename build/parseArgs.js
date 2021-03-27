@@ -20,7 +20,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.scripts = exports.allChanges = exports.isDryRun = exports.lerna = exports.lernaCheck = void 0;
+exports.remote = exports.scripts = exports.allChanges = exports.isDryRun = exports.lerna = exports.lernaCheck = void 0;
 const yargs_1 = require("yargs");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
@@ -45,6 +45,9 @@ const lernaCheck = (_d = (_c = yargs_1.argv.lernaCheck) !== null && _c !== void 
 exports.lernaCheck = lernaCheck;
 const lerna = lernaCheck || ((_f = (_e = rcFile === null || rcFile === void 0 ? void 0 : rcFile.lerna) !== null && _e !== void 0 ? _e : yargs_1.argv.lerna) !== null && _f !== void 0 ? _f : yargs_1.argv._.includes("--lerna"));
 exports.lerna = lerna;
+// remote repo, can be set by remote flag - else we let it be falsy
+const remote = yargs_1.argv.r;
+exports.remote = remote;
 // in lerna mode, these have no effect
 const isDryRun = (_g = yargs_1.argv.dry) !== null && _g !== void 0 ? _g : yargs_1.argv._.includes("--dry");
 exports.isDryRun = isDryRun;
