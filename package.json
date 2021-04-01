@@ -36,7 +36,7 @@
     "alcalzone-shared": "^3.0.2",
     "axios": "^0.21.1",
     "colors": "^1.4.0",
-    "semver": "^7.3.4",
+    "semver": "^7.3.5",
     "yargs": "^16.2.0"
   },
   "scripts": {
