@@ -4,7 +4,7 @@
     ## __WORK IN PROGRESS__
 -->
 
-## __WORK IN PROGRESS__
+## 1.9.0 (2021-04-23)
 * Allow defining different remotes than origin by using `r` flag, e.g. `-r upstream/master`
 * Replace `npm` commands with `yarn` when `yarn.lock` is present.
 
