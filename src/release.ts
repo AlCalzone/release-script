@@ -41,7 +41,7 @@ import {
 	lerna,
 	lernaCheck,
 	scripts as userScripts,
-	remote
+	remote,
 } from "./parseArgs";
 import { gitStatus } from "./gitStatus";
 
@@ -83,6 +83,9 @@ const ioPack = hasIoPack ? require(ioPackPath) : undefined;
 if (!lerna && hasIoPack && !ioPack?.common?.version) {
 	fail("Missing property common.version from io-package.json!");
 }
+
+// Assume the repo is managed with yarn if there is a yarn.lock
+const isYarn = fs.existsSync(path.join(rootDir, "yarn.lock"));
 
 // Try to find the changelog
 let isChangelogInReadme = false;
@@ -183,7 +186,7 @@ if (branchStatus === "diverged") {
 			),
 		);
 	}
-} else if (branchStatus === "ahead" ||branchStatus==="up-to-date") {
+} else if (branchStatus === "ahead" || branchStatus === "up-to-date") {
 	// all good
 	if (!lerna) {
 		console.log(colors.green("git status is good - I can continue..."));
@@ -252,7 +255,11 @@ if (lerna) {
 	if (releaseTypes.indexOf(releaseType) > -1) {
 		if (releaseType.startsWith("pre") && argv._.length >= 2) {
 			// increment to pre-release with an additional prerelease string
-			newVersion = semver.inc(oldVersion, releaseType as any, argv._[1]?.toString())!;
+			newVersion = semver.inc(
+				oldVersion,
+				releaseType as any,
+				argv._[1]?.toString(),
+			)!;
 		} else {
 			newVersion = semver.inc(oldVersion, releaseType as any)!;
 		}
@@ -412,12 +419,14 @@ ${newChangelog}`,
 				// lerna does the rest for us
 		  ]
 		: [
-				`npm install`,
+				isYarn ? `yarn install` : `npm install`,
 				`git add -A -- ":(exclude).commitmessage"`,
 				`git commit -F ".commitmessage"`,
 				`git tag v${newVersion}`,
-				`git push${remote ? ` ${remote.split('/').join(' ')}` : ''}`,
-				`git push${remote ? ` ${remote.split('/').join(' ')}` : ''} --tags`,
+				`git push${remote ? ` ${remote.split("/").join(" ")}` : ""}`,
+				`git push${
+					remote ? ` ${remote.split("/").join(" ")}` : ""
+				} --tags`,
 		  ];
 
 	// Execute user scripts before pushing

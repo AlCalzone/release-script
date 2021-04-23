@@ -5,7 +5,8 @@
 -->
 
 ## __WORK IN PROGRESS__
-Allow defining different remotes than origin by using `r` flag, e.g. `-r upstream/master`
+* Allow defining different remotes than origin by using `r` flag, e.g. `-r upstream/master`
+* Replace `npm` commands with `yarn` when `yarn.lock` is present.
 
 ## 1.8.3 (2021-01-11)
 * Changelog entries like `* (Author 1, Author 2) Whazaaaap!` are now correctly handled when creating the `io-package.json` news entries.

@@ -96,6 +96,8 @@ const ioPack = hasIoPack ? require(ioPackPath) : undefined;
 if (!parseArgs_1.lerna && hasIoPack && !((_a = ioPack === null || ioPack === void 0 ? void 0 : ioPack.common) === null || _a === void 0 ? void 0 : _a.version)) {
     fail("Missing property common.version from io-package.json!");
 }
+// Assume the repo is managed with yarn if there is a yarn.lock
+const isYarn = fs.existsSync(path.join(rootDir, "yarn.lock"));
 // Try to find the changelog
 let isChangelogInReadme = false;
 let CHANGELOG_PLACEHOLDER_PREFIX = "##";
@@ -310,12 +312,12 @@ ${newChangelog}`);
             `git commit -F ".commitmessage" --no-verify`,
         ]
         : [
-            `npm install`,
+            isYarn ? `yarn install` : `npm install`,
             `git add -A -- ":(exclude).commitmessage"`,
             `git commit -F ".commitmessage"`,
             `git tag v${newVersion}`,
-            `git push${parseArgs_1.remote ? ` ${parseArgs_1.remote.split('/').join(' ')}` : ''}`,
-            `git push${parseArgs_1.remote ? ` ${parseArgs_1.remote.split('/').join(' ')}` : ''} --tags`,
+            `git push${parseArgs_1.remote ? ` ${parseArgs_1.remote.split("/").join(" ")}` : ""}`,
+            `git push${parseArgs_1.remote ? ` ${parseArgs_1.remote.split("/").join(" ")}` : ""} --tags`,
         ];
     // Execute user scripts before pushing
     if (typeof parseArgs_1.scripts.beforePush === "string") {
