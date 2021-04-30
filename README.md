@@ -29,7 +29,7 @@ Together with the corresponding **Github Actions** workflow (more on that below)
     ## Changelog
     <!--
     	Placeholder for the next version (at the beginning of the line):
-    	### __WORK IN PROGRESS__
+    	### **WORK IN PROGRESS**
     -->
     ```
 
@@ -38,7 +38,7 @@ Together with the corresponding **Github Actions** workflow (more on that below)
     # Changelog
     <!--
     	Placeholder for the next version (at the beginning of the line):
-    	## __WORK IN PROGRESS__
+    	## **WORK IN PROGRESS**
     -->
     ```
 
@@ -50,10 +50,10 @@ In order to use this script, you need to maintain the changelog in either `READM
 # Changelog
 <!--
     Placeholder for the next version (at the beginning of the line):
-    ## __WORK IN PROGRESS__
+    ## **WORK IN PROGRESS**
 -->
 
-## __WORK IN PROGRESS__
+## **WORK IN PROGRESS**
 * Did some changes
 * Did some more changes
 
@@ -71,7 +71,7 @@ If you are using `README.md`, the script can automatically move old changelog en
 ### Add free text in the changelog entry headline
 Starting with `v1.8.0`, you can add free text after the placeholder:
 ```md
-## __WORK IN PROGRESS__ - 2020 Doomsday release
+## **WORK IN PROGRESS** - 2020 Doomsday release
 ```
 will be turned into
 ```md

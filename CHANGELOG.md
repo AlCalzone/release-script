@@ -1,8 +1,10 @@
 # Changelog
 <!--
     Placeholder for the next version (at the beginning of the line):
-    ## __WORK IN PROGRESS__
+    ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* Support both `**WORK IN PROGRESS**` and `__WORK IN PROGRESS__` as placeholders
 
 ## 1.9.0 (2021-04-23)
 * Allow defining different remotes than origin by using `r` flag, e.g. `-r upstream/master`
