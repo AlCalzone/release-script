@@ -9,10 +9,10 @@
 	npx AlCalzone/release-script#v1.0.0 -- <version> [--dry]
 
 	PLACEHOLDER for next version in CHANGELOG.md:
-	## __WORK IN PROGRESS__
+	## **WORK IN PROGRESS**
 
 	PLACEHOLDER for next version in README.md:
-	### __WORK IN PROGRESS__
+	### **WORK IN PROGRESS**
 
 */
 
@@ -113,12 +113,13 @@ if (!fs.existsSync(changelogPath)) {
 const changelogOldPath = path.join(rootDir, "CHANGELOG_OLD.md");
 const hasChangelogOld = isChangelogInReadme && fs.existsSync(changelogOldPath);
 
+const CHANGELOG_MARKERS = ["**WORK IN PROGRESS**", "__WORK IN PROGRESS__"] as const;
 const CHANGELOG_PLACEHOLDER =
-	CHANGELOG_PLACEHOLDER_PREFIX + " __WORK IN PROGRESS__";
+	`${CHANGELOG_PLACEHOLDER_PREFIX} ${CHANGELOG_MARKERS[0]}`;
 // The regex for the placeholder includes an optional free text at the end, e.g.
 // ### __WORK IN PROGRESS__ "2020 Doomsday release"
 const CHANGELOG_PLACEHOLDER_REGEX = new RegExp(
-	"^" + CHANGELOG_PLACEHOLDER + "(.*?)$",
+	`^${CHANGELOG_PLACEHOLDER_PREFIX} (?:${CHANGELOG_MARKERS.map(m => m.replace(/\*/g, "\\*")).join("|")})(.*?)$`,
 	"gm",
 );
 

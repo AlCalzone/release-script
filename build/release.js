@@ -10,10 +10,10 @@
     npx AlCalzone/release-script#v1.0.0 -- <version> [--dry]
 
     PLACEHOLDER for next version in CHANGELOG.md:
-    ## __WORK IN PROGRESS__
+    ## **WORK IN PROGRESS**
 
     PLACEHOLDER for next version in README.md:
-    ### __WORK IN PROGRESS__
+    ### **WORK IN PROGRESS**
 
 */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
@@ -124,10 +124,11 @@ else {
 // CHANGELOG_OLD is only used if the main changelog is in the readme
 const changelogOldPath = path.join(rootDir, "CHANGELOG_OLD.md");
 const hasChangelogOld = isChangelogInReadme && fs.existsSync(changelogOldPath);
-const CHANGELOG_PLACEHOLDER = CHANGELOG_PLACEHOLDER_PREFIX + " __WORK IN PROGRESS__";
+const CHANGELOG_MARKERS = ["**WORK IN PROGRESS**", "__WORK IN PROGRESS__"];
+const CHANGELOG_PLACEHOLDER = `${CHANGELOG_PLACEHOLDER_PREFIX} ${CHANGELOG_MARKERS[0]}`;
 // The regex for the placeholder includes an optional free text at the end, e.g.
 // ### __WORK IN PROGRESS__ "2020 Doomsday release"
-const CHANGELOG_PLACEHOLDER_REGEX = new RegExp("^" + CHANGELOG_PLACEHOLDER + "(.*?)$", "gm");
+const CHANGELOG_PLACEHOLDER_REGEX = new RegExp(`^${CHANGELOG_PLACEHOLDER_PREFIX} (?:${CHANGELOG_MARKERS.map(m => m.replace(/\*/g, "\\*")).join("|")})(.*?)$`, "gm");
 // check if the changelog contains exactly 1 occurence of the changelog placeholder
 switch ((changelog.match(CHANGELOG_PLACEHOLDER_REGEX) || []).length) {
     case 0:
@@ -310,6 +311,7 @@ ${newChangelog}`);
         ? [
             `git add -A -- ":(exclude).commitmessage"`,
             `git commit -F ".commitmessage" --no-verify`,
+            // lerna does the rest for us
         ]
         : [
             isYarn ? `yarn install` : `npm install`,
