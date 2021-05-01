@@ -33,7 +33,7 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "alcalzone-shared": "^3.0.3",
+    "alcalzone-shared": "^3.0.4",
     "axios": "^0.21.1",
     "colors": "^1.4.0",
     "semver": "^7.3.5",
