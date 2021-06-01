@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/AlCalzone/release-script#readme",
   "devDependencies": {
-    "@types/node": "^15.0.1",
+    "@types/node": "^15.6.1",
     "@types/semver": "^7.3.6",
     "@types/yargs": "^16.0.1",
     "typescript": "^4.3.2"
