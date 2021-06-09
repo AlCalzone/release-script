@@ -176,7 +176,7 @@ To execute multiple commands in sequence, you can also use an array of strings:
 ```
 
 ## Workflow file for automatic release
-When using Github Actions, you can enable automatic release on `npm` and `Github Releases` after a tagged build was successful. To do so, include the following job in your workflow definition file (e.g. `./github/workflows/test-and-release.yml`) and configure it to depend on the build jobs (here, they are called `unit-tests`).
+When using Github Actions, you can enable automatic release on `npm` and `Github Releases` after a tagged build was successful. To do so, include the following job in your workflow definition file (e.g. `.github/workflows/test-and-release.yml`) and configure it to depend on the build jobs (here, they are called `unit-tests`).
 The workflow must be configured to run when tags are pushed.
 
 Furthermore, you need to create a token in your npm account and add it to your repository secrets with the name `NPM_TOKEN`.
@@ -197,6 +197,7 @@ on:
   # This runs the workflow for all pull requests. You can leave this out if you only want to deploy
   pull_request: {}
 
+jobs:
 #
 # ... your other jobs go here ...
 #
