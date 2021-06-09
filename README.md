@@ -197,6 +197,7 @@ on:
   # This runs the workflow for all pull requests. You can leave this out if you only want to deploy
   pull_request: {}
 
+jobs:
 #
 # ... your other jobs go here ...
 #
