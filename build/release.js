@@ -57,12 +57,13 @@ const safe_1 = __importDefault(require("colors/safe"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const semver = __importStar(require("semver"));
-const yargs_1 = require("yargs");
+const yargs_1 = __importDefault(require("yargs"));
 const tools_1 = require("./tools");
 const translate_1 = require("./translate");
 const parseArgs_1 = require("./parseArgs");
 const gitStatus_1 = require("./gitStatus");
 const rootDir = process.cwd();
+const argv = yargs_1.default.parseSync();
 function fail(reason) {
     console.error("");
     console.error(safe_1.default.red("ERROR: " + reason));
@@ -198,7 +199,7 @@ const releaseTypes = [
     "prepatch",
     "prerelease",
 ];
-const releaseType = (yargs_1.argv._[0] || "patch").toString();
+const releaseType = (argv._[0] || "patch").toString();
 if (!parseArgs_1.lerna && releaseType.startsWith("--")) {
     fail(`Invalid release type ${releaseType}. If you meant to pass hyphenated args, try again without the single "--".`);
 }
@@ -215,9 +216,9 @@ else {
         oldVersion = ioPack.common.version;
     }
     if (releaseTypes.indexOf(releaseType) > -1) {
-        if (releaseType.startsWith("pre") && yargs_1.argv._.length >= 2) {
+        if (releaseType.startsWith("pre") && argv._.length >= 2) {
             // increment to pre-release with an additional prerelease string
-            newVersion = semver.inc(oldVersion, releaseType, (_b = yargs_1.argv._[1]) === null || _b === void 0 ? void 0 : _b.toString());
+            newVersion = semver.inc(oldVersion, releaseType, (_b = argv._[1]) === null || _b === void 0 ? void 0 : _b.toString());
         }
         else {
             newVersion = semver.inc(oldVersion, releaseType);

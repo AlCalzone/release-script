@@ -8,6 +8,9 @@
     "/bin",
     "/build"
   ],
+  "engines": {
+    "node": ">=12"
+  },
   "author": {
     "name": "AlCalzone",
     "email": "d.griesel@gmx.net"
