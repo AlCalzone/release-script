@@ -1,9 +1,10 @@
-import { argv } from "yargs";
+import yargs from "yargs";
 import * as fs from "fs";
 import * as path from "path";
 
 // Try to read the CLI args from an RC file
 let rcFile: Record<string, any> | undefined;
+const argv = yargs.parseSync();
 const rcFileName: string = (argv.c as any) ?? ".releaseconfig.json";
 const rcFilePath = path.isAbsolute(rcFileName)
 	? rcFileName
