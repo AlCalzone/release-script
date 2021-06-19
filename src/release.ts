@@ -25,7 +25,7 @@ import colors from "colors/safe";
 import * as fs from "fs";
 import * as path from "path";
 import * as semver from "semver";
-import { argv } from "yargs";
+import yargs from "yargs";
 import {
 	cleanChangelogForNews,
 	extractCurrentChangelog,
@@ -46,6 +46,7 @@ import {
 import { gitStatus } from "./gitStatus";
 
 const rootDir = process.cwd();
+const argv = yargs.parseSync();
 
 function fail(reason: string): never {
 	console.error("");
