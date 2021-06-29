@@ -37,6 +37,7 @@ import {
 import { translateText } from "./translate";
 import { parseArgs } from "./parseArgs";
 import { gitStatus } from "./gitStatus";
+import { getChangedWorkspaces } from "./yarn";
 
 (async () => {
 	const rootDir = process.cwd();
@@ -44,6 +45,7 @@ import { gitStatus } from "./gitStatus";
 	const {
 		allChanges,
 		isDryRun,
+		yarnWorkspace,
 		lerna,
 		lernaCheck,
 		scripts: userScripts,
@@ -168,7 +170,7 @@ import { gitStatus } from "./gitStatus";
 	}
 
 	// check if there are untracked changes
-	const branchStatus = gitStatus(rootDir);
+	const branchStatus = gitStatus(rootDir, remote);
 	if (branchStatus === "diverged") {
 		if (!isDryRun) {
 			fail(
@@ -309,7 +311,7 @@ Add them to a separate commit first or add the "--all" option to include them in
 	if (isDryRun) {
 		console.log(colors.yellow("dry run:") + " not updating package files");
 	} else {
-		if (!lerna) {
+		if (!lerna && !yarnWorkspace) {
 			console.log(
 				`updating package.json from ${colors.blue(
 					pack.version,
@@ -425,22 +427,43 @@ ${newChangelog}`,
 		}
 	}
 
-	const execQueue = lerna
-		? [
-				`git add -A -- ":(exclude).commitmessage"`,
-				`git commit -F ".commitmessage" --no-verify`,
-				// lerna does the rest for us
-		  ]
-		: [
-				isYarn ? `yarn install` : `npm install`,
-				`git add -A -- ":(exclude).commitmessage"`,
-				`git commit -F ".commitmessage"`,
-				`git tag v${newVersion}`,
-				`git push${remote ? ` ${remote.split("/").join(" ")}` : ""}`,
-				`git push${
-					remote ? ` ${remote.split("/").join(" ")}` : ""
-				} --tags`,
-		  ];
+	let changedWorkspaces: string[] = [];
+	if (yarnWorkspace) {
+		changedWorkspaces = await getChangedWorkspaces();
+		if (!changedWorkspaces.length) {
+			fail("No changed workspaces detected!");
+		}
+	}
+
+	const execQueue = (
+		lerna
+			? [
+					`git add -A -- ":(exclude).commitmessage"`,
+					`git commit -F ".commitmessage" --no-verify`,
+					// lerna does the rest for us
+			  ]
+			: [
+					...(yarnWorkspace
+						? [
+								...changedWorkspaces.map(
+									(ws) =>
+										`yarn workspace ${ws} version ${newVersion} --deferred`,
+								),
+								`yarn version apply --all`,
+						  ]
+						: []),
+					isYarn ? `yarn install` : `npm install`,
+					`git add -A -- ":(exclude).commitmessage"`,
+					`git commit -F ".commitmessage"`,
+					`git tag -a v${newVersion} -m "v${newVersion}"`,
+					`git push${
+						remote ? ` ${remote.split("/").join(" ")}` : ""
+					}`,
+					`git push${
+						remote ? ` ${remote.split("/").join(" ")}` : ""
+					} --tags`,
+			  ]
+	).filter((cmd): cmd is string => !!cmd);
 
 	// Execute user scripts before pushing
 	if (typeof userScripts.beforePush === "string") {
