@@ -2,16 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.gitStatus = void 0;
 const child_process_1 = require("child_process");
-const parseArgs_1 = require("./parseArgs");
 function getExecOptions(cwd) {
     return { cwd, encoding: "utf8" };
 }
 function getUpstream(cwd) {
     return child_process_1.execSync("git rev-parse --abbrev-ref --symbolic-full-name @{u}", getExecOptions(cwd)).trim();
 }
-function getCommitDifferences(cwd) {
+function getCommitDifferences(cwd, remote) {
     // if upstream hard configured we use it
-    const output = child_process_1.execSync(`git rev-list --left-right --count HEAD...${parseArgs_1.remote || getUpstream(cwd)}`, getExecOptions(cwd)).trim();
+    const output = child_process_1.execSync(`git rev-list --left-right --count HEAD...${remote || getUpstream(cwd)}`, getExecOptions(cwd)).trim();
     // something like "1\t0"
     return output.split("\t", 2).map(Number);
 }
@@ -20,19 +19,19 @@ function hasUncommittedChanges(cwd) {
     return output !== "";
 }
 /** Locale-independent check for uncommitted changes and commit differences between local and remote branches */
-function gitStatus(cwd) {
-    const [local, remote] = getCommitDifferences(cwd);
-    if (local > 0 && remote > 0) {
+function gitStatus(cwd, remote) {
+    const [localDiff, remoteDiff] = getCommitDifferences(cwd, remote);
+    if (localDiff > 0 && remoteDiff > 0) {
         return "diverged";
     }
-    else if (local === 0 && remote > 0) {
+    else if (localDiff === 0 && remoteDiff > 0) {
         return "behind";
     }
     else if (hasUncommittedChanges(cwd)) {
         return "uncommitted";
     } /* if (remote === 0) */
     else {
-        return local === 0 ? "up-to-date" : "ahead";
+        return localDiff === 0 ? "up-to-date" : "ahead";
     }
 }
 exports.gitStatus = gitStatus;

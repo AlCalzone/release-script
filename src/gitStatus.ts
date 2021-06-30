@@ -1,5 +1,4 @@
 import { execSync, ExecOptions } from "child_process";
-import { remote } from "./parseArgs";
 
 type GitStatus = "diverged" | "uncommitted" | "behind" | "ahead" | "up-to-date";
 
@@ -14,7 +13,7 @@ function getUpstream(cwd: string): string {
 	).trim();
 }
 
-function getCommitDifferences(cwd: string): [local: number, remote: number] {
+function getCommitDifferences(cwd: string, remote?: string): [localDiff: number, remoteDiff: number] {
 	// if upstream hard configured we use it
 	const output = execSync(
 		`git rev-list --left-right --count HEAD...${remote || getUpstream(cwd)}`,
@@ -33,16 +32,16 @@ function hasUncommittedChanges(cwd: string): boolean {
 }
 
 /** Locale-independent check for uncommitted changes and commit differences between local and remote branches */
-export function gitStatus(cwd: string): GitStatus {
-	const [local, remote] = getCommitDifferences(cwd);
-	if (local > 0 && remote > 0) {
+export function gitStatus(cwd: string, remote?: string): GitStatus {
+	const [localDiff, remoteDiff] = getCommitDifferences(cwd, remote);
+	if (localDiff > 0 && remoteDiff > 0) {
 		return "diverged";
-	} else if (local === 0 && remote > 0) {
+	} else if (localDiff === 0 && remoteDiff > 0) {
 		return "behind";
 	} else if (hasUncommittedChanges(cwd)) {
 		return "uncommitted";
 	} /* if (remote === 0) */ else {
-		return local === 0 ? "up-to-date" : "ahead";
+		return localDiff === 0 ? "up-to-date" : "ahead";
 	}
 }
 
