@@ -329,12 +329,8 @@ ${newChangelog}`);
             `git add -A -- ":(exclude).commitmessage"`,
             `git commit -F ".commitmessage"`,
             `git tag -a v${newVersion} -m "v${newVersion}"`,
-            // `git push${
-            // 	remote ? ` ${remote.split("/").join(" ")}` : ""
-            // }`,
-            // `git push${
-            // 	remote ? ` ${remote.split("/").join(" ")}` : ""
-            // } --tags`,
+            `git push${remote ? ` ${remote.split("/").join(" ")}` : ""}`,
+            `git push${remote ? ` ${remote.split("/").join(" ")}` : ""} --tags`,
         ]).filter((cmd) => !!cmd);
     // Execute user scripts before pushing
     if (typeof userScripts.beforePush === "string") {

@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* Add support to release `yarn v2+` workspaces (when the `workspace-tools` and `version` plugins are installed)
+
 ## 2.0.0 (2021-06-19)
 * Require Node.js 12+, update dependencies
 
