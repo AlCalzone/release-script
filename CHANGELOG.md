@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 2.2.0 (2021-07-01)
 * Added an automated check of the Github Actions workflow file to spot potential errors that could fail a release
 
 ## 2.1.0 (2021-06-30)
