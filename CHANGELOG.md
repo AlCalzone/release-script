@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* Added an automated check of the Github Actions workflow file to spot potential errors that could fail a release
+
 ## 2.1.0 (2021-06-30)
 * Add support to release `yarn v2+` workspaces (when the `workspace-tools` and `version` plugins are installed)
 

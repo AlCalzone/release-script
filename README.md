@@ -83,7 +83,7 @@ for example.
 
 Once you are ready to release the changes, commit everything so the working tree is clean. Also make sure that you are on the `master` branch. Now you can create a release by executing:
 ```
-npm run release [<releaseType> [<postfix>]] [-- [--dry] [--all]]
+npm run release [<releaseType> [<postfix>]] [-- [--dry] [--all] [--no-workflow-check]]
 ```
 You can choose between the following release types:
 The available release types are:
@@ -110,6 +110,15 @@ Although the release commit should only include the changes relevant to the vers
 ```bash
 npm run release patch -- --all
 ```
+
+### Skip the release workflow check
+The release script tries to find common errors in the Github Actions release workflow file. If the check results in a false positive, you can disable this check with the `--no-workflow-check` option.
+
+```bash
+npm run release patch -- --no-workflow-check
+```
+
+This can also be configured with `noWorkflowCheck: true` in the config file.
 
 ### Using a different remote than `origin`
 If the remote you want to push to is not called `origin`, you can use the `r` flag to specify a different one (after the double dashes!)  

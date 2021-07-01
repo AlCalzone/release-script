@@ -57,7 +57,7 @@ const yarn_1 = require("./yarn");
     var _a, _b;
     const rootDir = process.cwd();
     const argv = yargs_1.default.parseSync();
-    const { allChanges, isDryRun, yarnWorkspace, lerna, lernaCheck, scripts: userScripts, remote, } = await parseArgs_1.parseArgs();
+    const { allChanges, isDryRun, yarnWorkspace, lerna, lernaCheck, scripts: userScripts, remote, noWorkflowCheck, } = await parseArgs_1.parseArgs();
     function fail(reason) {
         console.error("");
         console.error(safe_1.default.red("ERROR: " + reason));
@@ -82,6 +82,33 @@ const yarn_1 = require("./yarn");
         lernaJson = require(lernaPath);
         if (!lernaJson.version) {
             fail("Missing property version from lerna.json!");
+        }
+    }
+    // ensure that the release workflow does not check for base_ref
+    // This is pretty specific to ioBroker's release workflow, but better than silently failing
+    const workflowPath = path.join(rootDir, ".github/workflows/test-and-release.yml");
+    if (!noWorkflowCheck && fs.existsSync(workflowPath)) {
+        let content = fs.readFileSync(workflowPath, "utf8");
+        // Find deploy step, crudely by string manipulation. TODO: This should be done with a yaml parser
+        while (true) {
+            let match = /^[ \t]+deploy:/gm.exec(content);
+            if (!match)
+                break;
+            content = content.substr(match.index);
+            match = /^[ \t]+if: |/gm.exec(content);
+            if (!match)
+                break;
+            content = content.substr(match.index);
+            match = /^[ \t]+github\.event\.base_ref ==/gm.exec(content);
+            if (!match)
+                break;
+            let line = content.substr(match.index);
+            line = line.substr(0, line.indexOf("\n"));
+            fail(`The ${safe_1.default.bold("deploy")} job in ${safe_1.default.bold(`.github/workflows/test-and-release.yml`)} potentially has an error, which can cause your deploy to fail.
+Remove this line to fix it:
+${safe_1.default.inverse(line)}
+
+You can suppress this check with the ${safe_1.default.bold("--no-workflow-check")} flag.`);
         }
     }
     // If this is an ioBroker project, also bump the io-package.json

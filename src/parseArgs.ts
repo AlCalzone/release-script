@@ -45,6 +45,9 @@ export async function parseArgs() {
 	const allChanges: boolean =
 		rcFile?.all ?? argv.all ?? argv._.includes("--all");
 
+	// Don't check workflow file
+	const noWorkflowCheck: boolean = rcFile?.noWorkflowCheck ?? argv.noWorkflowCheck ?? argv._.includes("--no-workflow-check");
+
 	return {
 		lernaCheck,
 		lerna,
@@ -53,5 +56,6 @@ export async function parseArgs() {
 		allChanges,
 		scripts,
 		remote,
+		noWorkflowCheck,
 	};
 }

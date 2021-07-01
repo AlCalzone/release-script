@@ -28,7 +28,7 @@ const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const yarn_1 = require("./yarn");
 async function parseArgs() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     // Try to read the CLI args from an RC file
     let rcFile;
     const argv = yargs_1.default.parseSync();
@@ -61,6 +61,8 @@ async function parseArgs() {
     // in lerna mode, these have no effect
     const isDryRun = (_g = argv.dry) !== null && _g !== void 0 ? _g : argv._.includes("--dry");
     const allChanges = (_j = (_h = rcFile === null || rcFile === void 0 ? void 0 : rcFile.all) !== null && _h !== void 0 ? _h : argv.all) !== null && _j !== void 0 ? _j : argv._.includes("--all");
+    // Don't check workflow file
+    const noWorkflowCheck = (_l = (_k = rcFile === null || rcFile === void 0 ? void 0 : rcFile.noWorkflowCheck) !== null && _k !== void 0 ? _k : argv.noWorkflowCheck) !== null && _l !== void 0 ? _l : argv._.includes("--no-workflow-check");
     return {
         lernaCheck,
         lerna,
@@ -69,6 +71,7 @@ async function parseArgs() {
         allChanges,
         scripts,
         remote,
+        noWorkflowCheck,
     };
 }
 exports.parseArgs = parseArgs;

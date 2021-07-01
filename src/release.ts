@@ -50,6 +50,7 @@ import { getChangedWorkspaces } from "./yarn";
 		lernaCheck,
 		scripts: userScripts,
 		remote,
+		noWorkflowCheck,
 	} = await parseArgs();
 
 	function fail(reason: string): never {
@@ -78,6 +79,40 @@ import { getChangedWorkspaces } from "./yarn";
 		lernaJson = require(lernaPath);
 		if (!lernaJson!.version) {
 			fail("Missing property version from lerna.json!");
+		}
+	}
+
+	// ensure that the release workflow does not check for base_ref
+	// This is pretty specific to ioBroker's release workflow, but better than silently failing
+	const workflowPath = path.join(
+		rootDir,
+		".github/workflows/test-and-release.yml",
+	);
+	if (!noWorkflowCheck && fs.existsSync(workflowPath)) {
+		let content = fs.readFileSync(workflowPath, "utf8");
+		// Find deploy step, crudely by string manipulation. TODO: This should be done with a yaml parser
+		while (true) {
+			let match = /^[ \t]+deploy:/gm.exec(content);
+			if (!match) break;
+			content = content.substr(match.index);
+
+			match = /^[ \t]+if: |/gm.exec(content);
+			if (!match) break;
+			content = content.substr(match.index);
+
+			match = /^[ \t]+github\.event\.base_ref ==/gm.exec(content);
+			if (!match) break;
+
+			let line = content.substr(match.index);
+			line = line.substr(0, line.indexOf("\n"));
+
+			fail(`The ${colors.bold("deploy")} job in ${colors.bold(
+				`.github/workflows/test-and-release.yml`,
+			)} potentially has an error, which can cause your deploy to fail.
+Remove this line to fix it:
+${colors.inverse(line)}
+
+You can suppress this check with the ${colors.bold("--no-workflow-check")} flag.`);
 		}
 	}
 
