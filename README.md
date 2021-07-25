@@ -268,11 +268,11 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release v${{ env.VERSION }}
+        release_name: Release v${{ steps.extract_release.outputs.VERSION }}
         draft: false
         # Prerelease versions create prereleases on Github
-        prerelease: ${{ contains(env.VERSION, '-') }}
-        body: ${{ env.BODY }}
+        prerelease: ${{ contains(steps.extract_release.outputs.VERSION, '-') }}
+        body: ${{ steps.extract_release.outputs.BODY }}
 ```
 
 ## License
