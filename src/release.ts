@@ -25,6 +25,7 @@ import colors from "colors/safe";
 import * as fs from "fs";
 import * as path from "path";
 import * as semver from "semver";
+import * as os from "os";
 import yargs from "yargs";
 import {
 	cleanChangelogForNews,
@@ -36,7 +37,7 @@ import {
 } from "./tools";
 import { translateText } from "./translate";
 import { parseArgs } from "./parseArgs";
-import { gitStatus } from "./gitStatus";
+import { checkGitIdentity, gitStatus } from "./git";
 import { getChangedWorkspaces } from "./yarn";
 
 (async () => {
@@ -82,6 +83,33 @@ import { getChangedWorkspaces } from "./yarn";
 		}
 	}
 
+	// Check that git can push
+	if (!checkGitIdentity(rootDir)) {
+		let message = colors.red(
+			(isDryRun
+				? "This is a dry run. The full run would fail because "
+				: "Cannot continue because ") +
+				`no git identity is configured for the current user ${colors.bold(
+					colors.blue(os.userInfo().username),
+				)}!`,
+		);
+		message += `\n
+Please tell git who you are, either globally using
+	${colors.blue(`git config --global user.name "Your Name"
+	git config --global user.email "your@e-mail.com"`)}
+
+or only for this folder
+	${colors.blue(`git config user.name "Your Name"
+	git config user.email "your@e-mail.com"`)}
+
+Note: If the current folder belongs to a different user than ${colors.bold(
+			colors.blue(os.userInfo().username),
+		)}, you might have to switch to that user first before changing the global config.
+`;
+		if (isDryRun) console.log(message);
+		else fail(message);
+	}
+
 	// ensure that the release workflow does not check for base_ref
 	// This is pretty specific to ioBroker's release workflow, but better than silently failing
 	const workflowPath = path.join(
@@ -112,7 +140,9 @@ import { getChangedWorkspaces } from "./yarn";
 Remove this line to fix it:
 ${colors.inverse(line)}
 
-You can suppress this check with the ${colors.bold("--no-workflow-check")} flag.`);
+You can suppress this check with the ${colors.bold(
+				"--no-workflow-check",
+			)} flag.`);
 		}
 	}
 
