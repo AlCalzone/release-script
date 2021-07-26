@@ -45,6 +45,16 @@ export function gitStatus(cwd: string, remote?: string): GitStatus {
 	}
 }
 
+export function checkGitIdentity(cwd: string): boolean {
+	try {
+		const username = execSync("git config --get user.name", getExecOptions(cwd)).trim();
+		const email = execSync("git config --get user.email", getExecOptions(cwd)).trim();
+		return username !== "" && email !== "";
+	} catch (e) {
+		return false;
+	}
+}
+
 // // check if there are untracked changes
 // const gitStatus = execSync("git status", { cwd: rootDir, encoding: "utf8" });
 // if (/have diverged/.test(gitStatus)) {

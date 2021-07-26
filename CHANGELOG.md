@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* The script now detects a missing git identity and provides help on how to configure it
+
 ## 2.2.0 (2021-07-01)
 * Added an automated check of the Github Actions workflow file to spot potential errors that could fail a release
 

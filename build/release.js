@@ -47,11 +47,12 @@ const safe_1 = __importDefault(require("colors/safe"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const semver = __importStar(require("semver"));
+const os = __importStar(require("os"));
 const yargs_1 = __importDefault(require("yargs"));
 const tools_1 = require("./tools");
 const translate_1 = require("./translate");
 const parseArgs_1 = require("./parseArgs");
-const gitStatus_1 = require("./gitStatus");
+const git_1 = require("./git");
 const yarn_1 = require("./yarn");
 (async () => {
     var _a, _b;
@@ -83,6 +84,28 @@ const yarn_1 = require("./yarn");
         if (!lernaJson.version) {
             fail("Missing property version from lerna.json!");
         }
+    }
+    // Check that git can push
+    if (!git_1.checkGitIdentity(rootDir)) {
+        let message = safe_1.default.red((isDryRun
+            ? "This is a dry run. The full run would fail because "
+            : "Cannot continue because ") +
+            `no git identity is configured for the current user ${safe_1.default.bold(safe_1.default.blue(os.userInfo().username))}!`);
+        message += `\n
+Please tell git who you are, either globally using
+	${safe_1.default.blue(`git config --global user.name "Your Name"
+	git config --global user.email "your@e-mail.com"`)}
+
+or only for this folder
+	${safe_1.default.blue(`git config user.name "Your Name"
+	git config user.email "your@e-mail.com"`)}
+
+Note: If the current folder belongs to a different user than ${safe_1.default.bold(safe_1.default.blue(os.userInfo().username))}, you might have to switch to that user first before changing the global config.
+`;
+        if (isDryRun)
+            console.log(message);
+        else
+            fail(message);
     }
     // ensure that the release workflow does not check for base_ref
     // This is pretty specific to ioBroker's release workflow, but better than silently failing
@@ -171,7 +194,7 @@ You can suppress this check with the ${safe_1.default.bold("--no-workflow-check"
         fail(safe_1.default.red("Cannot continue, the changelog for the next version is empty!"));
     }
     // check if there are untracked changes
-    const branchStatus = gitStatus_1.gitStatus(rootDir, remote);
+    const branchStatus = git_1.gitStatus(rootDir, remote);
     if (branchStatus === "diverged") {
         if (!isDryRun) {
             fail(safe_1.default.red("Cannot continue, both the remote and the local repo have different changes! Please merge the remote changes first."));
