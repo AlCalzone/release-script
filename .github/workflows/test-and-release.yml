@@ -1,138 +1,138 @@
-# This is a composition of lint and test scripts
-
 name: Test and Release
 
 # Run this job on all pushes and pull requests
 # as well as tags with a semantic version
 on:
-    push:
-        branches:
-            - "*"
-        tags:
-          # normal versions
-          - "v[0-9]+.[0-9]+.[0-9]+"
-          # pre-releases
-          - "v[0-9]+.[0-9]+.[0-9]+-**"
-    pull_request: {}
+  push:
+    branches:
+      - master
+    tags:
+      # normal versions
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      # pre-releases
+      - "v[0-9]+.[0-9]+.[0-9]+-**"
+  pull_request: {}
 
 jobs:
-  # Performs quick checks before the expensive test runs
-  check-and-lint:
+  lint:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
 
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         node-version: [14.x]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install Dependencies
+        run: yarn install --prefer-offline --frozen-lockfile
 
-    # - name: Lint TypeScript code
-    #   run: npm run lint
+      - name: Compile TypeScript code
+        run: yarn build
 
-    - name: Typecheck TypeScript code
-      run: npm run check
+      - name: Run linters
+        run: yarn lint
 
-# TODO: No tests yet :'(
+  # Runs unit tests on all supported node versions and OSes
+  unit-tests:
+    if: contains(github.event.head_commit.message, '[skip ci]') == false
 
-#   # ===================
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 16.x]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
-#   # Runs unit tests on all supported node versions and OSes
-#   unit-tests:
-#     if: contains(github.event.head_commit.message, '[skip ci]') == false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-#     needs: [check-and-lint]
+        - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
 
-#     runs-on: ${{ matrix.os }}
-#     strategy:
-#       matrix:
-#         node-version: [10.x, 12.x, 14.x]
-#         os: [ubuntu-latest]
+      - name: Install Dependencies
+        run: yarn install --prefer-offline --frozen-lockfile
 
-#     steps:
-#     - uses: actions/checkout@v1
-#     - name: Use Node.js ${{ matrix.node-version }}
-#       uses: actions/setup-node@v1
-#       with:
-#         node-version: ${{ matrix.node-version }}
+      - name: Compile TypeScript code
+        run: yarn build
 
-#     - name: Install dependencies
-#       run: npm ci
+      - name: Run unit tests
+        run: yarn test:ci
 
-#     - name: Run component tests
-#       # Some tests are flaky, try them 3 times if necessary
-#       run: npm run test:ci || npm run test:ci || npm run test:ci
-#       env:
-#         CI: true
+# TODO: To enable automatic npm releases, create a token on npmjs.org 
+# Enter this token as a GitHub secret (with name NPM_TOKEN) in the repository options
+# Then uncomment the following block:
 
-  # ===================
-
-  # Deploys the final package to NPM and Github Actions
+  # Deploys the final package to NPM
   deploy:
-    # Trigger this step only when a commit on master is tagged with a version number
+    needs: [lint, unit-tests]
+
+    # Trigger this step only when a commit on any branch is tagged with a version number
     if: |
       contains(github.event.head_commit.message, '[skip ci]') == false &&
       github.event_name == 'push' &&
       startsWith(github.ref, 'refs/tags/v')
 
-    needs: [check-and-lint]
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [14.x]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
 
-    - name: Extract the version and commit body from the tag
-      id: extract_release
-      # The body may be multiline, therefore we need to escape some characters
-      run: |
-        VERSION="${{ github.ref }}"
-        VERSION=${VERSION##*/v}
-        echo "::set-output name=VERSION::$VERSION"
-        BODY=$(git show -s --format=%b)
-        BODY="${BODY//'%'/'%25'}"
-        BODY="${BODY//$'\n'/'%0A'}"
-        BODY="${BODY//$'\r'/'%0D'}"
-        echo "::set-output name=BODY::$BODY"
+      - name: Extract the version and commit body from the tag
+        id: extract_release
+        # The body may be multiline, therefore newlines and % need to be escaped
+        run: |
+          VERSION="${{ github.ref }}"
+          VERSION=${VERSION##*/v}
+          echo "::set-output name=VERSION::$VERSION"
+          BODY=$(git show -s --format=%b)
+          BODY="${BODY//'%'/'%25'}"
+          BODY="${BODY//$'\n'/'%0A'}"
+          BODY="${BODY//$'\r'/'%0D'}"
+          echo "::set-output name=BODY::$BODY"
 
-    - name: Install dependencies
-      run: npm ci
-    - name: Create a clean build
-      run: npm run build
+      - name: Install Dependencies
+        run: yarn install --prefer-offline --frozen-lockfile
 
-    - name: Publish package to npm
-      run: |
-        npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
-        npm whoami
-        npm publish
+      - name: Create a clean build
+        run: yarn build
 
-    - name: Create Github Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release v${{ steps.extract_release.outputs.VERSION }}
-        draft: false
-        # Prerelease versions create prereleases on Github
-        prerelease: ${{ contains(steps.extract_release.outputs.VERSION, '-') }}
-        body: ${{ steps.extract_release.outputs.BODY }}
+      - name: Publish package to npm
+        run: |
+          npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+          npm whoami
+          yarn lerna publish from-package --yes
+
+      - name: Create Github Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release v${{ steps.extract_release.outputs.VERSION }}
+          draft: false
+          # Prerelease versions create prereleases on Github
+          prerelease: ${{ contains(steps.extract_release.outputs.VERSION, '-') }}
+          body: ${{ steps.extract_release.outputs.BODY }}
