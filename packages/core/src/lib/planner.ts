@@ -57,13 +57,22 @@ export async function planStages(context: Context): Promise<Stage[]> {
 	// Pass 2: create dependencies
 	for (const node of graphNodes.values()) {
 		const stage = node.value;
-		const after = stage.after;
-		if (!after) continue;
-		for (const dep of after) {
-			if (!graphNodes.has(dep)) {
-				throw new Error(`Stage ${stage.id} has unknown dependency ${dep}!`);
+		const { before, after } = stage;
+		if (after) {
+			for (const dep of after) {
+				if (!graphNodes.has(dep)) {
+					throw new Error(`Stage ${stage.id} has unknown dependency ${dep}!`);
+				}
+				node.edges.add(graphNodes.get(dep)!);
 			}
-			node.edges.add(graphNodes.get(dep)!);
+		}
+		if (before) {
+			for (const dep of before) {
+				if (!graphNodes.has(dep)) {
+					throw new Error(`Stage ${stage.id} has unknown dependency ${dep}!`);
+				}
+				graphNodes.get(dep)!.edges.add(node);
+			}
 		}
 	}
 

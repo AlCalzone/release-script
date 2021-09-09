@@ -71,19 +71,20 @@ describe("planStages", () => {
 		const plugin3 = {
 			id: "plugin3",
 			dependencies: ["plugin1"],
-			stages: async (ctx) => [
+			stages: async (ctx: any) => [
 				{
 					id: "cleanup",
 					after: [(ctx.plugins[0].stages as any)[2].id],
+					before: ["push"],
 				},
 			],
-		} as Plugin;
+		} as any as Plugin;
 
 		const plugins = [plugin1, plugin2, plugin3];
 		const context = { plugins } as Context;
 
 		const result = (await planStages(context)).map((s) => s.id);
-		expect(result).toEqual(["check", "commit", "check2", "push", "cleanup"]);
+		expect(result).toEqual(["check", "commit", "check2", "cleanup", "push"]);
 	});
 });
 
