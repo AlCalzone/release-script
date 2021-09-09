@@ -1,8 +1,6 @@
-CHANGELOG.md
+.github/actions/**/*.yml
+.github/workflows/
+CHANGELOG*.md
 package.json
 package-lock.json
 build/
-.github/workflows/
-.github/actions
-!.github/actions/**/*.js
-cache/
