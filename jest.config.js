@@ -1,14 +1,15 @@
 module.exports = {
 	testEnvironment: "node",
 	roots: [
+		"<rootDir>/packages/release-script/src",
 		"<rootDir>/packages/core/src",
 		// Add others as necessary
 	],
 	testRegex: "(.|/)test.tsx?$",
 	moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
 	moduleNameMapper: {
-		"^@alcalzone/release-script-(.*)/package.json": "<rootDir>/packages/$1/package.json",
 		"^@alcalzone/release-script-core(.*)": "<rootDir>/packages/core/src$1",
+		"^@alcalzone/release-script-(.*)/package.json": "<rootDir>/packages/$1/package.json",
 		// Add others as necessary
 	},
 	setupFilesAfterEnv: ["jest-extended"],
