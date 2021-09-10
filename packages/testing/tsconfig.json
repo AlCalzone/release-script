@@ -7,12 +7,6 @@
 		{
 			"path": "../core/tsconfig.build.json"
 		},
-		{
-			"path": "../plugin-git/tsconfig.build.json"
-		},
-		{
-			"path": "../testing/tsconfig.build.json"
-		},
 	],
 	"include": [
 		"src/**/*.ts"

@@ -46,7 +46,7 @@
   },
   "scripts": {
     "build": "lerna run build",
-    "watch": "lerna run watch",
+    "watch": "lerna run watch --parallel",
     "start": "node packages/release-script/bin/release.js",
     "test:reset": "jest --clear-cache",
     "test:ts": "jest",

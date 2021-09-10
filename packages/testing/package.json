@@ -1,10 +1,8 @@
 {
-  "name": "@alcalzone/release-script-core",
-  "publishConfig": {
-    "access": "public"
-  },
+  "name": "@alcalzone/release-script-testing",
+  "private": true,
   "version": "3.0.0-alpha.0",
-  "description": "Al Calzone's release script: Core components",
+  "description": "Al Calzone's release script: testing tools",
   "keywords": [],
   "license": "MIT",
   "author": {
@@ -36,7 +34,8 @@
   "engines": {
     "node": ">=12.20"
   },
-  "devDependencies": {
+  "dependencies": {
+    "@alcalzone/release-script-core": "^3.0.0-alpha.0",
     "colors": "^1.4.0"
   },
   "scripts": {
@@ -45,7 +44,7 @@
     "build": "tsc -p tsconfig.build.json",
     "watch": "tsc -p tsconfig.build.json --watch"
   },
-  "homepage": "https://github.com/AlCalzone/release-script/tree/main/packages/core#readme",
+  "homepage": "https://github.com/AlCalzone/release-script/tree/main/packages/testing#readme",
   "repository": {
     "type": "git",
     "url": "git@github.com:AlCalzone/release-script.git"

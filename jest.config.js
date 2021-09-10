@@ -3,12 +3,14 @@ module.exports = {
 	roots: [
 		"<rootDir>/packages/release-script/src",
 		"<rootDir>/packages/core/src",
+		"<rootDir>/packages/plugin-git/src",
 		// Add others as necessary
 	],
 	testRegex: "(.|/)test.tsx?$",
 	moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
 	moduleNameMapper: {
 		"^@alcalzone/release-script-core(.*)": "<rootDir>/packages/core/src$1",
+		"^@alcalzone/release-script-plugin-git(.*)": "<rootDir>/packages/plugin-git/src$1",
 		"^@alcalzone/release-script-(.*)/package.json": "<rootDir>/packages/$1/package.json",
 		// Add others as necessary
 	},

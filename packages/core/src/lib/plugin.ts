@@ -4,10 +4,10 @@ import type { Stage } from "./stage";
 
 export interface Plugin {
 	/** A unique identifier for this plugin */
-	id: string;
+	readonly id: string;
 
 	/** Define which plugins are required by this plugin and need to be included */
-	dependencies?: string[];
+	readonly dependencies?: string[];
 
 	/** Allows a plugin to define additional stages in the release process */
 	stages?: ConstOrDynamic<Stage[]>;
@@ -24,5 +24,5 @@ export interface Plugin {
 	executeStage(context: Context, stage: Stage): Promise<void>;
 
 	/** Plugin-specific data storage */
-	context: Map<string, any>;
+	context?: Map<string, any>;
 }

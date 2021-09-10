@@ -16,6 +16,9 @@ export interface Context {
 	/** The git remote to push to */
 	remote: string;
 
+	warnings: string[];
+	errors: string[];
+
 	/** An array of enabled plugins and their context */
 	plugins: Plugin[];
 }

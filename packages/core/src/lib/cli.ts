@@ -9,7 +9,10 @@ export interface CLI {
 	error(message: string): void;
 
 	/** Logs an error and exits */
-	fatal(message: string, code?: number): void;
+	fatal(message: string, code?: number): never;
+
+	prefix: string;
+	colors: typeof import("colors/safe");
 
 	// TODO: Ask the user something
 }

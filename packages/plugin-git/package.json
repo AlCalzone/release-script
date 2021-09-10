@@ -1,10 +1,10 @@
 {
-  "name": "@alcalzone/release-script-core",
+  "name": "@alcalzone/release-script-plugin-git",
   "publishConfig": {
     "access": "public"
   },
   "version": "3.0.0-alpha.0",
-  "description": "Al Calzone's release script: Core components",
+  "description": "Plugin for Al Calzone's release script: git",
   "keywords": [],
   "license": "MIT",
   "author": {
@@ -36,8 +36,10 @@
   "engines": {
     "node": ">=12.20"
   },
-  "devDependencies": {
-    "colors": "^1.4.0"
+  "dependencies": {
+    "@alcalzone/release-script-core": "^3.0.0-alpha.0",
+    "@alcalzone/release-script-testing": "^3.0.0-alpha.0",
+    "execa": "^5.1.1"
   },
   "scripts": {
     "clean": "tsc -b tsconfig.build.json --clean",
@@ -45,7 +47,7 @@
     "build": "tsc -p tsconfig.build.json",
     "watch": "tsc -p tsconfig.build.json --watch"
   },
-  "homepage": "https://github.com/AlCalzone/release-script/tree/main/packages/core#readme",
+  "homepage": "https://github.com/AlCalzone/release-script/tree/main/packages/plugin-git#readme",
   "repository": {
     "type": "git",
     "url": "git@github.com:AlCalzone/release-script.git"

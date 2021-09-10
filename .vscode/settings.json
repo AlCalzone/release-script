@@ -6,5 +6,13 @@
 		"editor.codeActionsOnSave": {
 			"source.organizeImports": true
 		}
+	},
+	"jest.jestCommandLine": "yarn test",
+	"jest.autoRun": {
+		"watch": false,
+		"onStartup": [
+			"all-tests"
+		],
+		"onSave": "test-file",
 	}
 }

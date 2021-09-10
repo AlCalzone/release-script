@@ -189,6 +189,7 @@ describe("execute", () => {
 			cli: {
 				log: logStub,
 			},
+			errors: [],
 		} as unknown as Context;
 
 		await execute(context);

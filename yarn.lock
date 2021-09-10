@@ -5,9 +5,21 @@ __metadata:
   version: 4
   cacheKey: 8
 
-"@alcalzone/release-script-core@workspace:packages/core":
+"@alcalzone/release-script-core@^3.0.0-alpha.0, @alcalzone/release-script-core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-core@workspace:packages/core"
+  dependencies:
+    colors: ^1.4.0
+  languageName: unknown
+  linkType: soft
+
+"@alcalzone/release-script-plugin-git@^3.0.0-alpha.0, @alcalzone/release-script-plugin-git@workspace:packages/plugin-git":
+  version: 0.0.0-use.local
+  resolution: "@alcalzone/release-script-plugin-git@workspace:packages/plugin-git"
+  dependencies:
+    "@alcalzone/release-script-core": ^3.0.0-alpha.0
+    "@alcalzone/release-script-testing": ^3.0.0-alpha.0
+    execa: ^5.1.1
   languageName: unknown
   linkType: soft
 
@@ -45,16 +57,29 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@alcalzone/release-script-testing@^3.0.0-alpha.0, @alcalzone/release-script-testing@workspace:packages/testing":
+  version: 0.0.0-use.local
+  resolution: "@alcalzone/release-script-testing@workspace:packages/testing"
+  dependencies:
+    "@alcalzone/release-script-core": ^3.0.0-alpha.0
+    colors: ^1.4.0
+  languageName: unknown
+  linkType: soft
+
 "@alcalzone/release-script@workspace:packages/release-script":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script@workspace:packages/release-script"
   dependencies:
+    "@alcalzone/release-script-core": ^3.0.0-alpha.0
+    "@alcalzone/release-script-plugin-git": ^3.0.0-alpha.0
+    "@alcalzone/release-script-testing": ^3.0.0-alpha.0
     alcalzone-shared: ^4.0.0
     axios: ^0.21.4
     colors: ^1.4.0
     execa: ^5.1.1
     fs-extra: ^10.0.0
     semver: ^7.3.5
+    source-map-support: ^0.5.20
     yargs: ^17.1.1
   bin:
     release-script: bin/release.js

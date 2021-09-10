@@ -116,11 +116,27 @@ export async function planStage(context: Context, stage: Stage): Promise<Plugin[
 
 /** Plans all stages of the given context and executes them in the correct order */
 export async function execute(context: Context): Promise<void> {
+	context.cli.prefix = "$plan";
 	const stages = await planStages(context);
 	for (const stage of stages) {
+		context.cli.prefix = `${stage.id}:$plan`;
 		const plugins = await planStage(context, stage);
 		for (const plugin of plugins) {
+			context.cli.prefix = `${stage.id}:${plugin.id}`;
 			await plugin.executeStage(context, stage);
+
+			// If there were errors, we may need to abort
+			if (context.errors.length > 0) {
+				switch (stage.continueOnError) {
+					case true:
+						continue;
+					case "dry-run":
+						if (context.dryRun) continue;
+					// fall through
+					default:
+						return;
+				}
+			}
 		}
 	}
 }

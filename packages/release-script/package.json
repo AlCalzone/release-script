@@ -38,12 +38,16 @@
     "node": ">=12.20"
   },
   "dependencies": {
+    "@alcalzone/release-script-core": "^3.0.0-alpha.0",
+    "@alcalzone/release-script-plugin-git": "^3.0.0-alpha.0",
+    "@alcalzone/release-script-testing": "^3.0.0-alpha.0",
     "alcalzone-shared": "^4.0.0",
     "axios": "^0.21.4",
     "colors": "^1.4.0",
     "execa": "^5.1.1",
     "fs-extra": "^10.0.0",
     "semver": "^7.3.5",
+    "source-map-support": "^0.5.20",
     "yargs": "^17.1.1"
   },
   "scripts": {

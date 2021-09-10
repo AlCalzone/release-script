@@ -10,9 +10,6 @@
 		{
 			"path": "../core/tsconfig.build.json"
 		},
-		{
-			"path": "../plugin-git/tsconfig.build.json"
-		},
 	],
 	"include": [
 		"src/**/*.ts"
