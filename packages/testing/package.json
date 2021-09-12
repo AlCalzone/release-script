@@ -38,6 +38,9 @@
     "@alcalzone/release-script-core": "^3.0.0-alpha.0",
     "colors": "^1.4.0"
   },
+  "peerDependencies": {
+    "execa": "*"
+  },
   "scripts": {
     "clean": "tsc -b tsconfig.build.json --clean",
     "prebuild": "rimraf ./build",

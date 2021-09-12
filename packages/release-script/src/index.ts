@@ -1,11 +1,27 @@
 import {
 	Context,
 	execute,
+	isReleaseError,
 	Plugin,
 	ReleaseError,
 	resolvePlugins,
 } from "@alcalzone/release-script-core";
 import colors from "colors/safe";
+
+const primaryAndInlineTagRegex = /\[([^\]]+)\]/g;
+
+function colorizeTextAndTags(
+	textWithTags: string,
+	textColor: (input: string) => string,
+	bgColor: (input: string) => string,
+): string {
+	return textColor(
+		textWithTags.replace(
+			primaryAndInlineTagRegex,
+			(match, group1) => bgColor("[") + colors.inverse(group1) + bgColor("]"),
+		),
+	);
+}
 
 export async function main(): Promise<void> {
 	const allPlugins: Plugin[] = [
@@ -18,14 +34,17 @@ export async function main(): Promise<void> {
 		return colors.bold(`${prefix} `) + str;
 	};
 
+	const data = new Map();
+
 	const context: Context = {
+		cwd: process.cwd(),
 		cli: {
 			log: console.log,
 			warn(msg) {
 				console.warn(
 					prependPrefix(
 						context.cli.prefix,
-						colors.yellow(`${colors.inverse(" WARN ")} ${msg}`),
+						colorizeTextAndTags(`[WARN] ${msg}`, colors.yellow, colors.bgYellow),
 					),
 				);
 				context.warnings.push(msg);
@@ -34,7 +53,7 @@ export async function main(): Promise<void> {
 				console.error(
 					prependPrefix(
 						context.cli.prefix,
-						colors.red(`${colors.inverse(" ERR ")} ${msg}`),
+						colorizeTextAndTags(`[ERR] ${msg}`, colors.red, colors.bgRed),
 					),
 				);
 				context.errors.push(msg);
@@ -51,6 +70,20 @@ export async function main(): Promise<void> {
 		plugins,
 		warnings: [],
 		errors: [],
+		getData: <T>(key: string) => {
+			if (!data.has(key)) {
+				throw new ReleaseError(
+					`A plugin tried to access non-existent data with key "${key}"`,
+					true,
+				);
+			} else {
+				return data.get(key) as T;
+			}
+		},
+		hasData: (key: string) => data.has(key),
+		setData: (key: string, value: any) => {
+			data.set(key, value);
+		},
 	};
 
 	try {
@@ -74,8 +107,26 @@ export async function main(): Promise<void> {
 			process.exit(1);
 		}
 	} catch (e: any) {
-		const msg = e.stack ?? e.message ?? String(e);
-		context.cli.error(prependPrefix(context.cli.prefix, `${colors.inverse("FATAL")} ${msg}`));
+		if (isReleaseError(e)) {
+			console.error(
+				prependPrefix(
+					context.cli.prefix,
+					colorizeTextAndTags(
+						`[FATAL] ${e.message.replace("ReleaseError: ", "")}`,
+						colors.red,
+						colors.bgRed,
+					),
+				),
+			);
+		} else {
+			const msg = e.stack ?? e.message ?? String(e);
+			console.error(
+				prependPrefix(
+					context.cli.prefix,
+					colorizeTextAndTags(`[FATAL] ${msg}`, colors.red, colors.bgRed),
+				),
+			);
+		}
 		process.exit((e as any).code ?? 1);
 	}
 }

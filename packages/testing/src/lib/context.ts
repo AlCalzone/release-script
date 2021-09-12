@@ -1,7 +1,11 @@
 import { CLI, Context, ReleaseError } from "@alcalzone/release-script-core";
 import colors from "colors/safe";
 
-export const defaultContextOptions: Omit<Context, "cli" | "warnings" | "errors"> = {
+export const defaultContextOptions: Omit<
+	Context,
+	"cli" | "warnings" | "errors" | "getData" | "hasData" | "setData"
+> = {
+	cwd: process.cwd(),
 	dryRun: false,
 	includeUnstaged: false,
 	remote: "origin",
@@ -11,6 +15,7 @@ export const defaultContextOptions: Omit<Context, "cli" | "warnings" | "errors">
 export function createMockContext(
 	options: Partial<Omit<Context, "cli" | "warnings" | "errors">>,
 ): Context {
+	const data = new Map();
 	const ret: Context = {
 		cli: {
 			log: jest.fn(),
@@ -30,6 +35,20 @@ export function createMockContext(
 		errors: [],
 		...defaultContextOptions,
 		...options,
+		getData: <T>(key: string) => {
+			if (!data.has(key)) {
+				throw new ReleaseError(
+					`A plugin tried to access non-existent data with key "${key}"`,
+					true,
+				);
+			} else {
+				return data.get(key) as T;
+			}
+		},
+		hasData: (key: string) => data.has(key),
+		setData: (key: string, value: any) => {
+			data.set(key, value);
+		},
 	};
 	return ret;
 }

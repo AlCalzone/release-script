@@ -1,36 +1,23 @@
 import { DefaultStages } from "@alcalzone/release-script-core";
-import { assertReleaseError, createMockContext } from "@alcalzone/release-script-testing";
-import execa from "execa";
+import {
+	assertReleaseError,
+	createMockContext,
+	createMockExec,
+	TestFS,
+} from "@alcalzone/release-script-testing";
+import fs from "fs-extra";
+import "jest-extended";
+import path from "path";
 import GitPlugin from ".";
-jest.mock("execa");
 
-const execaMock = execa as jest.MockedFunction<typeof execa>;
-
-function mockCommands(commands: Record<string, string>) {
-	execa.command = jest.fn().mockImplementation((command) => {
-		if (command in commands) {
-			return { stdout: commands[command] };
-		} else {
-			throw new Error(`mock missing for command "${command}"!`);
-		}
-	});
-	execaMock.mockImplementation((file, args: any) => {
-		let command = `${file}`;
-		if (args && args.length) {
-			command += ` ${args.join(" ")}`;
-		}
-
-		if (command in commands) {
-			return { stdout: commands[command] } as any;
-		} else {
-			throw new Error(`mock missing for command "${command}"!`);
-		}
-	});
-}
+const exec = createMockExec();
 
 describe("Git plugin", () => {
 	afterEach(() => {
-		execaMock.mockClear();
+		exec.instance.mockClear();
+	});
+	afterAll(() => {
+		exec.unmock();
 	});
 
 	describe("check stage", () => {
@@ -38,7 +25,7 @@ describe("Git plugin", () => {
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({ plugins: [gitPlugin] });
 
-			mockCommands({
+			exec.mock({
 				"git config --get user.name": "",
 				"git config --get user.email": "",
 			});
@@ -53,7 +40,7 @@ describe("Git plugin", () => {
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({ plugins: [gitPlugin] });
 
-			mockCommands({
+			exec.mock({
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
 				"git rev-list --left-right --count HEAD...origin": "0\t2",
@@ -69,7 +56,7 @@ describe("Git plugin", () => {
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({ plugins: [gitPlugin] });
 
-			mockCommands({
+			exec.mock({
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
 				"git rev-list --left-right --count HEAD...origin": "1\t1",
@@ -88,7 +75,7 @@ describe("Git plugin", () => {
 				includeUnstaged: false,
 			});
 
-			mockCommands({
+			exec.mock({
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
 				"git rev-list --left-right --count HEAD...origin": "1\t0",
@@ -107,7 +94,7 @@ describe("Git plugin", () => {
 				includeUnstaged: true,
 			});
 
-			mockCommands({
+			exec.mock({
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
 				"git rev-list --left-right --count HEAD...origin": "1\t0",
@@ -124,7 +111,7 @@ describe("Git plugin", () => {
 				plugins: [gitPlugin],
 			});
 
-			mockCommands({
+			exec.mock({
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
 				"git rev-list --left-right --count HEAD...origin": "1\t0",
@@ -133,6 +120,60 @@ describe("Git plugin", () => {
 
 			await gitPlugin.executeStage(context, DefaultStages.check);
 			expect(context.errors).toHaveLength(0);
+		});
+	});
+
+	describe("cleanup stage", () => {
+		let testFS: TestFS;
+		let testFSRoot: string;
+		beforeEach(async () => {
+			testFS = new TestFS();
+			testFSRoot = await testFS.getRoot();
+		});
+		afterEach(async () => {
+			await testFS.remove();
+		});
+
+		it("deletes an existing .commitmessage file", async () => {
+			await testFS.create({
+				".commitmessage": "this is a commit message",
+			});
+
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({ plugins: [gitPlugin], cwd: testFSRoot });
+
+			const commitmessagePath = path.join(testFSRoot, ".commitmessage");
+
+			await expect(fs.pathExists(commitmessagePath)).resolves.toBeTrue();
+			await gitPlugin.executeStage(context, DefaultStages.cleanup);
+			await expect(fs.pathExists(commitmessagePath)).resolves.toBeFalse();
+		});
+	});
+
+	describe("cleanup stage", () => {
+		let testFS: TestFS;
+		let testFSRoot: string;
+		beforeEach(async () => {
+			testFS = new TestFS();
+			testFSRoot = await testFS.getRoot();
+		});
+		afterEach(async () => {
+			await testFS.remove();
+		});
+
+		it("deletes an existing .commitmessage file", async () => {
+			await testFS.create({
+				".commitmessage": "this is a commit message",
+			});
+
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({ plugins: [gitPlugin], cwd: testFSRoot });
+
+			const commitmessagePath = path.join(testFSRoot, ".commitmessage");
+
+			await expect(fs.pathExists(commitmessagePath)).resolves.toBeTrue();
+			await gitPlugin.executeStage(context, DefaultStages.cleanup);
+			await expect(fs.pathExists(commitmessagePath)).resolves.toBeFalse();
 		});
 	});
 });

@@ -5,6 +5,9 @@ export interface Context {
 	/** Access to the CLI instance. */
 	cli: CLI;
 
+	/** Which directory the release script is executed in */
+	cwd: string;
+
 	/**
 	 * Whether unstaged changes should be committed aswell
 	 */
@@ -19,6 +22,11 @@ export interface Context {
 	warnings: string[];
 	errors: string[];
 
-	/** An array of enabled plugins and their context */
+	/** An array of enabled plugins */
 	plugins: Plugin[];
+
+	/** Data storage to be used by plugins */
+	getData<T>(key: string): T;
+	hasData(key: string): boolean;
+	setData(key: string, value: any): void;
 }

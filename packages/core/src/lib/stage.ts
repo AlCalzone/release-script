@@ -36,4 +36,8 @@ export const DefaultStages = Object.freeze({
 		id: "push",
 		after: ["commit"],
 	} as Stage,
+	cleanup: {
+		id: "cleanup",
+		after: ["push"],
+	} as Stage,
 });
