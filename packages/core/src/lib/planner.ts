@@ -1,3 +1,4 @@
+import { DefaultStages } from "..";
 import type { Context } from "./context";
 import { GraphNode, topologicalSort } from "./graph";
 import type { Plugin } from "./plugin";
@@ -39,6 +40,11 @@ export function resolvePlugins(allPlugins: Plugin[], chosenPluginIds: string[]):
 export async function planStages(context: Context): Promise<Stage[]> {
 	// Pass 1: collect all graph nodes
 	const graphNodes = new Map<string, GraphNode<Stage>>();
+	// Always add the default stages
+	for (const defStage of Object.values(DefaultStages)) {
+		graphNodes.set(defStage.id, new GraphNode(defStage));
+	}
+	// Now add the ones required by plugins
 	for (const plugin of context.plugins) {
 		// Resolve stages to an array
 		let stages = plugin.stages;

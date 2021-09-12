@@ -1,5 +1,8 @@
 import {
+	CLI,
 	Context,
+	exec,
+	execRaw,
 	execute,
 	isReleaseError,
 	Plugin,
@@ -34,37 +37,55 @@ export async function main(): Promise<void> {
 		return colors.bold(`${prefix} `) + str;
 	};
 
-	const data = new Map();
+	const dryRun = true;
 
-	const context: Context = {
-		cwd: process.cwd(),
-		cli: {
-			log: console.log,
-			warn(msg) {
-				console.warn(
-					prependPrefix(
-						context.cli.prefix,
-						colorizeTextAndTags(`[WARN] ${msg}`, colors.yellow, colors.bgYellow),
-					),
-				);
-				context.warnings.push(msg);
-			},
-			error(msg) {
-				console.error(
-					prependPrefix(
-						context.cli.prefix,
-						colorizeTextAndTags(`[ERR] ${msg}`, colors.red, colors.bgRed),
-					),
-				);
-				context.errors.push(msg);
-			},
-			fatal(msg, code) {
-				throw new ReleaseError(msg, true, code);
-			},
-			colors,
-			prefix: "",
+	// eslint-disable-next-line prefer-const
+	let context: Context;
+
+	const data = new Map();
+	const cli: CLI = {
+		log(msg) {
+			console.log(prependPrefix(context.cli.prefix, msg));
 		},
-		dryRun: true,
+		warn(msg) {
+			console.warn(
+				prependPrefix(
+					context.cli.prefix,
+					colorizeTextAndTags(`[WARN] ${msg}`, colors.yellow, colors.bgYellow),
+				),
+			);
+			context.warnings.push(msg);
+		},
+		error(msg) {
+			console.error(
+				prependPrefix(
+					context.cli.prefix,
+					colorizeTextAndTags(`[ERR] ${msg}`, colors.red, colors.bgRed),
+				),
+			);
+			context.errors.push(msg);
+		},
+		fatal(msg, code) {
+			throw new ReleaseError(msg, true, code);
+		},
+		logCommand(command, args) {
+			if (args?.length) {
+				command += ` ${args.join(" ")}`;
+			}
+			cli.log(` $ ${command}`);
+		},
+		colors,
+		prefix: "",
+	};
+
+	context = {
+		cwd: process.cwd(),
+		cli,
+		sys: {
+			exec,
+			execRaw,
+		},
+		dryRun,
 		includeUnstaged: false,
 		remote: "origin",
 		plugins,

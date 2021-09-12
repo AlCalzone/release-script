@@ -13,6 +13,6 @@
 		"onStartup": [
 			"all-tests"
 		],
-		"onSave": "test-file",
+		"onSave": "test-src-file",
 	}
 }

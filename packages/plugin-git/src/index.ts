@@ -1,56 +1,65 @@
 import { DefaultStages } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
-import execa from "execa";
 import fs from "fs-extra";
 import os from "os";
 import path from "path";
 
 type GitStatus = "diverged" | "uncommitted" | "behind" | "ahead" | "up-to-date";
 
-async function hasGitIdentity(cwd: string): Promise<boolean> {
+async function hasGitIdentity(context: Context): Promise<boolean> {
 	try {
-		const { stdout: username } = await execa.command("git config --get user.name", { cwd });
-		const { stdout: email } = await execa.command("git config --get user.email", { cwd });
+		const { stdout: username } = await context.sys.execRaw("git config --get user.name", {
+			cwd: context.cwd,
+		});
+		const { stdout: email } = await context.sys.execRaw("git config --get user.email", {
+			cwd: context.cwd,
+		});
 		return username !== "" && email !== "";
 	} catch (e) {
 		return false;
 	}
 }
 
-async function getUpstream(cwd: string): Promise<string> {
-	const { stdout: upstream } = await execa.command(
+async function getUpstream(context: Context): Promise<string> {
+	const { stdout: upstream } = await context.sys.execRaw(
 		"git rev-parse --abbrev-ref --symbolic-full-name @{u}",
-		{ cwd },
+		{ cwd: context.cwd },
 	);
 	return upstream;
 }
 
 async function getCommitDifferences(
-	cwd: string,
-	remote?: string,
+	context: Context,
 ): Promise<[localDiff: number, remoteDiff: number]> {
 	// if upstream hard configured we use it
-	const { stdout: output } = await execa(
+	const { stdout: output } = await context.sys.exec(
 		"git",
-		["rev-list", "--left-right", "--count", `HEAD...${remote || getUpstream(cwd)}`],
-		{ cwd },
+		[
+			"rev-list",
+			"--left-right",
+			"--count",
+			`HEAD...${context.remote || (await getUpstream(context))}`,
+		],
+		{ cwd: context.cwd },
 	);
 	// something like "1\t0"
 	return output.split("\t", 2).map(Number) as any;
 }
 
-async function hasUncommittedChanges(cwd: string): Promise<boolean> {
-	const { stdout: output } = await execa.command(`git status --porcelain`, { cwd });
+async function hasUncommittedChanges(context: Context): Promise<boolean> {
+	const { stdout: output } = await context.sys.execRaw(`git status --porcelain`, {
+		cwd: context.cwd,
+	});
 	return output !== "";
 }
 
-async function gitStatus(cwd: string, remote?: string): Promise<GitStatus> {
-	const [localDiff, remoteDiff] = await getCommitDifferences(cwd, remote);
+async function gitStatus(context: Context): Promise<GitStatus> {
+	const [localDiff, remoteDiff] = await getCommitDifferences(context);
 	if (localDiff > 0 && remoteDiff > 0) {
 		return "diverged";
 	} else if (localDiff === 0 && remoteDiff > 0) {
 		return "behind";
-	} else if (await hasUncommittedChanges(cwd)) {
+	} else if (await hasUncommittedChanges(context)) {
 		return "uncommitted";
 	} /* if (remote === 0) */ else {
 		return localDiff === 0 ? "up-to-date" : "ahead";
@@ -71,9 +80,8 @@ class GitPlugin implements Plugin {
 
 	private async executeCheckStage(context: Context): Promise<void> {
 		const colors = context.cli.colors;
-		if (!(await hasGitIdentity(context.cwd))) {
-			const message = `
-No git identity is configured for the current user ${colors.bold(
+		if (!(await hasGitIdentity(context))) {
+			const message = `No git identity is configured for the current user ${colors.bold(
 				colors.blue(os.userInfo().username),
 			)}!
 			
@@ -96,7 +104,7 @@ Note: If the current folder belongs to a different user than ${colors.bold(
 		const lerna = false;
 
 		// check if there are untracked changes
-		const branchStatus = await gitStatus(context.cwd, context.remote);
+		const branchStatus = await gitStatus(context);
 		if (branchStatus === "diverged") {
 			context.cli.fatal(
 				"Both the remote and the local repo have different changes! Please merge the remote changes first.",
@@ -119,24 +127,59 @@ Note: If the current folder belongs to a different user than ${colors.bold(
 		}
 	}
 
+	private async executeCommitStage(context: Context): Promise<void> {
+		// Prepare the commit message
+		await fs.writeFile(
+			path.join(context.cwd, ".commitmessage"),
+			`chore: release v${context.getData("version_new")}
+
+${context.getData("changelog_new")}`,
+		);
+
+		// TODO:
+		const lerna = false;
+
+		// And commit stuff
+		const newVersion = context.getData<string>("version_new");
+		const commands = [
+			`git add -A -- ":(exclude).commitmessage"`,
+			`git commit -F ".commitmessage"`,
+			...(lerna ? [] : [`git tag -a v${newVersion} -m "v${newVersion}"`]),
+		];
+
+		for (const command of commands) {
+			if (context.dryRun) {
+				context.cli.logCommand(command);
+			} else {
+				await context.sys.execRaw(command, { cwd: context.cwd });
+			}
+		}
+	}
+
 	async executeStage(context: Context, stage: Stage): Promise<void> {
 		if (stage.id === "check") {
 			await this.executeCheckStage(context);
 		} else if (stage.id === "commit") {
-			// Prepare the commit message
-			await fs.writeFile(
-				path.join(context.cwd, ".commitmessage"),
-				`chore: release v${context.getData("version_new")}
-
-${context.getData("changelog_new")}`,
-			);
+			await this.executeCommitStage(context);
 		} else if (stage.id === "push") {
-			context.cli.warn("TODO: Implement stage");
+			const remoteStr =
+				context.remote && context.remote !== "origin"
+					? ` ${context.remote.split("/").join(" ")}`
+					: "";
+
+			const commands = [`git push${remoteStr}`, `git push${remoteStr} --tags`];
+
+			for (const command of commands) {
+				if (context.dryRun) {
+					context.cli.logCommand(command);
+				} else {
+					await context.sys.execRaw(command, { cwd: context.cwd });
+				}
+			}
 		} else if (stage.id === "cleanup") {
 			await fs.unlink(path.join(context.cwd, ".commitmessage"));
 		}
 	}
-	// context: Map<string, any>;
 }
 
 export default GitPlugin;

@@ -1,9 +1,13 @@
 import type { CLI } from "./cli";
 import type { Plugin } from "./plugin";
+import type { System } from "./system";
 
 export interface Context {
 	/** Access to the CLI instance. */
 	cli: CLI;
+
+	/** Access to the system layer */
+	sys: System;
 
 	/** Which directory the release script is executed in */
 	cwd: string;
@@ -17,7 +21,7 @@ export interface Context {
 	dryRun: boolean;
 
 	/** The git remote to push to */
-	remote: string;
+	remote?: string;
 
 	warnings: string[];
 	errors: string[];

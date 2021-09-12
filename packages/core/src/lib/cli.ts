@@ -11,6 +11,9 @@ export interface CLI {
 	/** Logs an error and exits */
 	fatal(message: string, code?: number): never;
 
+	/** Logs an executed command (mainly used for dry runs) */
+	logCommand(command: string, args?: string[]): void;
+
 	prefix: string;
 	colors: typeof import("colors/safe");
 
