@@ -12,7 +12,7 @@ class MockSystem implements System {
 			| Record<string, string | ExecaReturnValue>
 			| ((cmd: string) => string | ExecaReturnValue),
 	): void {
-		const execRaw = (command: string): ExecaReturnValue => {
+		const execRaw = (command: string): Promise<ExecaReturnValue> => {
 			let ret: string | ExecaReturnValue;
 			if (typeof commands === "function") {
 				ret = commands(command);
@@ -22,15 +22,17 @@ class MockSystem implements System {
 				throw new Error(`mock missing for command "${command}"!`);
 			}
 
-			return typeof ret === "string"
-				? ({
-						stdout: ret,
-						stderr: "",
-						isCanceled: false,
-						failed: false,
-						exitCode: 0,
-				  } as any)
-				: ret;
+			return Promise.resolve(
+				typeof ret === "string"
+					? ({
+							stdout: ret,
+							stderr: "",
+							isCanceled: false,
+							failed: false,
+							exitCode: 0,
+					  } as any)
+					: ret,
+			);
 		};
 		// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 		const exec = (file: string, args: any) => {
@@ -59,6 +61,7 @@ export const defaultContextOptions: Omit<
 		dryRun: false,
 		includeUnstaged: false,
 		remote: "origin",
+		verbose: false,
 	},
 	plugins: [],
 	sys: new MockSystem(),

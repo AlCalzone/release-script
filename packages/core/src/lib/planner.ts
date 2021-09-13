@@ -136,21 +136,32 @@ export async function planStage(context: Context, stage: Stage): Promise<Plugin[
 
 /** Plans all stages of the given context and executes them in the correct order */
 export async function execute(context: Context): Promise<void> {
-	context.cli.prefix = "$plan";
+	const colors = context.cli.colors;
+	context.cli.prefix = "";
 	const stages = await planStages(context);
 	if (context.argv.verbose) {
-		context.cli.log(`Stages: ${stages.map((s) => s.id).join(", ")}`);
+		context.cli.log(
+			colors.gray(
+				`Stages: ${stages.map((s) => colors.white(colors.bold(s.id))).join(" → ")}`,
+			),
+		);
 	}
 	for (const stage of stages) {
-		context.cli.prefix = `${stage.id}:$plan`;
+		context.cli.prefix = `${stage.id}`;
 		const plugins = await planStage(context, stage);
 		if (context.argv.verbose) {
-			context.cli.log(`Plugins in this stage: ${plugins.map((s) => s.id).join(", ")}`);
+			context.cli.log(
+				colors.gray(
+					`Plugins in this stage: ${plugins
+						.map((s) => colors.white(colors.bold(s.id)))
+						.join(" → ")}`,
+				),
+			);
 		}
 		for (const plugin of plugins) {
 			context.cli.prefix = `${stage.id}:${plugin.id}`;
 			if (context.argv.verbose) {
-				context.cli.log(`executing...`);
+				context.cli.log(colors.gray(`executing...`));
 			}
 			await plugin.executeStage(context, stage);
 

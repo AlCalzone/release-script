@@ -1,10 +1,10 @@
 {
-  "name": "@alcalzone/release-script-plugin-package",
+  "name": "@alcalzone/release-script-plugin-exec",
   "publishConfig": {
     "access": "public"
   },
   "version": "3.0.0-alpha.0",
-  "description": "Plugin for Al Calzone's release script: npm package files",
+  "description": "Plugin for Al Calzone's release script: execute user scripts",
   "keywords": [],
   "license": "MIT",
   "author": {
@@ -39,7 +39,7 @@
   "dependencies": {
     "@alcalzone/release-script-core": "^3.0.0-alpha.0",
     "@alcalzone/release-script-testing": "^3.0.0-alpha.0",
-    "semver": "^7.3.5"
+    "alcalzone-shared": "^4.0.0"
   },
   "devDependencies": {
     "jest-extended": "^0.11.5"
@@ -50,7 +50,7 @@
     "build": "tsc -p tsconfig.build.json",
     "watch": "tsc -p tsconfig.build.json --watch"
   },
-  "homepage": "https://github.com/AlCalzone/release-script/tree/main/packages/plugin-package#readme",
+  "homepage": "https://github.com/AlCalzone/release-script/tree/main/packages/plugin-exec#readme",
   "repository": {
     "type": "git",
     "url": "git@github.com:AlCalzone/release-script.git"

@@ -63,7 +63,7 @@ class CLI implements ICLI {
 		if (args?.length) {
 			command += ` ${args.join(" ")}`;
 		}
-		this.log(` $ ${command}`);
+		this.log(`$ ${command}`);
 	}
 	// eslint-disable-next-line @typescript-eslint/no-inferrable-types
 	public prefix: string = "";
@@ -72,7 +72,7 @@ class CLI implements ICLI {
 
 export async function main(): Promise<void> {
 	// TODO: this doesn't really make sense
-	const chosenPlugins = ["git", "package"];
+	const chosenPlugins = ["git", "package", "exec"];
 	const allPlugins: Plugin[] = await Promise.all(
 		chosenPlugins.map(
 			async (plugin) =>
@@ -152,10 +152,19 @@ export async function main(): Promise<void> {
 			data.set(key, value);
 		},
 	};
-
 	context.cli = new CLI(context);
 
+	context.argv.exec_commands = {
+		before_check: "echo before_check",
+	} as any;
+
 	try {
+		// Initialize plugins
+		for (const plugin of plugins) {
+			await plugin.init?.(context);
+		}
+
+		// Execute stages
 		await execute(context);
 
 		const numWarnings = context.warnings.length;

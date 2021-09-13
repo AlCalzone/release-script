@@ -9,6 +9,9 @@ export interface Plugin {
 	/** Define which plugins are required by this plugin and need to be included */
 	readonly dependencies?: string[];
 
+	/** Will be called before anything else */
+	init?: (context: Context) => Promise<void> | void;
+
 	/** Allows a plugin to define additional CLI options */
 	defineCLIOptions?: <T extends unknown>(yargs: Argv<T>) => Argv<T>;
 

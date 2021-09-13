@@ -16,6 +16,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@alcalzone/release-script-plugin-exec@workspace:packages/plugin-exec":
+  version: 0.0.0-use.local
+  resolution: "@alcalzone/release-script-plugin-exec@workspace:packages/plugin-exec"
+  dependencies:
+    "@alcalzone/release-script-core": ^3.0.0-alpha.0
+    "@alcalzone/release-script-testing": ^3.0.0-alpha.0
+    alcalzone-shared: ^4.0.0
+    jest-extended: ^0.11.5
+  languageName: unknown
+  linkType: soft
+
 "@alcalzone/release-script-plugin-git@^3.0.0-alpha.0, @alcalzone/release-script-plugin-git@workspace:packages/plugin-git":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-git@workspace:packages/plugin-git"
