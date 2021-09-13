@@ -76,7 +76,8 @@ class GitPlugin implements Plugin {
 	];
 
 	// dependencies?: string[] | undefined;
-	// stageDependencies?: Record<string, ConstOrDynamic<string[]>> | undefined;
+	// stageAfter?: Record<string, ConstOrDynamic<string[]>> | undefined;
+	// stageBefore?: Record<string, ConstOrDynamic<string[]>> | undefined;
 
 	private async executeCheckStage(context: Context): Promise<void> {
 		const colors = context.cli.colors;

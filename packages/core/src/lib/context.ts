@@ -23,6 +23,8 @@ export interface Context {
 		/** The git remote to push to */
 		remote?: string;
 
+		verbose: boolean;
+
 		[arg: string]: string | number | boolean | undefined;
 	};
 

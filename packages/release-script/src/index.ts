@@ -71,10 +71,17 @@ class CLI implements ICLI {
 }
 
 export async function main(): Promise<void> {
-	const allPlugins: Plugin[] = [
-		(await import("@alcalzone/release-script-plugin-git")).default,
-	].map((c) => new c());
-	const plugins = resolvePlugins(allPlugins, ["git"]);
+	// TODO: this doesn't really make sense
+	const chosenPlugins = ["git", "package"];
+	const allPlugins: Plugin[] = await Promise.all(
+		chosenPlugins.map(
+			async (plugin) =>
+				new (
+					await import(`@alcalzone/release-script-plugin-${plugin}`)
+				).default(),
+		),
+	);
+	const plugins = resolvePlugins(allPlugins, chosenPlugins);
 
 	let argv = yargs
 		.env("RELEASE_SCRIPT")
@@ -100,6 +107,12 @@ export async function main(): Promise<void> {
 				alias: "all",
 				type: "boolean",
 				description: "Whether unstaged changes should be allowed",
+				default: false,
+			},
+			verbose: {
+				alias: "V",
+				type: "boolean",
+				description: "Enable debug output",
 				default: false,
 			},
 		});

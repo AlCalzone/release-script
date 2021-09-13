@@ -1,8 +1,7 @@
-import { DefaultStages } from "..";
 import type { Context } from "./context";
 import { GraphNode, topologicalSort } from "./graph";
 import type { Plugin } from "./plugin";
-import type { Stage } from "./stage";
+import { DefaultStages, Stage } from "./stage";
 
 /** Resolve all plugins that are required by the chosen plugins */
 export function resolvePlugins(allPlugins: Plugin[], chosenPluginIds: string[]): Plugin[] {
@@ -100,20 +99,35 @@ export async function planStage(context: Context, stage: Stage): Promise<Plugin[
 	// Pass 2: create dependencies
 	for (const node of graphNodes.values()) {
 		const plugin = node.value;
-		// Resolve the current stage's dependencies to an array
-		let deps = plugin.stageDependencies?.[stage.id];
-		if (!deps) continue;
-		if (typeof deps === "function") {
-			deps = await deps(context);
-		}
-
-		for (const dep of deps) {
-			if (!graphNodes.has(dep)) {
-				throw new Error(
-					`Plugin ${plugin.id} has unknown dependency ${dep} in stage ${stage.id}!`,
-				);
+		// Resolve the current plugin's stage dependencies to an array
+		let stageAfter = plugin.stageAfter?.[stage.id];
+		if (stageAfter) {
+			if (typeof stageAfter === "function") {
+				stageAfter = await stageAfter(context);
 			}
-			node.edges.add(graphNodes.get(dep)!);
+
+			for (const dep of stageAfter) {
+				if (!graphNodes.has(dep)) {
+					throw new Error(
+						`Plugin ${plugin.id} has unknown dependency ${dep} in stage ${stage.id}!`,
+					);
+				}
+				node.edges.add(graphNodes.get(dep)!);
+			}
+		}
+		let stageBefore = plugin.stageBefore?.[stage.id];
+		if (stageBefore) {
+			if (typeof stageBefore === "function") {
+				stageBefore = await stageBefore(context);
+			}
+			for (const dep of stageBefore) {
+				if (!graphNodes.has(dep)) {
+					throw new Error(
+						`Plugin ${plugin.id} has unknown dependency ${dep} in stage ${stage.id}!`,
+					);
+				}
+				graphNodes.get(dep)!.edges.add(node);
+			}
 		}
 	}
 
@@ -124,11 +138,20 @@ export async function planStage(context: Context, stage: Stage): Promise<Plugin[
 export async function execute(context: Context): Promise<void> {
 	context.cli.prefix = "$plan";
 	const stages = await planStages(context);
+	if (context.argv.verbose) {
+		context.cli.log(`Stages: ${stages.map((s) => s.id).join(", ")}`);
+	}
 	for (const stage of stages) {
 		context.cli.prefix = `${stage.id}:$plan`;
 		const plugins = await planStage(context, stage);
+		if (context.argv.verbose) {
+			context.cli.log(`Plugins in this stage: ${plugins.map((s) => s.id).join(", ")}`);
+		}
 		for (const plugin of plugins) {
 			context.cli.prefix = `${stage.id}:${plugin.id}`;
+			if (context.argv.verbose) {
+				context.cli.log(`executing...`);
+			}
 			await plugin.executeStage(context, stage);
 
 			// If there were errors, we may need to abort

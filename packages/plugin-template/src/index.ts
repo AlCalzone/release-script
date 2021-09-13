@@ -9,7 +9,8 @@ class TemplatePlugin implements Plugin {
 	];
 
 	// dependencies?: string[] | undefined;
-	// stageDependencies?: Record<string, ConstOrDynamic<string[]>> | undefined;
+	// stageAfter?: Record<string, ConstOrDynamic<string[]>> | undefined;
+	// stageBefore?: Record<string, ConstOrDynamic<string[]>> | undefined;
 
 	async executeStage(context: Context, stage: Stage): Promise<void> {
 		if (stage.id === "check") {

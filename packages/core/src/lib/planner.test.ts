@@ -104,14 +104,14 @@ describe("planStage", () => {
 		const plugin1 = {
 			id: "plugin1",
 			stages,
-			stageDependencies: undefined,
+			stageAfter: undefined,
 		} as Plugin;
 
 		const plugin2 = {
 			id: "plugin2",
 			dependencies: ["plugin1"],
 			stages,
-			stageDependencies: {
+			stageAfter: {
 				commit: ["plugin3"],
 			},
 		} as any as Plugin;
@@ -120,7 +120,7 @@ describe("planStage", () => {
 			id: "plugin3",
 			dependencies: ["plugin1"],
 			stages,
-			stageDependencies: {
+			stageAfter: {
 				commit: async (ctx: Context) => [ctx.plugins[0].id],
 			},
 		} as any as Plugin;
@@ -150,7 +150,7 @@ describe("execute", () => {
 		const plugin1 = {
 			id: "plugin1",
 			stages,
-			stageDependencies: {
+			stageAfter: {
 				check: ["plugin3"],
 			},
 			executeStage: async (ctx: Context, stage: Stage) => {
@@ -162,7 +162,7 @@ describe("execute", () => {
 			id: "plugin2",
 			dependencies: ["plugin1"],
 			stages,
-			stageDependencies: {
+			stageAfter: {
 				check: ["plugin1"],
 				commit: ["plugin3"],
 			},
@@ -175,7 +175,7 @@ describe("execute", () => {
 			id: "plugin3",
 			dependencies: ["plugin1"],
 			stages,
-			stageDependencies: {
+			stageAfter: {
 				commit: ["plugin1"],
 			},
 			executeStage: async (ctx: Context, stage: Stage) => {
@@ -190,6 +190,7 @@ describe("execute", () => {
 			cli: {
 				log: logStub,
 			},
+			argv: {},
 			errors: [],
 		} as unknown as Context;
 
