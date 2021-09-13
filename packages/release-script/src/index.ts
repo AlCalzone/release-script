@@ -10,6 +10,7 @@ import {
 	resolvePlugins,
 } from "@alcalzone/release-script-core";
 import colors from "colors/safe";
+import yargs from "yargs";
 
 const primaryAndInlineTagRegex = /\[([^\]]+)\]/g;
 
@@ -75,6 +76,41 @@ export async function main(): Promise<void> {
 	].map((c) => new c());
 	const plugins = resolvePlugins(allPlugins, ["git"]);
 
+	let argv = yargs
+		.env("RELEASE_SCRIPT")
+		.strict()
+		.usage("AlCalzone's Release Script\n\nUsage: $0 [options]")
+		.alias("h", "help")
+		.alias("v", "version")
+		.options({
+			dryRun: {
+				alias: "dry",
+				type: "boolean",
+				description:
+					"Perform a dry-run: check status, describe changes without changing anything",
+				default: false,
+			},
+			remote: {
+				alias: "r",
+				type: "string",
+				description: "Which remote to push to",
+				default: "origin",
+			},
+			includeUnstaged: {
+				alias: "all",
+				type: "boolean",
+				description: "Whether unstaged changes should be allowed",
+				default: false,
+			},
+		});
+	// Let plugins hook into the CLI options
+	for (const plugin of plugins) {
+		if (typeof plugin.defineCLIOptions === "function") {
+			argv = plugin.defineCLIOptions(argv);
+		}
+	}
+	const parsedArgv = await argv.parseAsync();
+
 	const data = new Map();
 
 	const context = {
@@ -84,11 +120,7 @@ export async function main(): Promise<void> {
 			exec,
 			execRaw,
 		},
-		argv: {
-			dryRun: true,
-			includeUnstaged: false,
-			remote: "origin",
-		},
+		argv: parsedArgv as typeof parsedArgv & { [prop: string]: boolean | number | string },
 		plugins,
 		warnings: [],
 		errors: [],

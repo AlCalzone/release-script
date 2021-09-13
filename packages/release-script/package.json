@@ -63,5 +63,8 @@
   "bugs": {
     "url": "https://github.com/AlCalzone/release-script/issues"
   },
-  "readmeFilename": "README.md"
+  "readmeFilename": "README.md",
+  "devDependencies": {
+    "@types/yargs": "^17.0.2"
+  }
 }

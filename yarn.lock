@@ -9,8 +9,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-core@workspace:packages/core"
   dependencies:
+    "@types/yargs": ^17.0.2
     colors: ^1.4.0
     execa: ^5.1.1
+    yargs: ^17.1.1
   languageName: unknown
   linkType: soft
 
@@ -75,6 +77,7 @@ __metadata:
   dependencies:
     "@alcalzone/release-script-core": ^3.0.0-alpha.0
     colors: ^1.4.0
+    execa: "*"
   peerDependencies:
     execa: "*"
   languageName: unknown
@@ -87,6 +90,7 @@ __metadata:
     "@alcalzone/release-script-core": ^3.0.0-alpha.0
     "@alcalzone/release-script-plugin-git": ^3.0.0-alpha.0
     "@alcalzone/release-script-testing": ^3.0.0-alpha.0
+    "@types/yargs": ^17.0.2
     alcalzone-shared: ^4.0.0
     axios: ^0.21.4
     colors: ^1.4.0
@@ -5388,7 +5392,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"execa@npm:^5.0.0, execa@npm:^5.1.1":
+"execa@npm:*, execa@npm:^5.0.0, execa@npm:^5.1.1":
   version: 5.1.1
   resolution: "execa@npm:5.1.1"
   dependencies:

@@ -1,13 +1,16 @@
+import type { Argv } from "yargs";
 import type { Context } from "./context";
 import type { ConstOrDynamic } from "./shared";
 import type { Stage } from "./stage";
-
 export interface Plugin {
 	/** A unique identifier for this plugin */
 	readonly id: string;
 
 	/** Define which plugins are required by this plugin and need to be included */
 	readonly dependencies?: string[];
+
+	/** Allows a plugin to define additional CLI options */
+	defineCLIOptions?: <T extends unknown>(yargs: Argv<T>) => Argv<T>;
 
 	/** Allows a plugin to define additional stages in the release process */
 	stages?: ConstOrDynamic<Stage[]>;

@@ -84,7 +84,8 @@ describe("planStages", () => {
 		const context = { plugins } as Context;
 
 		const result = (await planStages(context)).map((s) => s.id);
-		expect(result).toEqual(["check", "commit", "check2", "cleanup", "push"]);
+		// The expected array includes the default stagess
+		expect(result).toEqual(["check", "edit", "commit", "check2", "cleanup", "push"]);
 	});
 });
 
