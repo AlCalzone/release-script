@@ -61,7 +61,7 @@ describe("Git plugin", () => {
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({
 				plugins: [gitPlugin],
-				includeUnstaged: false,
+				argv: { includeUnstaged: false },
 			});
 			context.sys.mockExec({
 				"git config --get user.name": "henlo",
@@ -79,7 +79,7 @@ describe("Git plugin", () => {
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({
 				plugins: [gitPlugin],
-				includeUnstaged: true,
+				argv: { includeUnstaged: true },
 			});
 			context.sys.mockExec({
 				"git config --get user.name": "henlo",
@@ -178,7 +178,10 @@ This is the changelog.`);
 
 		it("and respects the configured origin", async () => {
 			const gitPlugin = new GitPlugin();
-			const context = createMockContext({ plugins: [gitPlugin], remote: "upstream/foobar" });
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				argv: { remote: "upstream/foobar" },
+			});
 
 			// Don't throw when calling system commands commands
 			context.sys.mockExec(() => "");

@@ -38,7 +38,7 @@ async function getCommitDifferences(
 			"rev-list",
 			"--left-right",
 			"--count",
-			`HEAD...${context.remote || (await getUpstream(context))}`,
+			`HEAD...${context.argv.remote || (await getUpstream(context))}`,
 		],
 		{ cwd: context.cwd },
 	);
@@ -119,7 +119,7 @@ Note: If the current folder belongs to a different user than ${colors.bold(
 				context.cli.log(colors.green("git status is good - I can continue..."));
 			}
 		} else if (branchStatus === "uncommitted" && !lerna) {
-			if (!context.includeUnstaged) {
+			if (!context.argv.includeUnstaged) {
 				context.cli.error(
 					`The local branch has uncommitted changes! Add them to a separate commit first or add the "--all" option to include them in the release commit.`,
 				);
@@ -148,7 +148,7 @@ ${context.getData("changelog_new")}`,
 		];
 
 		for (const command of commands) {
-			if (context.dryRun) {
+			if (context.argv.dryRun) {
 				context.cli.logCommand(command);
 			} else {
 				await context.sys.execRaw(command, { cwd: context.cwd });
@@ -162,15 +162,14 @@ ${context.getData("changelog_new")}`,
 		} else if (stage.id === "commit") {
 			await this.executeCommitStage(context);
 		} else if (stage.id === "push") {
+			const remote = context.argv.remote;
 			const remoteStr =
-				context.remote && context.remote !== "origin"
-					? ` ${context.remote.split("/").join(" ")}`
-					: "";
+				remote && remote !== "origin" ? ` ${remote.split("/").join(" ")}` : "";
 
 			const commands = [`git push${remoteStr}`, `git push${remoteStr} --tags`];
 
 			for (const command of commands) {
-				if (context.dryRun) {
+				if (context.argv.dryRun) {
 					context.cli.logCommand(command);
 				} else {
 					await context.sys.execRaw(command, { cwd: context.cwd });

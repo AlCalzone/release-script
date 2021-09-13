@@ -137,7 +137,7 @@ export async function execute(context: Context): Promise<void> {
 					case true:
 						continue;
 					case "dry-run":
-						if (context.dryRun) continue;
+						if (context.argv.dryRun) continue;
 					// fall through
 					default:
 						return;

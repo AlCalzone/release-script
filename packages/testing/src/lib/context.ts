@@ -55,15 +55,21 @@ export const defaultContextOptions: Omit<
 	"cli" | "warnings" | "errors" | "getData" | "hasData" | "setData"
 > & { sys: MockSystem } = {
 	cwd: process.cwd(),
-	dryRun: false,
-	includeUnstaged: false,
-	remote: "origin",
+	argv: {
+		dryRun: false,
+		includeUnstaged: false,
+		remote: "origin",
+	},
 	plugins: [],
 	sys: new MockSystem(),
 };
 
 export function createMockContext(
-	options: Partial<Omit<Context, "cli" | "warnings" | "errors" | "sys">>,
+	options: Partial<
+		Omit<Context, "cli" | "warnings" | "errors" | "sys" | "argv"> & {
+			argv: Partial<Context["argv"]>;
+		}
+	>,
 ): Context & { sys: MockSystem } {
 	const data = new Map();
 	const ret: Context & { sys: MockSystem } = {
@@ -78,6 +84,7 @@ export function createMockContext(
 			fatal: jest.fn<never, Parameters<CLI["fatal"]>>().mockImplementation((msg, code) => {
 				throw new ReleaseError(msg, true, code);
 			}),
+			logCommand: jest.fn(),
 			colors,
 			prefix: "",
 		},
@@ -85,6 +92,10 @@ export function createMockContext(
 		errors: [],
 		...defaultContextOptions,
 		...options,
+		argv: {
+			...defaultContextOptions.argv,
+			...(options.argv ?? {}),
+		},
 		getData: <T>(key: string) => {
 			if (!data.has(key)) {
 				throw new ReleaseError(

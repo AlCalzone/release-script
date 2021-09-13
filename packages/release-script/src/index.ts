@@ -37,8 +37,6 @@ export async function main(): Promise<void> {
 		return colors.bold(`${prefix} `) + str;
 	};
 
-	const dryRun = true;
-
 	// eslint-disable-next-line prefer-const
 	let context: Context;
 
@@ -85,9 +83,11 @@ export async function main(): Promise<void> {
 			exec,
 			execRaw,
 		},
-		dryRun,
-		includeUnstaged: false,
-		remote: "origin",
+		argv: {
+			dryRun: true,
+			includeUnstaged: false,
+			remote: "origin",
+		},
 		plugins,
 		warnings: [],
 		errors: [],

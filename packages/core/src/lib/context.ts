@@ -12,16 +12,19 @@ export interface Context {
 	/** Which directory the release script is executed in */
 	cwd: string;
 
-	/**
-	 * Whether unstaged changes should be committed aswell
-	 */
-	includeUnstaged: boolean;
+	/** Command line arguments to the release script */
+	argv: {
+		/** Whether unstaged changes should be committed aswell */
+		includeUnstaged: boolean;
 
-	/** Whether this is a dry run */
-	dryRun: boolean;
+		/** Whether this is a dry run */
+		dryRun: boolean;
 
-	/** The git remote to push to */
-	remote?: string;
+		/** The git remote to push to */
+		remote?: string;
+
+		[arg: string]: string | number | boolean | undefined;
+	};
 
 	warnings: string[];
 	errors: string[];
