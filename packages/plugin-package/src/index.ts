@@ -3,13 +3,29 @@ import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/type
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
+import type { Argv } from "yargs";
 
 class PackagePlugin implements Plugin {
 	public readonly id = "package";
 	public readonly stages = [DefaultStages.check, DefaultStages.edit];
 
+	public defineCLIOptions(yargs: Argv<any>): Argv<any> {
+		return yargs.options({
+			updateLockfile: {
+				alias: ["update-lockfile", "l"],
+				description: "Update the lockfile before committing",
+				type: "boolean",
+				default: true,
+			},
+		});
+	}
+
 	// dependencies?: string[] | undefined;
-	// stageDependencies?: Record<string, ConstOrDynamic<string[]>> | undefined;
+	// stageAfter?: Record<string, ConstOrDynamic<string[]>> | undefined;
+	public readonly stageBefore = {
+		// Before committing, we need a hook to sync the lockfile
+		commit: ["git"],
+	};
 
 	private async executeCheckStage(context: Context): Promise<void> {
 		// ensure that package.json exists and has a version (unless in lerna mode)
@@ -55,6 +71,13 @@ class PackagePlugin implements Plugin {
 			const lerna = context.hasData("lerna") && !!context.getData("lerna");
 			if (lerna) return;
 			await this.executeEditStage(context);
+		} else if (stage.id === "commit") {
+			if (context.argv.updateLockfile) {
+				context.cli.log(`updating lockfile...`);
+				if (!context.argv.dryRun) {
+					await context.sys.execRaw("npm install", { cwd: context.cwd });
+				}
+			}
 		}
 	}
 }

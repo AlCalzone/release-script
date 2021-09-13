@@ -177,4 +177,59 @@ describe("Package plugin", () => {
 			expect(fileContent).toEqual(pack);
 		});
 	});
+
+	describe("commit stage", () => {
+		let testFS: TestFS;
+		let testFSRoot: string;
+		beforeEach(async () => {
+			testFS = new TestFS();
+			testFSRoot = await testFS.getRoot();
+		});
+		afterEach(async () => {
+			await testFS.remove();
+		});
+
+		it("executes npm install if the lockfile should be synchronized", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+				argv: {
+					updateLockfile: true,
+				},
+			});
+
+			// Don't throw when calling system commands commands
+			context.sys.mockExec(() => "");
+
+			await pkgPlugin.executeStage(context, DefaultStages.commit);
+
+			expect(context.cli.log).toHaveBeenCalledWith(
+				expect.stringMatching(/updating lockfile/i),
+			);
+			expect(context.sys.execRaw).toHaveBeenCalledWith("npm install", expect.anything());
+		});
+
+		it("but not during a dry run", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+				argv: {
+					updateLockfile: true,
+					dryRun: true,
+				},
+			});
+
+			// Don't throw when calling system commands commands
+			context.sys.mockExec(() => "");
+
+			await pkgPlugin.executeStage(context, DefaultStages.commit);
+
+			expect(context.cli.log).toHaveBeenCalledWith(
+				expect.stringMatching(/updating lockfile/i),
+			);
+			expect(context.sys.execRaw).not.toHaveBeenCalled();
+		});
+	});
 });
