@@ -20,7 +20,12 @@
 
 		// Required for TS debugging
 		"sourceMap": true,
-		"inlineSourceMap": false
+		"inlineSourceMap": false,
+
+		// Make jest-extended work in tests
+		"types": ["jest-extended"],
+
+		"preserveWatchOutput": true
 	},
 	"include": ["packages/**/src/**/*.ts", "test/**/*.ts"],
 	"exclude": ["**/build/**", "node_modules/**", "packages/**/node_modules"]

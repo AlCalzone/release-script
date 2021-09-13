@@ -1,5 +1,5 @@
 import {
-	CLI,
+	CLI as ICLI,
 	Context,
 	exec,
 	execRaw,
@@ -26,59 +26,60 @@ function colorizeTextAndTags(
 	);
 }
 
+function prependPrefix(prefix: string, str: string): string {
+	if (!prefix) return str;
+	return colors.bold(`${prefix} `) + str;
+}
+
+class CLI implements ICLI {
+	public constructor(private context: Context) {}
+
+	log(msg: string): void {
+		console.log(prependPrefix(this.context.cli.prefix, msg));
+	}
+	warn(msg: string): void {
+		console.warn(
+			prependPrefix(
+				this.context.cli.prefix,
+				colorizeTextAndTags(`[WARN] ${msg}`, colors.yellow, colors.bgYellow),
+			),
+		);
+		this.context.warnings.push(msg);
+	}
+	error(msg: string): void {
+		console.error(
+			prependPrefix(
+				this.context.cli.prefix,
+				colorizeTextAndTags(`[ERR] ${msg}`, colors.red, colors.bgRed),
+			),
+		);
+		this.context.errors.push(msg);
+	}
+	fatal(msg: string, code?: number): never {
+		throw new ReleaseError(msg, true, code);
+	}
+	logCommand(command: string, args?: string[]): void {
+		if (args?.length) {
+			command += ` ${args.join(" ")}`;
+		}
+		this.log(` $ ${command}`);
+	}
+	// eslint-disable-next-line @typescript-eslint/no-inferrable-types
+	public prefix: string = "";
+	public readonly colors = colors;
+}
+
 export async function main(): Promise<void> {
 	const allPlugins: Plugin[] = [
 		(await import("@alcalzone/release-script-plugin-git")).default,
 	].map((c) => new c());
 	const plugins = resolvePlugins(allPlugins, ["git"]);
 
-	const prependPrefix = (prefix: string, str: string): string => {
-		if (!prefix) return str;
-		return colors.bold(`${prefix} `) + str;
-	};
-
-	// eslint-disable-next-line prefer-const
-	let context: Context;
-
 	const data = new Map();
-	const cli: CLI = {
-		log(msg) {
-			console.log(prependPrefix(context.cli.prefix, msg));
-		},
-		warn(msg) {
-			console.warn(
-				prependPrefix(
-					context.cli.prefix,
-					colorizeTextAndTags(`[WARN] ${msg}`, colors.yellow, colors.bgYellow),
-				),
-			);
-			context.warnings.push(msg);
-		},
-		error(msg) {
-			console.error(
-				prependPrefix(
-					context.cli.prefix,
-					colorizeTextAndTags(`[ERR] ${msg}`, colors.red, colors.bgRed),
-				),
-			);
-			context.errors.push(msg);
-		},
-		fatal(msg, code) {
-			throw new ReleaseError(msg, true, code);
-		},
-		logCommand(command, args) {
-			if (args?.length) {
-				command += ` ${args.join(" ")}`;
-			}
-			cli.log(` $ ${command}`);
-		},
-		colors,
-		prefix: "",
-	};
 
-	context = {
+	const context = {
 		cwd: process.cwd(),
-		cli,
+		cli: undefined as any,
 		sys: {
 			exec,
 			execRaw,
@@ -106,6 +107,8 @@ export async function main(): Promise<void> {
 			data.set(key, value);
 		},
 	};
+
+	context.cli = new CLI(context);
 
 	try {
 		await execute(context);

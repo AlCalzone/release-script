@@ -1,7 +1,6 @@
 import { DefaultStages } from "@alcalzone/release-script-core";
 import { assertReleaseError, createMockContext, TestFS } from "@alcalzone/release-script-testing";
 import fs from "fs-extra";
-import "jest-extended";
 import path from "path";
 import GitPlugin from ".";
 
