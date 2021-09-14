@@ -15,8 +15,6 @@ import colors from "colors/safe";
 import { prompt } from "enquirer";
 import yargs from "yargs";
 
-const primaryAndInlineTagRegex = /\[([^\]]+)\]/g;
-
 function colorizeTextAndTags(
 	textWithTags: string,
 	textColor: (input: string) => string,
@@ -24,7 +22,7 @@ function colorizeTextAndTags(
 ): string {
 	return textColor(
 		textWithTags.replace(
-			primaryAndInlineTagRegex,
+			/\[(.*?)\]/g,
 			(match, group1) => bgColor("[") + colors.inverse(group1) + bgColor("]"),
 		),
 	);
