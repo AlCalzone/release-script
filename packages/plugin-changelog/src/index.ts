@@ -94,7 +94,7 @@ class ChangelogPlugin implements Plugin {
 	public defineCLIOptions(yargs: Argv<any>): Argv<any> {
 		return yargs.options({
 			numChangelogEntries: {
-				alias: ["nc"],
+				alias: ["n"],
 				type: "number",
 				description: `How many changelog entries should be kept in README.md. Only applies when README.md and CHANGELOG_OLD.md exist.`,
 				default: 5,

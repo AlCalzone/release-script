@@ -3,8 +3,9 @@
 -   [x] package.json validation
 -   [x] package.json/lockfile synchronization
 -   [ ] Lerna mode
--   [ ] Updating changelogs
+-   [x] Updating changelogs
 -   [x] ioBroker workflow check
--   [ ] io-package.json
+-   [x] io-package.json
 -   [x] Version bump
 -   [x] user scripts
+-   [ ] prerelease bump

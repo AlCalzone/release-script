@@ -1,9 +1,12 @@
 import { DefaultStages } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
+import { isObject } from "alcalzone-shared/typeguards";
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
 import type { Argv } from "yargs";
+import { cleanChangelogForNews, limitKeys, prependKey } from "./tools";
+import { translateText } from "./translate";
 
 class IoBrokerPlugin implements Plugin {
 	public readonly id = "iobroker";
@@ -13,7 +16,7 @@ class IoBrokerPlugin implements Plugin {
 		// Add others as necessary
 	];
 
-	public readonly dependencies = ["package"];
+	public readonly dependencies = ["package", "changelog"];
 	// stageAfter?: Record<string, ConstOrDynamic<string[]>> | undefined;
 	// stageBefore?: Record<string, ConstOrDynamic<string[]>> | undefined;
 	public readonly stageAfter = {
@@ -32,6 +35,12 @@ class IoBrokerPlugin implements Plugin {
 				description: "Disable checking the test-and-release.yml workflow",
 				type: "boolean",
 				default: false,
+			},
+			numNews: {
+				alias: ["nn"],
+				type: "number",
+				description: `How many news entries should be kept in io-package.json`,
+				default: 7,
 			},
 		});
 	}
@@ -100,12 +109,84 @@ You can suppress this check with the ${colors.bold("--no-workflow-check")} flag.
 		}
 	}
 
+	private async executeEditStage(context: Context): Promise<void> {
+		const newVersion = context.getData<string>("version_new");
+		const ioPack = context.getData<any>("io-package.json");
+
+		if (context.argv.dryRun) {
+			context.cli.log(
+				`Dry run, would update io-package.json version to ${context.cli.colors.green(
+					newVersion,
+				)}`,
+			);
+		} else {
+			context.cli.log(
+				`updating io-package.json version to ${context.cli.colors.green(newVersion)}`,
+			);
+			ioPack.common.version = newVersion;
+		}
+
+		context.cli.log(`updating news in io-package.json`);
+		ioPack.common.news ??= {};
+
+		if (newVersion in ioPack.common.news) {
+			context.cli.log(`current news is already in io-package.json, not changing it`);
+		} else if (isObject(ioPack.common.news.NEXT)) {
+			if (context.argv.dryRun) {
+				context.cli.log(
+					`Dry run, would replace "NEXT" with new version number in io-package.json news`,
+				);
+			} else {
+				context.cli.log(`replacing "NEXT" with new version number in io-package.json news`);
+				ioPack.common.news = prependKey(
+					ioPack.common.news,
+					newVersion,
+					ioPack.common.news.NEXT,
+				);
+				delete ioPack.common.news.NEXT;
+			}
+		} else {
+			if (context.argv.dryRun) {
+				context.cli.log(`Dry run, would add new news to io-package.json`);
+			} else {
+				context.cli.log(`adding new news to io-package.json`);
+				const newChangelog = cleanChangelogForNews(
+					context.getData<string>("changelog_new"),
+				);
+				try {
+					const translated = await translateText(newChangelog);
+					ioPack.common.news = prependKey(ioPack.common.news, newVersion, translated);
+				} catch (e) {
+					fail(`could not translate the news: ${e}`);
+				}
+				// If someone left this in here, also delete it
+				delete ioPack.common.news.NEXT;
+			}
+		}
+		// Make sure we don't have too many keys
+		const maxNews = context.argv.numNews as number;
+		if (Object.keys(ioPack.common.news).length > maxNews) {
+			ioPack.common.news = limitKeys(ioPack.common.news, maxNews);
+		}
+
+		if (!context.argv.dryRun) {
+			let ioPackDirectory = context.cwd;
+			if (context.argv.ioPackage) {
+				ioPackDirectory = path.join(ioPackDirectory, context.argv.ioPackage as string);
+			}
+			const ioPackPath = path.join(ioPackDirectory, "io-package.json");
+			await fs.writeJson(ioPackPath, ioPack, { spaces: 2 });
+		}
+	}
+
 	async executeStage(context: Context, stage: Stage): Promise<void> {
 		if (stage.id === "check") {
 			await this.checkIoPackage(context);
 			if (!context.argv.noWorkflowCheck) {
 				await this.checkWorkflow(context);
 			}
+		} else if (stage.id === "edit") {
+			await this.executeEditStage(context);
 		}
 	}
 }

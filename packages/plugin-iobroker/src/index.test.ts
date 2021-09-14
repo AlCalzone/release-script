@@ -1,6 +1,13 @@
 import { DefaultStages } from "@alcalzone/release-script-core";
 import { assertReleaseError, createMockContext, TestFS } from "@alcalzone/release-script-testing";
+import fs from "fs-extra";
+import path from "path";
 import IoBrokerPlugin from ".";
+
+const mockTranslate = { translate: "mock" };
+jest.mock("./translate", () => ({
+	translateText: () => mockTranslate,
+}));
 
 const fixtures = {
 	ioPackage_noVersion: JSON.stringify({
@@ -14,10 +21,73 @@ const fixtures = {
 		name: "test-adapter",
 		common: { version: "1.2.3" },
 	}),
+	ioPackage_bumped: JSON.stringify(
+		{
+			name: "test-adapter",
+			common: {
+				version: "2.0.0",
+				news: {
+					"2.0.0": mockTranslate,
+				},
+			},
+		},
+		null,
+		2,
+	),
 	ioPackage_incorrectVersion: JSON.stringify({
 		name: "test-adapter",
 		common: { version: "1.2.4" },
 	}),
+	ioPackage_tooManyNews: JSON.stringify({
+		name: "test-adapter",
+		common: {
+			version: "1.2.3",
+			news: {
+				"1.2.3": "c",
+				"1.2.2": "b",
+				"1.2.1": "a",
+			},
+		},
+	}),
+	ioPackage_tooManyNews_bumped: JSON.stringify(
+		{
+			name: "test-adapter",
+			common: {
+				version: "2.0.0",
+				news: {
+					"2.0.0": mockTranslate,
+					"1.2.3": "c",
+				},
+			},
+		},
+		null,
+		2,
+	),
+	ioPackage_news_NEXT: JSON.stringify({
+		name: "test-adapter",
+		common: {
+			version: "1.2.3",
+			news: {
+				NEXT: { foo: ":)" },
+				"1.2.3": "c",
+			},
+		},
+	}),
+	ioPackage_news_NEXT_bumped: JSON.stringify(
+		{
+			name: "test-adapter",
+			common: {
+				version: "2.0.0",
+				news: {
+					"2.0.0": { foo: ":)" },
+					"1.2.3": "c",
+				},
+			},
+		},
+		null,
+		2,
+	),
+
 	package_version: "1.2.3",
 	test_workflow: `
   deploy:
@@ -45,29 +115,29 @@ describe("ioBroker plugin", () => {
 		});
 
 		it("raises a fatal error when io-package.json is missing from cwd", async () => {
-			const pkgPlugin = new IoBrokerPlugin();
+			const iobPlugin = new IoBrokerPlugin();
 			const context = createMockContext({
-				plugins: [pkgPlugin],
+				plugins: [iobPlugin],
 				cwd: testFSRoot,
 			});
 
-			await assertReleaseError(() => pkgPlugin.executeStage(context, DefaultStages.check), {
+			await assertReleaseError(() => iobPlugin.executeStage(context, DefaultStages.check), {
 				fatal: true,
 				messageMatches: /io-package.json not found/i,
 			});
 		});
 
 		it("raises a fatal error when io-package.json is missing from the specified directory", async () => {
-			const pkgPlugin = new IoBrokerPlugin();
+			const iobPlugin = new IoBrokerPlugin();
 			const context = createMockContext({
-				plugins: [pkgPlugin],
+				plugins: [iobPlugin],
 				cwd: testFSRoot,
 				argv: {
 					ioPackage: "packages/foobar",
 				},
 			});
 
-			await assertReleaseError(() => pkgPlugin.executeStage(context, DefaultStages.check), {
+			await assertReleaseError(() => iobPlugin.executeStage(context, DefaultStages.check), {
 				fatal: true,
 				messageMatches: /io-package.json not found/i,
 			});
@@ -191,6 +261,97 @@ describe("ioBroker plugin", () => {
 			});
 			await iobPlugin.executeStage(context, DefaultStages.check);
 			expect(context.errors).toHaveLength(0);
+		});
+	});
+
+	describe("edit stage", () => {
+		let testFS: TestFS;
+		let testFSRoot: string;
+		beforeEach(async () => {
+			testFS = new TestFS();
+			testFSRoot = await testFS.getRoot();
+		});
+		afterEach(async () => {
+			await testFS.remove();
+		});
+
+		it("logs the version change", async () => {
+			const iobPlugin = new IoBrokerPlugin();
+			const context = createMockContext({
+				plugins: [iobPlugin],
+				cwd: testFSRoot,
+			});
+
+			context.setData("io-package.json", JSON.parse(fixtures.ioPackage_correctVersion));
+			context.setData("version_new", "2.0.0");
+			context.setData("changelog_new", "This is new");
+
+			await iobPlugin.executeStage(context, DefaultStages.edit);
+
+			expect(context.cli.log).toHaveBeenCalledWith(
+				expect.stringMatching(/updating io-package.json version/i),
+			);
+			expect(context.cli.log).toHaveBeenCalledWith(expect.stringMatching("2.0.0"));
+		});
+
+		it("updates the version in io-package.json", async () => {
+			const iobPlugin = new IoBrokerPlugin();
+			const context = createMockContext({
+				plugins: [iobPlugin],
+				cwd: testFSRoot,
+			});
+
+			context.setData("io-package.json", JSON.parse(fixtures.ioPackage_correctVersion));
+			context.setData("version_new", "2.0.0");
+			context.setData("changelog_new", "This is new");
+
+			await iobPlugin.executeStage(context, DefaultStages.edit);
+
+			const packPath = path.join(testFSRoot, "io-package.json");
+			const fileContent = (await fs.readFile(packPath, "utf8")).trim();
+			expect(fileContent).toBe(fixtures.ioPackage_bumped);
+		});
+
+		it("removes older news entries from io-package.json", async () => {
+			const iobPlugin = new IoBrokerPlugin();
+			const context = createMockContext({
+				plugins: [iobPlugin],
+				cwd: testFSRoot,
+				argv: {
+					numNews: 2,
+				},
+			});
+
+			context.setData("io-package.json", JSON.parse(fixtures.ioPackage_tooManyNews));
+			context.setData("version_new", "2.0.0");
+			context.setData("changelog_new", "This is new");
+
+			await iobPlugin.executeStage(context, DefaultStages.edit);
+
+			const packPath = path.join(testFSRoot, "io-package.json");
+			const fileContent = (await fs.readFile(packPath, "utf8")).trim();
+			expect(fileContent).toBe(fixtures.ioPackage_tooManyNews_bumped);
+		});
+
+		it("preserves the NEXT news in io-package.json", async () => {
+			const iobPlugin = new IoBrokerPlugin();
+			const context = createMockContext({
+				plugins: [iobPlugin],
+				cwd: testFSRoot,
+				argv: {
+					numNews: 2,
+				},
+			});
+
+			context.setData("io-package.json", JSON.parse(fixtures.ioPackage_news_NEXT));
+			context.setData("version_new", "2.0.0");
+			context.setData("changelog_new", "This is new");
+
+			await iobPlugin.executeStage(context, DefaultStages.edit);
+
+			const packPath = path.join(testFSRoot, "io-package.json");
+			const fileContent = (await fs.readFile(packPath, "utf8")).trim();
+			expect(fileContent).toBe(fixtures.ioPackage_news_NEXT_bumped);
 		});
 	});
 });

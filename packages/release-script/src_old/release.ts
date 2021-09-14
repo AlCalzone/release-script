@@ -19,14 +19,17 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { padStart } from "alcalzone-shared/strings";
-import { isObject, isArray } from "alcalzone-shared/typeguards";
+import { isArray, isObject } from "alcalzone-shared/typeguards";
 import { execSync } from "child_process";
 import colors from "colors/safe";
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import * as semver from "semver";
-import * as os from "os";
 import yargs from "yargs";
+import { translateText } from "../../plugin-iobroker/src/translate";
+import { checkGitIdentity, gitStatus } from "./git";
+import { parseArgs } from "./parseArgs";
 import {
 	cleanChangelogForNews,
 	extractCurrentChangelog,
@@ -35,9 +38,6 @@ import {
 	prependKey,
 	splitChangelog,
 } from "./tools";
-import { translateText } from "./translate";
-import { parseArgs } from "./parseArgs";
-import { checkGitIdentity, gitStatus } from "./git";
 import { getChangedWorkspaces } from "./yarn";
 
 (async () => {
@@ -112,10 +112,7 @@ Note: If the current folder belongs to a different user than ${colors.bold(
 
 	// ensure that the release workflow does not check for base_ref
 	// This is pretty specific to ioBroker's release workflow, but better than silently failing
-	const workflowPath = path.join(
-		rootDir,
-		".github/workflows/test-and-release.yml",
-	);
+	const workflowPath = path.join(rootDir, ".github/workflows/test-and-release.yml");
 	if (!noWorkflowCheck && fs.existsSync(workflowPath)) {
 		let content = fs.readFileSync(workflowPath, "utf8");
 		// Find deploy step, crudely by string manipulation. TODO: This should be done with a yaml parser
@@ -140,9 +137,7 @@ Note: If the current folder belongs to a different user than ${colors.bold(
 Remove this line to fix it:
 ${colors.inverse(line)}
 
-You can suppress this check with the ${colors.bold(
-				"--no-workflow-check",
-			)} flag.`);
+You can suppress this check with the ${colors.bold("--no-workflow-check")} flag.`);
 		}
 	}
 
@@ -168,9 +163,7 @@ You can suppress this check with the ${colors.bold(
 	if (!fs.existsSync(changelogPath)) {
 		// The changelog might be in the readme
 		if (!fs.existsSync(readmePath)) {
-			fail(
-				"No CHANGELOG.md or README.md found in the current directory!",
-			);
+			fail("No CHANGELOG.md or README.md found in the current directory!");
 		}
 		isChangelogInReadme = true;
 		changelog = fs.readFileSync(readmePath, "utf8");
@@ -183,13 +176,9 @@ You can suppress this check with the ${colors.bold(
 	}
 	// CHANGELOG_OLD is only used if the main changelog is in the readme
 	const changelogOldPath = path.join(rootDir, "CHANGELOG_OLD.md");
-	const hasChangelogOld =
-		isChangelogInReadme && fs.existsSync(changelogOldPath);
+	const hasChangelogOld = isChangelogInReadme && fs.existsSync(changelogOldPath);
 
-	const CHANGELOG_MARKERS = [
-		"**WORK IN PROGRESS**",
-		"__WORK IN PROGRESS__",
-	] as const;
+	const CHANGELOG_MARKERS = ["**WORK IN PROGRESS**", "__WORK IN PROGRESS__"] as const;
 	const CHANGELOG_PLACEHOLDER = `${CHANGELOG_PLACEHOLDER_PREFIX} ${CHANGELOG_MARKERS[0]}`;
 	// The regex for the placeholder includes an optional free text at the end, e.g.
 	// ### __WORK IN PROGRESS__ "2020 Doomsday release"
@@ -227,11 +216,7 @@ You can suppress this check with the ${colors.bold(
 		CHANGELOG_PLACEHOLDER_REGEX,
 	);
 	if (!currentChangelog) {
-		fail(
-			colors.red(
-				"Cannot continue, the changelog for the next version is empty!",
-			),
-		);
+		fail(colors.red("Cannot continue, the changelog for the next version is empty!"));
 	}
 
 	// check if there are untracked changes
@@ -245,9 +230,7 @@ You can suppress this check with the ${colors.bold(
 			);
 		} else {
 			console.log(
-				colors.red(
-					"This is a dry run. The full run would fail due to a diverged branch\n",
-				),
+				colors.red("This is a dry run. The full run would fail due to a diverged branch\n"),
 			);
 		}
 	} else if (branchStatus === "behind") {
@@ -333,11 +316,7 @@ Add them to a separate commit first or add the "--all" option to include them in
 		if (releaseTypes.indexOf(releaseType) > -1) {
 			if (releaseType.startsWith("pre") && argv._.length >= 2) {
 				// increment to pre-release with an additional prerelease string
-				newVersion = semver.inc(
-					oldVersion,
-					releaseType as any,
-					argv._[1]?.toString(),
-				)!;
+				newVersion = semver.inc(oldVersion, releaseType as any, argv._[1]?.toString())!;
 			} else {
 				newVersion = semver.inc(oldVersion, releaseType as any)!;
 			}
@@ -358,18 +337,13 @@ Add them to a separate commit first or add the "--all" option to include them in
 						`new version ${newVersion} is NOT > than package.json version ${pack.version}`,
 					);
 				}
-				if (
-					hasIoPack &&
-					!semver.gt(newVersion, ioPack.common.version)
-				) {
+				if (hasIoPack && !semver.gt(newVersion, ioPack.common.version)) {
 					fail(
 						`new version ${newVersion} is NOT > than io-package.json version ${ioPack.common.version}`,
 					);
 				}
 			}
-			console.log(
-				`bumping version ${oldVersion} to specific version ${newVersion}`,
-			);
+			console.log(`bumping version ${oldVersion} to specific version ${newVersion}`);
 		}
 	}
 
@@ -378,9 +352,9 @@ Add them to a separate commit first or add the "--all" option to include them in
 	} else {
 		if (!lerna && !yarnWorkspace) {
 			console.log(
-				`updating package.json from ${colors.blue(
-					pack.version,
-				)} to ${colors.green(newVersion!)}`,
+				`updating package.json from ${colors.blue(pack.version)} to ${colors.green(
+					newVersion!,
+				)}`,
 			);
 			pack.version = newVersion;
 			fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
@@ -414,28 +388,17 @@ Add them to a separate commit first or add the "--all" option to include them in
 
 			if (oldChangelog) {
 				console.log(`moving old changelog entries to CHANGELOG_OLD.md`);
-				let oldChangelogFileContent = fs.readFileSync(
-					changelogOldPath,
-					"utf8",
-				);
+				let oldChangelogFileContent = fs.readFileSync(changelogOldPath, "utf8");
 				oldChangelogFileContent = insertIntoChangelog(
 					oldChangelogFileContent,
 					oldChangelog,
 					CHANGELOG_PLACEHOLDER_PREFIX.slice(1),
 				);
-				fs.writeFileSync(
-					changelogOldPath,
-					oldChangelogFileContent,
-					"utf8",
-				);
+				fs.writeFileSync(changelogOldPath, oldChangelogFileContent, "utf8");
 			}
 		} else {
 			console.log(`updating ${changelogFilename}`);
-			fs.writeFileSync(
-				isChangelogInReadme ? readmePath : changelogPath,
-				changelog,
-				"utf8",
-			);
+			fs.writeFileSync(isChangelogInReadme ? readmePath : changelogPath, changelog, "utf8");
 		}
 
 		// Prepare the changelog so it can be put into io-package.json news and the commit message
@@ -460,9 +423,7 @@ ${newChangelog}`,
 			if (newVersion! in ioPack.common.news) {
 				console.log(`current news is already in io-package.json`);
 			} else if (isObject(ioPack.common.news.NEXT)) {
-				console.log(
-					`replacing version number for current news io-package.json...`,
-				);
+				console.log(`replacing version number for current news io-package.json...`);
 				ioPack.common.news = prependKey(
 					ioPack.common.news,
 					newVersion!,
@@ -473,11 +434,7 @@ ${newChangelog}`,
 				console.log(`adding new news to io-package.json...`);
 				try {
 					const translated = await translateText(newChangelog);
-					ioPack.common.news = prependKey(
-						ioPack.common.news,
-						newVersion!,
-						translated,
-					);
+					ioPack.common.news = prependKey(ioPack.common.news, newVersion!, translated);
 				} catch (e) {
 					fail(`could not translate the news: ${e}`);
 				}
@@ -511,8 +468,7 @@ ${newChangelog}`,
 					...(yarnWorkspace
 						? [
 								...changedWorkspaces.map(
-									(ws) =>
-										`yarn workspace ${ws} version ${newVersion} --deferred`,
+									(ws) => `yarn workspace ${ws} version ${newVersion} --deferred`,
 								),
 								`yarn version apply --all`,
 						  ]
@@ -521,12 +477,8 @@ ${newChangelog}`,
 					`git add -A -- ":(exclude).commitmessage"`,
 					`git commit -F ".commitmessage"`,
 					`git tag -a v${newVersion} -m "v${newVersion}"`,
-					`git push${
-						remote ? ` ${remote.split("/").join(" ")}` : ""
-					}`,
-					`git push${
-						remote ? ` ${remote.split("/").join(" ")}` : ""
-					} --tags`,
+					`git push${remote ? ` ${remote.split("/").join(" ")}` : ""}`,
+					`git push${remote ? ` ${remote.split("/").join(" ")}` : ""} --tags`,
 			  ]
 	).filter((cmd): cmd is string => !!cmd);
 
