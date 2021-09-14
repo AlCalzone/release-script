@@ -150,12 +150,12 @@ This is the changelog.`);
 
 			await gitPlugin.executeStage(context, DefaultStages.commit);
 			const expectedCommands = [
-				`git add -A -- ":(exclude).commitmessage"`,
-				`git commit -F ".commitmessage"`,
-				`git tag -a v${newVersion} -m "v${newVersion}"`,
+				["git", "add", "-A", "--", ":(exclude).commitmessage"],
+				["git", "commit", "-F", ".commitmessage"],
+				["git", "tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`],
 			];
-			for (const cmd of expectedCommands) {
-				expect(context.sys.execRaw).toHaveBeenCalledWith(cmd, expect.anything());
+			for (const [cmd, ...args] of expectedCommands) {
+				expect(context.sys.exec).toHaveBeenCalledWith(cmd, args, expect.anything());
 			}
 		});
 
@@ -171,8 +171,8 @@ This is the changelog.`);
 			context.sys.mockExec(() => "");
 
 			await gitPlugin.executeStage(context, DefaultStages.commit);
-			expect(context.sys.execRaw).not.toHaveBeenCalledWith(
-				`git tag -a v${newVersion} -m "v${newVersion}"`,
+			expect(context.sys.exec).not.toHaveBeenCalledWith(
+				["git", "tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`],
 				expect.anything(),
 			);
 		});

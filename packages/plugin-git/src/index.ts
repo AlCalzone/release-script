@@ -165,16 +165,18 @@ ${context.getData("changelog_new")}`;
 		// And commit stuff
 		const newVersion = context.getData<string>("version_new");
 		const commands = [
-			`git add -A -- ":(exclude).commitmessage"`,
-			`git commit -F ".commitmessage"`,
-			...(lerna ? [] : [`git tag -a v${newVersion} -m "v${newVersion}"`]),
+			["git", "add", "-A", "--", ":(exclude).commitmessage"],
+			["git", "commit", "-F", ".commitmessage"],
 		];
+		if (!lerna) {
+			commands.push(["git", "tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`]);
+		}
 
-		for (const command of commands) {
+		for (const [cmd, ...args] of commands) {
 			if (context.argv.dryRun) {
-				context.cli.logCommand(command);
+				context.cli.logCommand(cmd, args);
 			} else {
-				await context.sys.execRaw(command, { cwd: context.cwd });
+				await context.sys.exec(cmd, args, { cwd: context.cwd });
 			}
 		}
 	}
