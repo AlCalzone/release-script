@@ -12,7 +12,19 @@ __metadata:
     "@types/yargs": ^17.0.2
     colors: ^1.4.0
     execa: ^5.1.1
+    typescript: "*"
     yargs: ^17.1.1
+  languageName: unknown
+  linkType: soft
+
+"@alcalzone/release-script-plugin-changelog@workspace:packages/plugin-changelog":
+  version: 0.0.0-use.local
+  resolution: "@alcalzone/release-script-plugin-changelog@workspace:packages/plugin-changelog"
+  dependencies:
+    "@alcalzone/release-script-core": ^3.0.0-alpha.0
+    "@alcalzone/release-script-testing": ^3.0.0-alpha.0
+    jest-extended: ^0.11.5
+    typescript: "*"
   languageName: unknown
   linkType: soft
 
@@ -24,6 +36,7 @@ __metadata:
     "@alcalzone/release-script-testing": ^3.0.0-alpha.0
     alcalzone-shared: ^4.0.0
     jest-extended: ^0.11.5
+    typescript: "*"
   languageName: unknown
   linkType: soft
 
@@ -35,6 +48,7 @@ __metadata:
     "@alcalzone/release-script-testing": ^3.0.0-alpha.0
     fs-extra: ^10.0.0
     jest-extended: ^0.11.5
+    typescript: "*"
   languageName: unknown
   linkType: soft
 
@@ -45,6 +59,7 @@ __metadata:
     "@alcalzone/release-script-core": ^3.0.0-alpha.0
     "@alcalzone/release-script-testing": ^3.0.0-alpha.0
     jest-extended: ^0.11.5
+    typescript: "*"
   languageName: unknown
   linkType: soft
 
@@ -56,6 +71,7 @@ __metadata:
     "@alcalzone/release-script-testing": ^3.0.0-alpha.0
     jest-extended: ^0.11.5
     semver: ^7.3.5
+    typescript: "*"
   languageName: unknown
   linkType: soft
 
@@ -66,6 +82,7 @@ __metadata:
     "@alcalzone/release-script-core": ^3.0.0-alpha.0
     "@alcalzone/release-script-testing": ^3.0.0-alpha.0
     jest-extended: ^0.11.5
+    typescript: "*"
   languageName: unknown
   linkType: soft
 
@@ -77,6 +94,7 @@ __metadata:
     "@alcalzone/release-script-testing": ^3.0.0-alpha.0
     jest-extended: ^0.11.5
     semver: ^7.3.5
+    typescript: "*"
   languageName: unknown
   linkType: soft
 
@@ -110,7 +128,7 @@ __metadata:
     rimraf: ^3.0.2
     source-map-support: ^0.5.20
     ts-node: ^10.2.1
-    typescript: ~4.4.2
+    typescript: ~4.4.3
   languageName: unknown
   linkType: soft
 
@@ -121,6 +139,7 @@ __metadata:
     "@alcalzone/release-script-core": ^3.0.0-alpha.0
     colors: ^1.4.0
     execa: "*"
+    typescript: "*"
   peerDependencies:
     execa: "*"
   languageName: unknown
@@ -140,6 +159,7 @@ __metadata:
     fs-extra: ^10.0.0
     semver: ^7.3.5
     source-map-support: ^0.5.20
+    typescript: "*"
     yargs: ^17.1.1
   bin:
     release-script: bin/release.js
@@ -11177,23 +11197,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@~4.4.2#~builtin<compat/typescript>":
-  version: 4.4.2
-  resolution: "typescript@patch:typescript@npm%3A4.4.2#~builtin<compat/typescript>::version=4.4.2&hash=ddd1e8"
+"typescript@*, typescript@~4.4.3":
+  version: 4.4.3
+  resolution: "typescript@npm:4.4.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 1f30617046271a94d6821fe9da9c4705111e0a2f5479269c82f65aa76b2421ff90def8838dd35b1aa464d015248b06c89ff867bd282f4822b5ee18b7f92f95ee
+  checksum: 05823f21796d450531a7e4ab299715d38fd9ded0e4ce7400876053f4b5166ca3dde7a68cecfe72d9086039f03c0b6edba36516fb10ed83c5837d9600532ea4c2
   languageName: node
   linkType: hard
 
-typescript@~4.4.2:
-  version: 4.4.2
-  resolution: "typescript@npm:4.4.2"
+"typescript@patch:typescript@*#~builtin<compat/typescript>, typescript@patch:typescript@~4.4.3#~builtin<compat/typescript>":
+  version: 4.4.3
+  resolution: "typescript@patch:typescript@npm%3A4.4.3#~builtin<compat/typescript>::version=4.4.3&hash=ddd1e8"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 194e08e9d1971d667d6fd1a0554616b7022312a2319d70e81a64e502a265992061ee7817ed9a69b52bbabe7a9b85e7938cb8c11c433e40a516b277f8c4dacd51
+  checksum: 79f5c13d21c9dea3eb44d2b7002ff25a0569fefc432e083d65a360e3aca990aca25fc733e14aa6883b5e9a68e3e2f0330a34123e048806f91d701732ece00e6f
   languageName: node
   linkType: hard
 

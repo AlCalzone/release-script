@@ -42,7 +42,8 @@
     "semver": "^7.3.5"
   },
   "devDependencies": {
-    "jest-extended": "^0.11.5"
+    "jest-extended": "^0.11.5",
+    "typescript": "*"
   },
   "scripts": {
     "clean": "tsc -b tsconfig.build.json --clean",

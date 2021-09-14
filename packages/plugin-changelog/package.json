@@ -1,10 +1,11 @@
 {
-  "name": "@alcalzone/release-script-plugin-git",
+  "name": "@alcalzone/release-script-plugin-changelog",
+  "private": true,
   "publishConfig": {
     "access": "public"
   },
   "version": "3.0.0-alpha.0",
-  "description": "Plugin for Al Calzone's release script: git",
+  "description": "Plugin for Al Calzone's release script: changelog",
   "keywords": [],
   "license": "MIT",
   "author": {
@@ -38,8 +39,7 @@
   },
   "dependencies": {
     "@alcalzone/release-script-core": "^3.0.0-alpha.0",
-    "@alcalzone/release-script-testing": "^3.0.0-alpha.0",
-    "fs-extra": "^10.0.0"
+    "@alcalzone/release-script-testing": "^3.0.0-alpha.0"
   },
   "devDependencies": {
     "jest-extended": "^0.11.5",
@@ -51,7 +51,7 @@
     "build": "tsc -p tsconfig.build.json",
     "watch": "tsc -p tsconfig.build.json --watch"
   },
-  "homepage": "https://github.com/AlCalzone/release-script/tree/main/packages/plugin-git#readme",
+  "homepage": "https://github.com/AlCalzone/release-script/tree/main/packages/plugin-changelog#readme",
   "repository": {
     "type": "git",
     "url": "git@github.com:AlCalzone/release-script.git"

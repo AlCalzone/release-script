@@ -3,6 +3,7 @@ module.exports = {
 	roots: [
 		"<rootDir>/packages/release-script/src",
 		"<rootDir>/packages/core/src",
+		"<rootDir>/packages/plugin-changelog/src",
 		"<rootDir>/packages/plugin-exec/src",
 		"<rootDir>/packages/plugin-git/src",
 		"<rootDir>/packages/plugin-iobroker/src",
@@ -14,6 +15,8 @@ module.exports = {
 	moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
 	moduleNameMapper: {
 		"^@alcalzone/release-script-core(.*)": "<rootDir>/packages/core/src$1",
+		"^@alcalzone/release-script-plugin-changelog(.*)":
+			"<rootDir>/packages/plugin-changelog/src$1",
 		"^@alcalzone/release-script-plugin-exec(.*)": "<rootDir>/packages/plugin-exec/src$1",
 		"^@alcalzone/release-script-plugin-git(.*)": "<rootDir>/packages/plugin-git/src$1",
 		"^@alcalzone/release-script-plugin-iobroker(.*)":

@@ -65,6 +65,7 @@
   },
   "readmeFilename": "README.md",
   "devDependencies": {
-    "@types/yargs": "^17.0.2"
+    "@types/yargs": "^17.0.2",
+    "typescript": "*"
   }
 }
