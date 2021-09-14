@@ -40,6 +40,7 @@ class PackagePlugin implements Plugin {
 			context.cli.fatal(`Invalid version "${pack.version}" in package.json!`);
 		} else {
 			context.setData("version", pack.version);
+			context.cli.log(`package.json ok ${context.cli.colors.green("✔")}`);
 		}
 
 		// Remember package.json contents

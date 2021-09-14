@@ -41,9 +41,10 @@ const prefixColors = [
 ];
 const usedPrefixes: string[] = [];
 function colorizePrefix(prefix: string): string {
-	let prefixIndex = usedPrefixes.indexOf(prefix);
+	const prefixShort = prefix.split(":").slice(-1)[0];
+	let prefixIndex = usedPrefixes.indexOf(prefixShort);
 	if (prefixIndex === -1) {
-		usedPrefixes.push(prefix);
+		usedPrefixes.push(prefixShort);
 		prefixIndex = usedPrefixes.length - 1;
 	}
 	return prefixColors[prefixIndex % prefixColors.length](prefix);

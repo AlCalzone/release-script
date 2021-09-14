@@ -134,13 +134,15 @@ Note: If the current folder belongs to a different user than ${colors.bold(
 		} else if (branchStatus === "ahead" || branchStatus === "up-to-date") {
 			// all good
 			if (!lerna) {
-				context.cli.log(colors.green("git status is good - I can continue..."));
+				context.cli.log(`git status ok ${context.cli.colors.green("✔")}`);
 			}
 		} else if (branchStatus === "uncommitted" && !lerna) {
 			if (!context.argv.includeUnstaged) {
 				context.cli.error(
 					`The local branch has uncommitted changes! Add them to a separate commit first or add the "--all" option to include them in the release commit.`,
 				);
+			} else {
+				context.cli.log(`git status ok ${context.cli.colors.green("✔")}`);
 			}
 		}
 	}

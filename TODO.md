@@ -4,7 +4,7 @@
 -   [x] package.json/lockfile synchronization
 -   [ ] Lerna mode
 -   [ ] Updating changelogs
--   [ ] ioBroker workflow check
+-   [x] ioBroker workflow check
 -   [ ] io-package.json
 -   [x] Version bump
 -   [x] user scripts
