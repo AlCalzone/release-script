@@ -9,6 +9,7 @@ import {
 	ReleaseError,
 	resolvePlugins,
 } from "@alcalzone/release-script-core";
+import { distinct } from "alcalzone-shared/arrays";
 import colors from "colors/safe";
 import yargs from "yargs";
 
@@ -27,9 +28,28 @@ function colorizeTextAndTags(
 	);
 }
 
+const prefixColors = [
+	colors.blue,
+	colors.magenta,
+	colors.cyan,
+	colors.red,
+	colors.green,
+	colors.yellow,
+	colors.white,
+];
+const usedPrefixes: string[] = [];
+function colorizePrefix(prefix: string): string {
+	let prefixIndex = usedPrefixes.indexOf(prefix);
+	if (prefixIndex === -1) {
+		usedPrefixes.push(prefix);
+		prefixIndex = usedPrefixes.length - 1;
+	}
+	return prefixColors[prefixIndex % prefixColors.length](prefix);
+}
+
 function prependPrefix(prefix: string, str: string): string {
 	if (!prefix) return str;
-	return colors.bold(`${prefix} `) + str;
+	return colors.bold(colorizePrefix(prefix)) + " " + str;
 }
 
 class CLI implements ICLI {
@@ -71,8 +91,46 @@ class CLI implements ICLI {
 }
 
 export async function main(): Promise<void> {
-	// TODO: this doesn't really make sense
-	const chosenPlugins = ["git", "package", "exec"];
+	let argv = yargs
+		.env("RELEASE_SCRIPT")
+		.usage("AlCalzone's Release Script\n\nUsage: $0 [options]")
+		.wrap(yargs.terminalWidth())
+		// Delay showing help until the second parsing pass
+		.help(false)
+		.alias("v", "version")
+		.options({
+			config: {
+				alias: "c",
+				describe: "Path to the release config file",
+				config: true,
+			},
+			plugins: {
+				alias: "p",
+				describe: "Additional plugins to load",
+				string: true,
+				array: true,
+			},
+			verbose: {
+				alias: "V",
+				type: "boolean",
+				description: "Enable debug output",
+				default: false,
+			},
+		});
+
+	// We do two-pass parsing:
+	// 1. parse the config file and plugins (non-strict)
+	// 2. parse all options (strict)
+	let parsedArgv = (await argv.parseAsync()) as unknown as Context["argv"];
+
+	const chosenPlugins = distinct([
+		// These plugins must always be loaded
+		"git",
+		"package",
+		"exec",
+		// These are provided by the user
+		...(parsedArgv.plugins || []),
+	]);
 	const allPlugins: Plugin[] = await Promise.all(
 		chosenPlugins.map(
 			async (plugin) =>
@@ -83,12 +141,10 @@ export async function main(): Promise<void> {
 	);
 	const plugins = resolvePlugins(allPlugins, chosenPlugins);
 
-	let argv = yargs
-		.env("RELEASE_SCRIPT")
+	argv = argv
 		.strict()
-		.usage("AlCalzone's Release Script\n\nUsage: $0 [options]")
+		.help(true)
 		.alias("h", "help")
-		.alias("v", "version")
 		.options({
 			dryRun: {
 				alias: "dry",
@@ -109,20 +165,15 @@ export async function main(): Promise<void> {
 				description: "Whether unstaged changes should be allowed",
 				default: false,
 			},
-			verbose: {
-				alias: "V",
-				type: "boolean",
-				description: "Enable debug output",
-				default: false,
-			},
 		});
+
 	// Let plugins hook into the CLI options
 	for (const plugin of plugins) {
 		if (typeof plugin.defineCLIOptions === "function") {
 			argv = plugin.defineCLIOptions(argv);
 		}
 	}
-	const parsedArgv = await argv.parseAsync();
+	parsedArgv = (await argv.parseAsync()) as unknown as Context["argv"];
 
 	const data = new Map();
 
@@ -153,10 +204,6 @@ export async function main(): Promise<void> {
 		},
 	};
 	context.cli = new CLI(context);
-
-	context.argv.exec_commands = {
-		before_check: "echo before_check",
-	} as any;
 
 	try {
 		// Initialize plugins

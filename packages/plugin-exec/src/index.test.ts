@@ -7,7 +7,7 @@ describe("Exec plugin", () => {
 		const context = createMockContext({
 			plugins: [execPlugin],
 			argv: {
-				exec_commands: {
+				exec: {
 					before_check: "echo before_check",
 					after_push: "echo after_push",
 				} as any,

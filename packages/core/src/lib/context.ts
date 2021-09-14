@@ -23,9 +23,13 @@ export interface Context {
 		/** The git remote to push to */
 		remote?: string;
 
+		/** Log debug information */
 		verbose: boolean;
 
-		[arg: string]: string | number | boolean | undefined;
+		/** Additional plugins to load */
+		plugins: string[];
+
+		[arg: string]: string | number | boolean | string[] | number[] | boolean[] | undefined;
 	};
 
 	warnings: string[];
