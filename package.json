@@ -45,7 +45,6 @@
   "scripts": {
     "build": "tsc -b tsconfig.build.json",
     "watch": "yarn run build --watch",
-    "start": "node packages/release-script/bin/release.js",
     "test:reset": "jest --clear-cache",
     "test:ts": "jest",
     "test:ci": "yarn test:ts --runInBand",
@@ -53,7 +52,7 @@
     "coverage:ci": "yarn test:ci --collect-coverage",
     "coverage": "yarn test:ts --collect-coverage",
     "lint": "eslint --ext .ts \"packages/*/src/**/*.ts\"",
-    "release": "release-script",
+    "release": "node packages/release-script/bin/release.js",
     "commit": "git-cz",
     "postinstall": "husky install"
   },

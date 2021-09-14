@@ -35,6 +35,7 @@ class LernaPlugin implements Plugin {
 		}
 
 		// Validate lerna options
+		let hasErrors = false;
 		if (json?.command?.version?.amend != undefined) {
 			context.cli.warn(
 				`The option "amend" in lerna.json is unnecessary and should be removed.`,
@@ -48,11 +49,12 @@ class LernaPlugin implements Plugin {
 			context.cli.error(
 				`The option "push: false" in lerna.json prevents the release script from working must be removed.`,
 			);
+			hasErrors = true;
 		}
 
 		context.setData("version", json.version);
 		context.setData("lerna", true);
-		context.cli.log(`lerna.json ok ${context.cli.colors.green("✔")}`);
+		if (!hasErrors) context.cli.log(`lerna.json ok ${context.cli.colors.green("✔")}`);
 	}
 
 	private async executeCommitStage(context: Context): Promise<void> {

@@ -181,8 +181,10 @@ module.exports = {
 Example:
 
 ```
-npm run release -- -c .releaseconfig.json
+npm run release -- -c mysuperduperconfig.json
 ```
+
+> By default, the release script looks for `.releaseconfig.json`
 
 #### Load extra plugins (`--plugins` or `-p`)
 

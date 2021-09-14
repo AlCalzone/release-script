@@ -1,0 +1,6 @@
+{
+	"plugins": ["lerna"],
+	"exec": {
+		"before_commit": "yarn run build"
+	}
+}

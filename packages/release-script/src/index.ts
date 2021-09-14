@@ -165,6 +165,7 @@ export async function main(): Promise<void> {
 				alias: "c",
 				describe: "Path to the release config file",
 				config: true,
+				default: ".releaseconfig.json",
 			},
 			plugins: {
 				alias: "p",
