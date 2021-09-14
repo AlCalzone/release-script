@@ -51,13 +51,19 @@ class PackagePlugin implements Plugin {
 		const newVersion = context.getData<string>("version_new");
 		const pack = context.getData<any>("package.json");
 
-		context.cli.log(
-			`updating package.json version from ${context.cli.colors.blue(
-				pack.version,
-			)} to ${context.cli.colors.green(newVersion!)}`,
-		);
+		if (context.argv.dryRun) {
+			context.cli.log(
+				`Dry run, would update package.json version from ${context.cli.colors.blue(
+					pack.version,
+				)} to ${context.cli.colors.green(newVersion!)}`,
+			);
+		} else {
+			context.cli.log(
+				`updating package.json version from ${context.cli.colors.blue(
+					pack.version,
+				)} to ${context.cli.colors.green(newVersion!)}`,
+			);
 
-		if (!context.argv.dryRun) {
 			pack.version = newVersion;
 			const packPath = path.join(context.cwd, "package.json");
 			await fs.writeJson(packPath, pack, { spaces: 2 });

@@ -39,7 +39,8 @@
   },
   "dependencies": {
     "@alcalzone/release-script-core": "^3.0.0-alpha.0",
-    "@alcalzone/release-script-testing": "^3.0.0-alpha.0"
+    "@alcalzone/release-script-testing": "^3.0.0-alpha.0",
+    "alcalzone-shared": "^4.0.0"
   },
   "devDependencies": {
     "jest-extended": "^0.11.5",

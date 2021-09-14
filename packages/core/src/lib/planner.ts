@@ -196,5 +196,6 @@ export async function execute(context: Context): Promise<void> {
 				}
 			}
 		}
+		console.log();
 	}
 }

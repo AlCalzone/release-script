@@ -149,12 +149,17 @@ Note: If the current folder belongs to a different user than ${colors.bold(
 
 	private async executeCommitStage(context: Context): Promise<void> {
 		// Prepare the commit message
-		await fs.writeFile(
-			path.join(context.cwd, ".commitmessage"),
-			`chore: release v${context.getData("version_new")}
+		const commitMessage = `chore: release v${context.getData("version_new")}
 
-${context.getData("changelog_new")}`,
+${context.getData("changelog_new")}`;
+
+		context.cli.log(
+			`Commit message: ${context.cli.colors.green(commitMessage.split("\n")[0])}`,
 		);
+
+		if (!context.argv.dryRun) {
+			await fs.writeFile(path.join(context.cwd, ".commitmessage"), commitMessage);
+		}
 
 		// TODO:
 		const lerna = false;
@@ -196,7 +201,11 @@ ${context.getData("changelog_new")}`,
 				}
 			}
 		} else if (stage.id === "cleanup") {
-			await fs.unlink(path.join(context.cwd, ".commitmessage"));
+			const commitMessagePath = path.join(context.cwd, ".commitmessage");
+			if (await fs.pathExists(commitMessagePath)) {
+				context.cli.log("Removing .commitmessage file");
+				await fs.unlink(path.join(context.cwd, ".commitmessage"));
+			}
 		}
 	}
 }
