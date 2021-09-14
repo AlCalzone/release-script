@@ -31,12 +31,12 @@ function colorizeTextAndTags(
 }
 
 const prefixColors = [
-	colors.blue,
 	colors.magenta,
 	colors.cyan,
+	colors.yellow,
 	colors.red,
 	colors.green,
-	colors.yellow,
+	colors.blue,
 	colors.white,
 ];
 const usedPrefixes: string[] = [];
@@ -102,8 +102,24 @@ class CLI implements ICLI {
 				choices: options.map((o) => ({
 					name: o.value,
 					message: o.label,
-					hint: o.hint,
+					hint: o.hint ? this.colors.gray(`· ${o.hint}`) : undefined,
 				})),
+			});
+			return result.default;
+		} catch (e) {
+			// Strg+C
+			if (e === "") this.fatal("Aborted by user");
+			throw e;
+		}
+	}
+
+	async ask(question: string, placeholder?: string): Promise<string> {
+		try {
+			const result = await prompt<any>({
+				name: "default",
+				message: question,
+				type: "input",
+				initial: placeholder,
 			});
 			return result.default;
 		} catch (e) {
@@ -121,11 +137,26 @@ class CLI implements ICLI {
 export async function main(): Promise<void> {
 	let argv = yargs
 		.env("RELEASE_SCRIPT")
-		.usage("$0 [<bump>] [options]", "AlCalzone's release script", (yargs) =>
-			yargs.positional("bump", {
-				describe: "The version bump to do",
-				required: false,
-			}),
+		.usage("$0 [<bump> [<preid>]] [options]", "AlCalzone's release script", (yargs) =>
+			yargs
+				.positional("bump", {
+					describe: "The version bump to do.",
+					choices: [
+						"major",
+						"premajor",
+						"minor",
+						"preminor",
+						"patch",
+						"prepatch",
+						"prerelease",
+					],
+					required: false,
+				})
+				.positional("preid", {
+					describe: "The prerelease identifier. Only for pre... bumps.",
+					required: false,
+					default: "alpha",
+				}),
 		)
 		.wrap(yargs.terminalWidth())
 		// Delay showing help until the second parsing pass

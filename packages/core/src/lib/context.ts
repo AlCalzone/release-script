@@ -25,6 +25,7 @@ export interface Context {
 
 		/** The desired version bump */
 		bump?: string;
+		preid?: string;
 
 		[arg: string]: string | number | boolean | string[] | number[] | boolean[] | undefined;
 	};

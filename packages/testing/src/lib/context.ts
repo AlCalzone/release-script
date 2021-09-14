@@ -90,6 +90,7 @@ export function createMockContext(
 			}),
 			logCommand: jest.fn(),
 			select: jest.fn(),
+			ask: jest.fn(),
 			clearLines: jest.fn(),
 			colors,
 			prefix: "",

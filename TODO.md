@@ -8,4 +8,4 @@
 -   [x] io-package.json
 -   [x] Version bump
 -   [x] user scripts
--   [ ] prerelease bump
+-   [x] prerelease bump
