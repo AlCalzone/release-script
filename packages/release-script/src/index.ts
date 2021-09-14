@@ -162,6 +162,7 @@ export async function main(): Promise<void> {
 		"package",
 		"exec",
 		"version",
+		"changelog",
 		// These are provided by the user
 		...(parsedArgv.plugins || []),
 	]);
