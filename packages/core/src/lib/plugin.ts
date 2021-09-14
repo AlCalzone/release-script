@@ -24,14 +24,14 @@ export interface Plugin {
 	 *
 	 * This is evaluated at the start of each stage, so a reaction to previous stage results is possible
 	 */
-	stageAfter?: Record<string, ConstOrDynamic<string[]>>;
+	stageAfter?: Record<string, ConstOrDynamic<string[] | "*">>;
 	/**
 	 * For each stage, define after which plugin this one hooks into the release process.
 	 * Without dependencies, plugins are executed in the order they are defined.
 	 *
 	 * This is evaluated at the start of each stage, so a reaction to previous stage results is possible
 	 */
-	stageBefore?: Record<string, ConstOrDynamic<string[]>>;
+	stageBefore?: Record<string, ConstOrDynamic<string[] | "*">>;
 
 	/** Execute the plugin for the given stage */
 	executeStage(context: Context, stage: Stage): Promise<void>;

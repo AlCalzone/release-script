@@ -1,3 +1,4 @@
+import { ReleaseError } from "..";
 import type { Context } from "./context";
 import { GraphNode, topologicalSort } from "./graph";
 import type { Plugin } from "./plugin";
@@ -106,10 +107,18 @@ export async function planStage(context: Context, stage: Stage): Promise<Plugin[
 				stageAfter = await stageAfter(context);
 			}
 
+			// Convert "*" dependency to "all other plugins"
+			if (stageAfter === "*") {
+				stageAfter = [...graphNodes.values()]
+					.filter((n) => n.value.id !== plugin.id)
+					.map((n) => n.value.id);
+			}
+
 			for (const dep of stageAfter) {
 				if (!graphNodes.has(dep)) {
-					throw new Error(
+					throw new ReleaseError(
 						`Plugin ${plugin.id} has unknown dependency ${dep} in stage ${stage.id}!`,
+						true,
 					);
 				}
 				node.edges.add(graphNodes.get(dep)!);
@@ -120,10 +129,19 @@ export async function planStage(context: Context, stage: Stage): Promise<Plugin[
 			if (typeof stageBefore === "function") {
 				stageBefore = await stageBefore(context);
 			}
+
+			// Convert "*" dependency to "all other plugins"
+			if (stageBefore === "*") {
+				stageBefore = [...graphNodes.values()]
+					.filter((n) => n.value.id !== plugin.id)
+					.map((n) => n.value.id);
+			}
+
 			for (const dep of stageBefore) {
 				if (!graphNodes.has(dep)) {
-					throw new Error(
+					throw new ReleaseError(
 						`Plugin ${plugin.id} has unknown dependency ${dep} in stage ${stage.id}!`,
+						true,
 					);
 				}
 				graphNodes.get(dep)!.edges.add(node);

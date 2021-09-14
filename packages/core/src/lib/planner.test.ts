@@ -133,6 +133,161 @@ describe("planStage", () => {
 		);
 		expect(result).toEqual(["plugin1", "plugin3", "plugin2"]);
 	});
+
+	it("allows plugins to be executed after all others with '*'", async () => {
+		const stages: Stage[] = [
+			{
+				id: "check",
+			},
+		];
+
+		const plugin1 = {
+			id: "plugin1",
+			stages,
+		} as Plugin;
+
+		const plugin2 = {
+			id: "plugin2",
+			dependencies: ["plugin1"],
+			stages,
+			stageAfter: {
+				check: ["plugin1"],
+			},
+		} as any as Plugin;
+
+		const plugin3 = {
+			id: "plugin3",
+			dependencies: ["plugin1"],
+			stages,
+			stageAfter: {
+				check: "*",
+			},
+		} as any as Plugin;
+
+		const plugins = [plugin3, plugin1, plugin2];
+		const context = { plugins } as Context;
+
+		const result = (await planStage(context, stages.find((s) => s.id === "check")!)).map(
+			(p) => p.id,
+		);
+		expect(result).toEqual(["plugin1", "plugin2", "plugin3"]);
+	});
+
+	it("allows plugins to be executed before all others with '*'", async () => {
+		const stages: Stage[] = [
+			{
+				id: "check",
+			},
+		];
+
+		const plugin1 = {
+			id: "plugin1",
+			stages,
+		} as Plugin;
+
+		const plugin2 = {
+			id: "plugin2",
+			dependencies: ["plugin1"],
+			stages,
+			stageAfter: {
+				check: ["plugin1"],
+			},
+		} as any as Plugin;
+
+		const plugin3 = {
+			id: "plugin3",
+			dependencies: ["plugin1"],
+			stages,
+			stageBefore: {
+				check: "*",
+			},
+		} as any as Plugin;
+
+		const plugins = [plugin1, plugin2, plugin3];
+		const context = { plugins } as Context;
+
+		const result = (await planStage(context, stages.find((s) => s.id === "check")!)).map(
+			(p) => p.id,
+		);
+		expect(result).toEqual(["plugin3", "plugin1", "plugin2"]);
+	});
+
+	it("allows combinations of 'before *' and 'after *'", async () => {
+		const stages: Stage[] = [
+			{
+				id: "check",
+			},
+		];
+
+		const plugin1 = {
+			id: "plugin1",
+			stages,
+		} as Plugin;
+
+		const plugin2 = {
+			id: "plugin2",
+			dependencies: ["plugin1"],
+			stages,
+			stageAfter: {
+				check: "*",
+			},
+		} as any as Plugin;
+
+		const plugin3 = {
+			id: "plugin3",
+			dependencies: ["plugin1"],
+			stages,
+			stageBefore: {
+				check: "*",
+			},
+		} as any as Plugin;
+
+		const plugins = [plugin2, plugin1, plugin3];
+		const context = { plugins } as Context;
+
+		const result = (await planStage(context, stages.find((s) => s.id === "check")!)).map(
+			(p) => p.id,
+		);
+		expect(result).toEqual(["plugin3", "plugin1", "plugin2"]);
+	});
+
+	it("disallows multiple conflicting '*' stage dependencies", async () => {
+		const stages: Stage[] = [
+			{
+				id: "check",
+			},
+		];
+
+		const plugin1 = {
+			id: "plugin1",
+			stages,
+		} as Plugin;
+
+		const plugin2 = {
+			id: "plugin2",
+			dependencies: ["plugin1"],
+			stages,
+			stageAfter: {
+				check: "*",
+			},
+		} as any as Plugin;
+
+		const plugin3 = {
+			id: "plugin3",
+			dependencies: ["plugin1"],
+			stages,
+			stageAfter: {
+				check: "*",
+			},
+		} as any as Plugin;
+
+		const plugins = [plugin1, plugin2, plugin3];
+		const context = { plugins } as Context;
+
+		await expect(
+			planStage(context, stages.find((s) => s.id === "check")!),
+		).rejects.toThrowError(/circular dependency/i);
+	});
 });
 
 describe("execute", () => {
