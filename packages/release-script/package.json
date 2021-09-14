@@ -31,7 +31,7 @@
     }
   },
   "files": [
-    "build/",
+    "build/*.js",
     "LICENSE"
   ],
   "engines": {
@@ -39,6 +39,11 @@
   },
   "dependencies": {
     "@alcalzone/release-script-core": "^3.0.0-alpha.0",
+    "@alcalzone/release-script-plugin-changelog": "^3.0.0-alpha.0",
+    "@alcalzone/release-script-plugin-exec": "^3.0.0-alpha.0",
+    "@alcalzone/release-script-plugin-git": "^3.0.0-alpha.0",
+    "@alcalzone/release-script-plugin-package": "^3.0.0-alpha.0",
+    "@alcalzone/release-script-plugin-version": "^3.0.0-alpha.0",
     "alcalzone-shared": "^4.0.0",
     "axios": "^0.21.4",
     "colors": "^1.4.0",
@@ -55,7 +60,6 @@
   },
   "scripts": {
     "clean": "tsc -b tsconfig.build.json --clean",
-    "prebuild": "rimraf ./build",
     "build": "tsc -b tsconfig.build.json",
     "watch": "tsc -b tsconfig.build.json --watch"
   },

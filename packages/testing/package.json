@@ -45,7 +45,6 @@
   },
   "scripts": {
     "clean": "tsc -b tsconfig.build.json --clean",
-    "prebuild": "rimraf ./build",
     "build": "tsc -b tsconfig.build.json",
     "watch": "tsc -b tsconfig.build.json --watch"
   },
