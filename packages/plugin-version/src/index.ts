@@ -4,32 +4,33 @@ import semver from "semver";
 
 class VersionPlugin implements Plugin {
 	public readonly id = "version";
-	public readonly stages = [DefaultStages.edit];
+	public readonly stages = [DefaultStages.check];
 
-	public readonly stageBefore = {
-		edit: "*" as const,
+	public readonly stageAfter = {
+		check: "*" as const,
 	};
 
 	async executeStage(context: Context, stage: Stage): Promise<void> {
-		if (stage.id === "edit") {
+		if (stage.id === "check") {
 			const version = context.getData<string>("version");
 			let newVersion: string;
 			if (!context.argv.bump) {
 				context.cli.log(`Version bump not provided`);
-				newVersion = await context.cli.select("Please choose a version", [
+				context.argv.bump = await context.cli.select("Please choose a version", [
 					{
-						value: semver.inc(version, "major")!,
+						value: "major",
 						label: `major (${semver.inc(version, "major")!})`,
 					},
 					{
-						value: semver.inc(version, "minor")!,
+						value: "minor",
 						label: `minor (${semver.inc(version, "minor")!})`,
 					},
 					{
-						value: semver.inc(version, "patch")!,
+						value: "patch",
 						label: `patch (${semver.inc(version, "patch")!})`,
 					},
 				]);
+				newVersion = semver.inc(version, context.argv.bump as any)!;
 			} else {
 				newVersion = semver.inc(version, context.argv.bump as any)!;
 				context.cli.log(`Bumping version from ${version} to ${newVersion}`);
@@ -46,6 +47,11 @@ class VersionPlugin implements Plugin {
 					])) === "yes";
 				if (!ok) context.cli.fatal("Aborted by user");
 			}
+			context.cli.clearLines(2);
+
+			context.cli.log(
+				`Bumping version from ${version} to ${newVersion} ${context.cli.colors.green("✔")}`,
+			);
 			context.setData("version_new", newVersion);
 		}
 	}

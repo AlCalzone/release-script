@@ -3,23 +3,32 @@ import { assertReleaseError, createMockContext } from "@alcalzone/release-script
 import VersionPlugin from ".";
 
 describe("Version plugin", () => {
-	describe("edit stage", () => {
+	describe("check stage", () => {
 		it("asks for the version bump when none was provided", async () => {
 			const versionPlugin = new VersionPlugin();
 			const context = createMockContext({
 				plugins: [versionPlugin],
 			});
 			context.setData("version", "1.2.3");
-			(context.cli.select as jest.Mock).mockResolvedValue("1.2.4");
+			(context.cli.select as jest.Mock).mockResolvedValue("patch");
 
-			await versionPlugin.executeStage(context, DefaultStages.edit);
+			await versionPlugin.executeStage(context, DefaultStages.check);
 
 			expect(context.cli.select).toHaveBeenCalledWith(
 				"Please choose a version",
 				expect.arrayContaining([
-					expect.objectContaining({ value: "2.0.0" }),
-					expect.objectContaining({ value: "1.3.0" }),
-					expect.objectContaining({ value: "1.2.4" }),
+					expect.objectContaining({
+						value: expect.stringContaining("major"),
+						label: expect.stringContaining("2.0.0"),
+					}),
+					expect.objectContaining({
+						value: expect.stringContaining("minor"),
+						label: expect.stringContaining("1.3.0"),
+					}),
+					expect.objectContaining({
+						value: expect.stringContaining("patch"),
+						label: expect.stringContaining("1.2.4"),
+					}),
 				]),
 			);
 			expect(context.getData<string>("version_new")).toBe("1.2.4");
@@ -36,7 +45,7 @@ describe("Version plugin", () => {
 			context.setData("version", "1.2.3");
 			(context.cli.select as jest.Mock).mockResolvedValue("yes");
 
-			await versionPlugin.executeStage(context, DefaultStages.edit);
+			await versionPlugin.executeStage(context, DefaultStages.check);
 
 			expect(context.cli.select).toHaveBeenCalledWith(
 				"Is this okay?",
@@ -60,7 +69,7 @@ describe("Version plugin", () => {
 			(context.cli.select as jest.Mock).mockResolvedValue("no");
 
 			await assertReleaseError(
-				() => versionPlugin.executeStage(context, DefaultStages.edit),
+				() => versionPlugin.executeStage(context, DefaultStages.check),
 				{
 					fatal: true,
 					messageMatches: /aborted/i,

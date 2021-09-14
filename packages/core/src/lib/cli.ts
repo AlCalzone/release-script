@@ -17,6 +17,9 @@ export interface CLI {
 	/** Displays a select dialog to the user and returns the value of the chosen option */
 	select(prompt: string, options: SelectOption[]): Promise<string>;
 
+	/** Clears the last N lines */
+	clearLines(lines: number): void;
+
 	prefix: string;
 	colors: typeof import("colors/safe");
 

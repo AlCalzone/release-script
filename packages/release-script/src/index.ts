@@ -88,6 +88,10 @@ class CLI implements ICLI {
 		}
 		this.log(`$ ${command}`);
 	}
+	clearLines(lines: number): void {
+		process.stdout.moveCursor(0, -lines);
+		process.stdout.clearScreenDown();
+	}
 
 	async select(question: string, options: SelectOption[]): Promise<string> {
 		try {
@@ -96,8 +100,8 @@ class CLI implements ICLI {
 				message: question,
 				type: "select",
 				choices: options.map((o) => ({
-					name: o.label,
-					value: o.value,
+					name: o.value,
+					message: o.label,
 					hint: o.hint,
 				})),
 			});
