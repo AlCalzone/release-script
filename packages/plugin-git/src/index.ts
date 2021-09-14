@@ -118,8 +118,7 @@ Note: If the current folder belongs to a different user than ${colors.bold(
 			context.cli.fatal(message);
 		}
 
-		// TODO:
-		const lerna = false;
+		const lerna = context.hasData("lerna") && !!context.getData("lerna");
 
 		// check if there are untracked changes
 		const branchStatus = await gitStatus(context);
@@ -161,8 +160,7 @@ ${context.getData("changelog_new")}`;
 			await fs.writeFile(path.join(context.cwd, ".commitmessage"), commitMessage);
 		}
 
-		// TODO:
-		const lerna = false;
+		const lerna = context.hasData("lerna") && !!context.getData("lerna");
 
 		// And commit stuff
 		const newVersion = context.getData<string>("version_new");
@@ -181,12 +179,14 @@ ${context.getData("changelog_new")}`;
 		}
 	}
 
-	async executeStage(context: Context, stage: Stage): Promise<void> {
-		if (stage.id === "check") {
-			await this.executeCheckStage(context);
-		} else if (stage.id === "commit") {
-			await this.executeCommitStage(context);
-		} else if (stage.id === "push") {
+	private async executePushStage(context: Context): Promise<void> {
+		const lerna = context.hasData("lerna") && !!context.getData("lerna");
+
+		if (lerna) {
+			if (context.argv.verbose) {
+				context.cli.log(`Lerna mode, skipping manual push`);
+			}
+		} else {
 			const remote = context.argv.remote as string | undefined;
 			const remoteStr =
 				remote && remote !== "origin" ? ` ${remote.split("/").join(" ")}` : "";
@@ -200,6 +200,16 @@ ${context.getData("changelog_new")}`;
 					await context.sys.execRaw(command, { cwd: context.cwd });
 				}
 			}
+		}
+	}
+
+	async executeStage(context: Context, stage: Stage): Promise<void> {
+		if (stage.id === "check") {
+			await this.executeCheckStage(context);
+		} else if (stage.id === "commit") {
+			await this.executeCommitStage(context);
+		} else if (stage.id === "push") {
+			await this.executePushStage(context);
 		} else if (stage.id === "cleanup") {
 			const commitMessagePath = path.join(context.cwd, ".commitmessage");
 			if (await fs.pathExists(commitMessagePath)) {

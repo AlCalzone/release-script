@@ -67,6 +67,34 @@ describe("Package plugin", () => {
 				messageMatches: /invalid version "a.b.c"/i,
 			});
 		});
+
+		it(`"errors when package scripts are outdated`, async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+			});
+			context.setData("lerna", true);
+
+			await testFS.create({
+				"package.json": JSON.stringify({
+					name: "test-package",
+					version: "1.2.3",
+					scripts: {
+						release: "lerna version",
+						preversion: "release-script --lerna-check",
+						version: "release-script --lerna",
+						postversion: "git push && git push --tags",
+					},
+				}),
+			});
+
+			await pkgPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toContainEqual(expect.stringMatching(`lerna version`));
+			expect(context.errors).toContainEqual(expect.stringMatching(`"preversion"`));
+			expect(context.errors).toContainEqual(expect.stringMatching(`"version"`));
+			expect(context.errors).toContainEqual(expect.stringMatching(`"postversion"`));
+		});
 	});
 
 	describe("edit stage", () => {
@@ -199,7 +227,7 @@ describe("Package plugin", () => {
 				},
 			});
 
-			// Don't throw when calling system commands commands
+			// Don't throw when calling system commands
 			context.sys.mockExec(() => "");
 
 			await pkgPlugin.executeStage(context, DefaultStages.commit);
@@ -221,7 +249,7 @@ describe("Package plugin", () => {
 				},
 			});
 
-			// Don't throw when calling system commands commands
+			// Don't throw when calling system commands
 			context.sys.mockExec(() => "");
 
 			await pkgPlugin.executeStage(context, DefaultStages.commit);

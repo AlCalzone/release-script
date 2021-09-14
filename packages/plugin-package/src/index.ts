@@ -1,5 +1,6 @@
 import { DefaultStages } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
+import { isObject } from "alcalzone-shared/typeguards";
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
@@ -40,8 +41,37 @@ class PackagePlugin implements Plugin {
 			context.cli.fatal(`Invalid version "${pack.version}" in package.json!`);
 		} else {
 			context.setData("version", pack.version);
-			context.cli.log(`package.json ok ${context.cli.colors.green("✔")}`);
 		}
+
+		// When in lerna mode, validate some legacy scripts
+		let hasErrors = false;
+		if (lerna && isObject(pack.scripts)) {
+			for (const [scriptName, script] of Object.entries<string>(pack.scripts)) {
+				if (script.includes("lerna version")) {
+					context.cli.error(
+						`package.json script "${scriptName}" calls "lerna version". This script must be removed!`,
+					);
+					hasErrors = true;
+				} else if (script.includes("release-script --lerna-check")) {
+					context.cli.error(
+						`package.json script "${scriptName}" calls "release-script --lerna-check". This script must be removed!`,
+					);
+					hasErrors = true;
+				} else if (script.includes("release-script --lerna")) {
+					context.cli.error(
+						`package.json script "${scriptName}" calls "release-script --lerna-check". This script must be removed!`,
+					);
+					hasErrors = true;
+				} else if (scriptName === "postversion" && script.includes("git push")) {
+					context.cli.error(
+						`package.json script "${scriptName}" calls "git push". Pushing is handled by the release script. The script must be removed or changed!`,
+					);
+					hasErrors = true;
+				}
+			}
+		}
+
+		if (!hasErrors) context.cli.log(`package.json ok ${context.cli.colors.green("✔")}`);
 
 		// Remember package.json contents
 		context.setData("package.json", pack);

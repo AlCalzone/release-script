@@ -12,7 +12,7 @@ export interface CLI {
 	fatal(message: string, code?: number): never;
 
 	/** Logs an executed command (mainly used for dry runs) */
-	logCommand(command: string, args?: string[]): void;
+	logCommand(command: string, args?: readonly string[]): void;
 
 	/** Displays a select dialog to the user and returns the value of the chosen option */
 	select(prompt: string, options: SelectOption[]): Promise<string>;

@@ -22,6 +22,9 @@
 			"path": "packages/plugin-iobroker/tsconfig.build.json"
 		},
 		{
+			"path": "packages/plugin-lerna/tsconfig.build.json"
+		},
+		{
 			"path": "packages/plugin-package/tsconfig.build.json"
 		},
 		{

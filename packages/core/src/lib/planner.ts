@@ -154,6 +154,7 @@ export async function planStage(context: Context, stage: Stage): Promise<Plugin[
 
 /** Plans all stages of the given context and executes them in the correct order */
 export async function execute(context: Context): Promise<void> {
+	const isTest = process.env.NODE_ENV === "test" || !!process.env.CI;
 	const colors = context.cli.colors;
 	context.cli.prefix = "";
 	const stages = await planStages(context);
@@ -196,6 +197,6 @@ export async function execute(context: Context): Promise<void> {
 				}
 			}
 		}
-		console.log();
+		if (!isTest) console.log();
 	}
 }

@@ -1,6 +1,5 @@
 {
   "name": "@alcalzone/release-script-repo",
-  "version": "1.2.3",
   "description": "Release script to automatically increment version numbers and push git tags",
   "keywords": [
     "release",
@@ -56,10 +55,7 @@
     "coverage:ci": "yarn test:ci --collect-coverage",
     "coverage": "yarn test:ts --collect-coverage",
     "lint": "eslint --ext .ts \"packages/*/src/**/*.ts\"",
-    "release": "lerna version",
-    "preversion": "release-script --lerna-check",
-    "version": "release-script --lerna",
-    "postversion": "git push && git push --tags",
+    "release": "release-script",
     "commit": "git-cz",
     "postinstall": "husky install"
   },

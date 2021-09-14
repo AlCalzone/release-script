@@ -124,7 +124,7 @@ describe("Git plugin", () => {
 			const context = createMockContext({ plugins: [gitPlugin], cwd: testFSRoot });
 			context.setData("version_new", "1.2.3");
 			context.setData("changelog_new", `This is the changelog.`);
-			// Don't throw when calling system commands commands
+			// Don't throw when calling system commands
 			context.sys.mockExec(() => "");
 
 			await gitPlugin.executeStage(context, DefaultStages.commit);
@@ -145,7 +145,7 @@ This is the changelog.`);
 			context.setData("version_new", newVersion);
 			context.setData("changelog_new", `This is the changelog.`);
 
-			// Don't throw when calling system commands commands
+			// Don't throw when calling system commands
 			context.sys.mockExec(() => "");
 
 			await gitPlugin.executeStage(context, DefaultStages.commit);
@@ -158,6 +158,24 @@ This is the changelog.`);
 				expect(context.sys.execRaw).toHaveBeenCalledWith(cmd, expect.anything());
 			}
 		});
+
+		it("does not tag in lerna mode", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({ plugins: [gitPlugin], cwd: testFSRoot });
+			const newVersion = "1.2.3";
+			context.setData("version_new", newVersion);
+			context.setData("changelog_new", `This is the changelog.`);
+			context.setData("lerna", true);
+
+			// Don't throw when calling system commands
+			context.sys.mockExec(() => "");
+
+			await gitPlugin.executeStage(context, DefaultStages.commit);
+			expect(context.sys.execRaw).not.toHaveBeenCalledWith(
+				`git tag -a v${newVersion} -m "v${newVersion}"`,
+				expect.anything(),
+			);
+		});
 	});
 
 	describe("push stage", () => {
@@ -165,7 +183,7 @@ This is the changelog.`);
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({ plugins: [gitPlugin] });
 
-			// Don't throw when calling system commands commands
+			// Don't throw when calling system commands
 			context.sys.mockExec(() => "");
 
 			await gitPlugin.executeStage(context, DefaultStages.push);
@@ -182,7 +200,7 @@ This is the changelog.`);
 				argv: { remote: "upstream/foobar" },
 			});
 
-			// Don't throw when calling system commands commands
+			// Don't throw when calling system commands
 			context.sys.mockExec(() => "");
 
 			await gitPlugin.executeStage(context, DefaultStages.push);
@@ -192,6 +210,24 @@ This is the changelog.`);
 			];
 			for (const cmd of expectedCommands) {
 				expect(context.sys.execRaw).toHaveBeenCalledWith(cmd, expect.anything());
+			}
+		});
+
+		it("does not push in lerna mode", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({ plugins: [gitPlugin] });
+			context.setData("lerna", true);
+
+			// Don't throw when calling system commands
+			context.sys.mockExec(() => "");
+
+			await gitPlugin.executeStage(context, DefaultStages.push);
+			const expectedCommands = [`git push`, `git push --tags`];
+			for (const cmd of expectedCommands) {
+				expect(context.sys.execRaw).not.toHaveBeenCalledWith(
+					expect.stringContaining(cmd),
+					expect.anything(),
+				);
 			}
 		});
 	});
