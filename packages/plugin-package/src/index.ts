@@ -40,6 +40,8 @@ class PackagePlugin implements Plugin {
 			if (!lerna) context.cli.fatal("Missing property version from package.json!");
 		} else if (!semver.valid(pack.version)) {
 			context.cli.fatal(`Invalid version "${pack.version}" in package.json!`);
+		} else {
+			context.setData("version", pack.version);
 		}
 
 		// Remember package.json contents

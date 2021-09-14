@@ -62,6 +62,7 @@ export const defaultContextOptions: Omit<
 		includeUnstaged: false,
 		remote: "origin",
 		verbose: false,
+		plugins: [],
 	},
 	plugins: [],
 	sys: new MockSystem(),
@@ -88,6 +89,7 @@ export function createMockContext(
 				throw new ReleaseError(msg, true, code);
 			}),
 			logCommand: jest.fn(),
+			select: jest.fn(),
 			colors,
 			prefix: "",
 		},

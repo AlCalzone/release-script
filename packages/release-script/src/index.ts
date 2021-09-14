@@ -8,9 +8,11 @@ import {
 	Plugin,
 	ReleaseError,
 	resolvePlugins,
+	SelectOption,
 } from "@alcalzone/release-script-core";
 import { distinct } from "alcalzone-shared/arrays";
 import colors from "colors/safe";
+import { prompt } from "enquirer";
 import yargs from "yargs";
 
 const primaryAndInlineTagRegex = /\[([^\]]+)\]/g;
@@ -85,6 +87,27 @@ class CLI implements ICLI {
 		}
 		this.log(`$ ${command}`);
 	}
+
+	async select(question: string, options: SelectOption[]): Promise<string> {
+		try {
+			const result = await prompt<any>({
+				name: "default",
+				message: question,
+				type: "select",
+				choices: options.map((o) => ({
+					name: o.label,
+					value: o.value,
+					hint: o.hint,
+				})),
+			});
+			return result.default;
+		} catch (e) {
+			// Strg+C
+			if (e === "") this.fatal("Aborted by user");
+			throw e;
+		}
+	}
+
 	// eslint-disable-next-line @typescript-eslint/no-inferrable-types
 	public prefix: string = "";
 	public readonly colors = colors;
@@ -93,7 +116,12 @@ class CLI implements ICLI {
 export async function main(): Promise<void> {
 	let argv = yargs
 		.env("RELEASE_SCRIPT")
-		.usage("AlCalzone's Release Script\n\nUsage: $0 [options]")
+		.usage("$0 [<bump>] [options]", "AlCalzone's release script", (yargs) =>
+			yargs.positional("bump", {
+				describe: "The version bump to do",
+				required: false,
+			}),
+		)
 		.wrap(yargs.terminalWidth())
 		// Delay showing help until the second parsing pass
 		.help(false)
@@ -128,6 +156,7 @@ export async function main(): Promise<void> {
 		"git",
 		"package",
 		"exec",
+		"version",
 		// These are provided by the user
 		...(parsedArgv.plugins || []),
 	]);

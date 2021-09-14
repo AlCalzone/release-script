@@ -1,4 +1,4 @@
-export type { CLI } from "./lib/cli";
+export type { CLI, SelectOption } from "./lib/cli";
 export type { Context } from "./lib/context";
 export type { Plugin } from "./lib/plugin";
 export type { ConstOrDynamic } from "./lib/shared";

@@ -27,7 +27,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@alcalzone/release-script-plugin-git@^3.0.0-alpha.0, @alcalzone/release-script-plugin-git@workspace:packages/plugin-git":
+"@alcalzone/release-script-plugin-git@workspace:packages/plugin-git":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-git@workspace:packages/plugin-git"
   dependencies:
@@ -56,6 +56,17 @@ __metadata:
     "@alcalzone/release-script-core": ^3.0.0-alpha.0
     "@alcalzone/release-script-testing": ^3.0.0-alpha.0
     jest-extended: ^0.11.5
+  languageName: unknown
+  linkType: soft
+
+"@alcalzone/release-script-plugin-version@workspace:packages/plugin-version":
+  version: 0.0.0-use.local
+  resolution: "@alcalzone/release-script-plugin-version@workspace:packages/plugin-version"
+  dependencies:
+    "@alcalzone/release-script-core": ^3.0.0-alpha.0
+    "@alcalzone/release-script-testing": ^3.0.0-alpha.0
+    jest-extended: ^0.11.5
+    semver: ^7.3.5
   languageName: unknown
   linkType: soft
 
@@ -110,12 +121,12 @@ __metadata:
   resolution: "@alcalzone/release-script@workspace:packages/release-script"
   dependencies:
     "@alcalzone/release-script-core": ^3.0.0-alpha.0
-    "@alcalzone/release-script-plugin-git": ^3.0.0-alpha.0
     "@alcalzone/release-script-testing": ^3.0.0-alpha.0
     "@types/yargs": ^17.0.2
     alcalzone-shared: ^4.0.0
     axios: ^0.21.4
     colors: ^1.4.0
+    enquirer: ^2.3.6
     fs-extra: ^10.0.0
     semver: ^7.3.5
     source-map-support: ^0.5.20
@@ -5102,7 +5113,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enquirer@npm:^2.3.5":
+"enquirer@npm:^2.3.5, enquirer@npm:^2.3.6":
   version: 2.3.6
   resolution: "enquirer@npm:2.3.6"
   dependencies:

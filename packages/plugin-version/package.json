@@ -1,17 +1,16 @@
 {
-  "name": "@alcalzone/release-script",
+  "name": "@alcalzone/release-script-plugin-version",
   "publishConfig": {
     "access": "public"
   },
   "version": "3.0.0-alpha.0",
-  "description": "Release script to automatically increment version numbers and push git tags of Node.js projects",
+  "description": "Plugin for Al Calzone's release script: Versioning",
   "keywords": [],
   "license": "MIT",
   "author": {
     "name": "AlCalzone",
     "email": "d.griesel@gmx.net"
   },
-  "bin": "bin/release.js",
   "main": "build/index.js",
   "exports": {
     ".": "./build/index.js",
@@ -40,14 +39,10 @@
   "dependencies": {
     "@alcalzone/release-script-core": "^3.0.0-alpha.0",
     "@alcalzone/release-script-testing": "^3.0.0-alpha.0",
-    "alcalzone-shared": "^4.0.0",
-    "axios": "^0.21.4",
-    "colors": "^1.4.0",
-    "enquirer": "^2.3.6",
-    "fs-extra": "^10.0.0",
-    "semver": "^7.3.5",
-    "source-map-support": "^0.5.20",
-    "yargs": "^17.1.1"
+    "semver": "^7.3.5"
+  },
+  "devDependencies": {
+    "jest-extended": "^0.11.5"
   },
   "scripts": {
     "clean": "tsc -b tsconfig.build.json --clean",
@@ -55,7 +50,7 @@
     "build": "tsc -p tsconfig.build.json",
     "watch": "tsc -p tsconfig.build.json --watch"
   },
-  "homepage": "https://github.com/AlCalzone/release-script",
+  "homepage": "https://github.com/AlCalzone/release-script/tree/main/packages/plugin-version#readme",
   "repository": {
     "type": "git",
     "url": "git@github.com:AlCalzone/release-script.git"
@@ -63,8 +58,5 @@
   "bugs": {
     "url": "https://github.com/AlCalzone/release-script/issues"
   },
-  "readmeFilename": "README.md",
-  "devDependencies": {
-    "@types/yargs": "^17.0.2"
-  }
+  "readmeFilename": "README.md"
 }

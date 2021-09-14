@@ -23,6 +23,9 @@ export interface Context {
 		/** Additional plugins to load */
 		plugins: string[];
 
+		/** The desired version bump */
+		bump?: string;
+
 		[arg: string]: string | number | boolean | string[] | number[] | boolean[] | undefined;
 	};
 

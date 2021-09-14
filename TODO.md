@@ -6,5 +6,5 @@
 -   [ ] Updating changelogs
 -   [ ] ioBroker workflow check
 -   [ ] io-package.json
--   [ ] Version bump
--   [ ] user scripts
+-   [x] Version bump
+-   [x] user scripts

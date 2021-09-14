@@ -6,6 +6,7 @@ module.exports = {
 		"<rootDir>/packages/plugin-exec/src",
 		"<rootDir>/packages/plugin-git/src",
 		"<rootDir>/packages/plugin-package/src",
+		"<rootDir>/packages/plugin-version/src",
 		// Add others as necessary
 	],
 	testRegex: "(.|/)test.tsx?$",
@@ -15,6 +16,7 @@ module.exports = {
 		"^@alcalzone/release-script-plugin-exec(.*)": "<rootDir>/packages/plugin-exec/src$1",
 		"^@alcalzone/release-script-plugin-git(.*)": "<rootDir>/packages/plugin-git/src$1",
 		"^@alcalzone/release-script-plugin-package(.*)": "<rootDir>/packages/plugin-package/src$1",
+		"^@alcalzone/release-script-plugin-version(.*)": "<rootDir>/packages/plugin-version/src$1",
 		"^@alcalzone/release-script-(.*)/package.json": "<rootDir>/packages/$1/package.json",
 		// Add others as necessary
 	},
