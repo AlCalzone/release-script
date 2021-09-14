@@ -46,8 +46,8 @@
     "typescript": "~4.4.3"
   },
   "scripts": {
-    "build": "lerna run build",
-    "watch": "lerna run watch --parallel",
+    "build": "tsc -b tsconfig.build.json",
+    "watch": "yarn run build --watch",
     "start": "node packages/release-script/bin/release.js",
     "test:reset": "jest --clear-cache",
     "test:ts": "jest",

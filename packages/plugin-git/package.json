@@ -48,8 +48,8 @@
   "scripts": {
     "clean": "tsc -b tsconfig.build.json --clean",
     "prebuild": "rimraf ./build",
-    "build": "tsc -p tsconfig.build.json",
-    "watch": "tsc -p tsconfig.build.json --watch"
+    "build": "tsc -b tsconfig.build.json",
+    "watch": "tsc -b tsconfig.build.json --watch"
   },
   "homepage": "https://github.com/AlCalzone/release-script/tree/main/packages/plugin-git#readme",
   "repository": {
