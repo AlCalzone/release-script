@@ -1,0 +1,47 @@
+// tsconfig for building
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"noEmit": true,
+	},
+	"references": [
+		// Add references to other projects here
+		{
+			"path": "packages/core/tsconfig.build.json"
+		},
+		{
+			"path": "packages/plugin-changelog/tsconfig.build.json"
+		},
+		{
+			"path": "packages/plugin-exec/tsconfig.build.json"
+		},
+		{
+			"path": "packages/plugin-git/tsconfig.build.json"
+		},
+		{
+			"path": "packages/plugin-iobroker/tsconfig.build.json"
+		},
+		{
+			"path": "packages/plugin-lerna/tsconfig.build.json"
+		},
+		{
+			"path": "packages/plugin-package/tsconfig.build.json"
+		},
+		{
+			"path": "packages/plugin-template/tsconfig.build.json"
+		},
+		{
+			"path": "packages/plugin-version/tsconfig.build.json"
+		},
+		{
+			"path": "packages/release-script/tsconfig.build.json"
+		},
+		{
+			"path": "packages/testing/tsconfig.build.json"
+		},
+	],
+	"include": [],
+	"exclude": [
+		"**/*.test.ts"
+	]
+}

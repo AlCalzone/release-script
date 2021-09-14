@@ -1,3 +1,18 @@
 {
-	"typescript.tsdk": "node_modules\\typescript\\lib"
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"[typescript]": {
+		"editor.codeActionsOnSave": {
+			"source.organizeImports": true
+		}
+	},
+	"jest.jestCommandLine": "yarn test",
+	"jest.autoRun": {
+		"watch": false,
+		"onStartup": [
+			"all-tests"
+		],
+		"onSave": "test-src-file",
+	}
 }

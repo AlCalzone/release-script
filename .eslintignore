@@ -1,0 +1,5 @@
+build/
+.prettierrc.js
+*.config.js
+test/jest.setup.js
+**/.eslintrc.js
