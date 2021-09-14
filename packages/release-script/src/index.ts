@@ -153,18 +153,6 @@ export async function main(): Promise<void> {
 					"Perform a dry-run: check status, describe changes without changing anything",
 				default: false,
 			},
-			remote: {
-				alias: "r",
-				type: "string",
-				description: "Which remote to push to",
-				default: "origin",
-			},
-			includeUnstaged: {
-				alias: "all",
-				type: "boolean",
-				description: "Whether unstaged changes should be allowed",
-				default: false,
-			},
 		});
 
 	// Let plugins hook into the CLI options

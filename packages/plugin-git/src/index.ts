@@ -3,6 +3,7 @@ import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/type
 import fs from "fs-extra";
 import os from "os";
 import path from "path";
+import type { Argv } from "yargs";
 
 type GitStatus = "diverged" | "uncommitted" | "behind" | "ahead" | "up-to-date";
 
@@ -78,6 +79,22 @@ class GitPlugin implements Plugin {
 	// dependencies?: string[] | undefined;
 	// stageAfter?: Record<string, ConstOrDynamic<string[]>> | undefined;
 	// stageBefore?: Record<string, ConstOrDynamic<string[]>> | undefined;
+	public defineCLIOptions(yargs: Argv<any>): Argv<any> {
+		return yargs.options({
+			remote: {
+				alias: "r",
+				type: "string",
+				description: "Which remote to push to",
+				defaultDescription: "The remote the current branch is tracking",
+			},
+			includeUnstaged: {
+				alias: "all",
+				type: "boolean",
+				description: "Whether unstaged changes should be allowed",
+				default: false,
+			},
+		});
+	}
 
 	private async executeCheckStage(context: Context): Promise<void> {
 		const colors = context.cli.colors;
@@ -163,7 +180,7 @@ ${context.getData("changelog_new")}`,
 		} else if (stage.id === "commit") {
 			await this.executeCommitStage(context);
 		} else if (stage.id === "push") {
-			const remote = context.argv.remote;
+			const remote = context.argv.remote as string | undefined;
 			const remoteStr =
 				remote && remote !== "origin" ? ` ${remote.split("/").join(" ")}` : "";
 

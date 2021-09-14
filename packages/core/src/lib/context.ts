@@ -14,14 +14,8 @@ export interface Context {
 
 	/** Command line arguments to the release script */
 	argv: {
-		/** Whether unstaged changes should be committed aswell */
-		includeUnstaged: boolean;
-
 		/** Whether this is a dry run */
 		dryRun: boolean;
-
-		/** The git remote to push to */
-		remote?: string;
 
 		/** Log debug information */
 		verbose: boolean;
