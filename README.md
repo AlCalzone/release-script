@@ -26,9 +26,9 @@ Together with the corresponding **Github Actions** workflow (more on that below)
 
 2. Add a new `npm` script in `package.json`:
 
-    ```json
+    ```jsonc
     "scripts": {
-        ... other scripts ...
+        // ... other scripts ...
         "release": "release-script"
     }
     ```
@@ -157,7 +157,7 @@ The release script makes it possible to test the command before actually changin
 
 Instead of manually providing all options, you can configure the release process with a configuration file. This must be a JSON file
 
-```json
+```jsonc
 {
 	// Boolean, number, string as is:
 	"dry": false,
@@ -219,6 +219,20 @@ If you need some of these plugins, you have to install and them separately:
 | `iobroker`  | Update ioBroker's `io-package.json` |
 | `lerna`     | Monorepo support with `lerna`       |
 
+To do so, add them as a `devDependency`:
+
+```jsonc
+// package.json
+// ...
+  "devDependencies": {
+    "@alcalzone/release-script": "3.0.0",
+    "@alcalzone/release-script-plugin-iobroker": "3.0.0",
+    // ... others ...
+  }
+```
+
+If possible, the version for the plugins should be the same as the one for `@alcalzone/release-script`.
+
 ### Stages
 
 The release process is separated into stages. By default, the following stages are active:
@@ -270,7 +284,7 @@ _none_
 
 To run custom scripts, you can use these options. They accept an object defining the stage in/after/before which scripts should be executed. To execute multiple commands in sequence, you can also use an array of strings. Example:
 
-```json
+```jsonc
 {
 	"exec": {
 		// Run "echo Hello" in the "commit" stage
@@ -408,27 +422,3 @@ jobs:
           prerelease: ${{ contains(steps.extract_release.outputs.VERSION, '-') }}
           body: ${{ steps.extract_release.outputs.BODY }}
 ```
-
-## License
-
-MIT License
-
-Copyright (c) 2019-2020 AlCalzone
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
