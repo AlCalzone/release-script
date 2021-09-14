@@ -25,6 +25,7 @@ module.exports = {
 		"^@alcalzone/release-script-plugin-lerna(.*)": "<rootDir>/packages/plugin-lerna/src$1",
 		"^@alcalzone/release-script-plugin-package(.*)": "<rootDir>/packages/plugin-package/src$1",
 		"^@alcalzone/release-script-plugin-version(.*)": "<rootDir>/packages/plugin-version/src$1",
+		"^@alcalzone/release-script-testing(.*)": "<rootDir>/packages/testing/src$1",
 		"^@alcalzone/release-script-(.*)/package.json": "<rootDir>/packages/$1/package.json",
 		// Add others as necessary
 	},
