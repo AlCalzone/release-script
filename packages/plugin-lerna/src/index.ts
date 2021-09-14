@@ -35,16 +35,16 @@ class LernaPlugin implements Plugin {
 		}
 
 		// Validate lerna options
-		if ("amend" in json) {
+		if (json?.command?.version?.amend != undefined) {
 			context.cli.warn(
 				`The option "amend" in lerna.json is unnecessary and should be removed.`,
 			);
 		}
-		if (json.push === true) {
+		if (json?.command?.version?.push === true) {
 			context.cli.warn(
 				`The option "push: true" in lerna.json is unnecessary and should be removed.`,
 			);
-		} else if (json.push === false) {
+		} else if (json?.command?.version?.push === false) {
 			context.cli.error(
 				`The option "push: false" in lerna.json prevents the release script from working must be removed.`,
 			);

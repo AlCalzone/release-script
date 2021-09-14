@@ -92,7 +92,11 @@ describe("Lerna plugin", () => {
 			await testFS.create({
 				"lerna.json": JSON.stringify({
 					version: "1.2.3",
-					amend: true,
+					command: {
+						version: {
+							amend: true,
+						},
+					},
 				}),
 			});
 
@@ -110,7 +114,11 @@ describe("Lerna plugin", () => {
 			await testFS.create({
 				"lerna.json": JSON.stringify({
 					version: "1.2.3",
-					push: true,
+					command: {
+						version: {
+							push: true,
+						},
+					},
 				}),
 			});
 
@@ -130,7 +138,11 @@ describe("Lerna plugin", () => {
 			await testFS.create({
 				"lerna.json": JSON.stringify({
 					version: "1.2.3",
-					push: false,
+					command: {
+						version: {
+							push: false,
+						},
+					},
 				}),
 			});
 
