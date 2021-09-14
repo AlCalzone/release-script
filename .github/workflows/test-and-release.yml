@@ -42,6 +42,7 @@ jobs:
       - name: Run linters
         run: yarn lint
 
+
   # Runs unit tests on all supported node versions and OSes
   unit-tests:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
@@ -71,9 +72,6 @@ jobs:
       - name: Run unit tests
         run: yarn test:ci
 
-# TODO: To enable automatic npm releases, create a token on npmjs.org 
-# Enter this token as a GitHub secret (with name NPM_TOKEN) in the repository options
-# Then uncomment the following block:
 
   # Deploys the final package to NPM
   deploy:

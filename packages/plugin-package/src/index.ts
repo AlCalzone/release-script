@@ -20,10 +20,8 @@ class PackagePlugin implements Plugin {
 		});
 	}
 
-	// dependencies?: string[] | undefined;
-	// stageAfter?: Record<string, ConstOrDynamic<string[]>> | undefined;
 	public readonly stageBefore = {
-		// Before committing, we need a hook to sync the lockfile
+		// The lockfile needs to be synchronized before committing
 		commit: ["git"],
 	};
 
