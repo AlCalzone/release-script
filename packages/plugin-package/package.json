@@ -37,6 +37,7 @@
     "node": ">=12.20"
   },
   "dependencies": {
+    "@alcalzone/pak": "^0.6.0",
     "@alcalzone/release-script-core": "3.0.0-alpha.0",
     "alcalzone-shared": "^4.0.0",
     "semver": "^7.3.5"

@@ -1,3 +1,4 @@
+import { detectPackageManager } from "@alcalzone/pak";
 import { DefaultStages } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
 import { isObject } from "alcalzone-shared/typeguards";
@@ -111,8 +112,16 @@ class PackagePlugin implements Plugin {
 		} else if (stage.id === "commit") {
 			if (context.argv.updateLockfile) {
 				context.cli.log(`updating lockfile...`);
+				const pak = await detectPackageManager({
+					cwd: context.cwd,
+					setCwdToPackageRoot: true,
+					requireLockfile: false,
+				});
 				if (!context.argv.dryRun) {
-					await context.sys.execRaw("npm install", { cwd: context.cwd });
+					const result = await pak.install();
+					if (!result.success) {
+						context.cli.error(`Updating lockfile failed: ${result.stderr}`);
+					}
 				}
 			}
 		}

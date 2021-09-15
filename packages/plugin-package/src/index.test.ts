@@ -1,8 +1,11 @@
+import { detectPackageManager } from "@alcalzone/pak";
 import { DefaultStages } from "@alcalzone/release-script-core";
 import { assertReleaseError, createMockContext, TestFS } from "@alcalzone/release-script-testing";
 import fs from "fs-extra";
 import path from "path";
 import PackagePlugin from ".";
+
+jest.mock("@alcalzone/pak");
 
 describe("Package plugin", () => {
 	describe("check stage", () => {
@@ -217,7 +220,7 @@ describe("Package plugin", () => {
 			await testFS.remove();
 		});
 
-		it("executes npm install if the lockfile should be synchronized", async () => {
+		it("executes npm/yarn install if the lockfile should be synchronized", async () => {
 			const pkgPlugin = new PackagePlugin();
 			const context = createMockContext({
 				plugins: [pkgPlugin],
@@ -230,12 +233,18 @@ describe("Package plugin", () => {
 			// Don't throw when calling system commands
 			context.sys.mockExec(() => "");
 
+			// Mock pak
+			const pakInstall = jest.fn().mockResolvedValue({ success: true });
+			(detectPackageManager as jest.Mock).mockReturnValue({
+				install: pakInstall,
+			});
+
 			await pkgPlugin.executeStage(context, DefaultStages.commit);
 
 			expect(context.cli.log).toHaveBeenCalledWith(
 				expect.stringMatching(/updating lockfile/i),
 			);
-			expect(context.sys.execRaw).toHaveBeenCalledWith("npm install", expect.anything());
+			expect(pakInstall).toHaveBeenCalled();
 		});
 
 		it("but not during a dry run", async () => {
@@ -252,12 +261,48 @@ describe("Package plugin", () => {
 			// Don't throw when calling system commands
 			context.sys.mockExec(() => "");
 
+			// Mock pak
+			const pakInstall = jest.fn().mockResolvedValue({ success: true });
+			(detectPackageManager as jest.Mock).mockReturnValue({
+				install: pakInstall,
+			});
+
 			await pkgPlugin.executeStage(context, DefaultStages.commit);
 
 			expect(context.cli.log).toHaveBeenCalledWith(
 				expect.stringMatching(/updating lockfile/i),
 			);
-			expect(context.sys.execRaw).not.toHaveBeenCalled();
+			expect(pakInstall).not.toHaveBeenCalled();
+		});
+
+		it("raises an error if npm/yarn install fails", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+				argv: {
+					updateLockfile: true,
+				},
+			});
+
+			// Don't throw when calling system commands
+			context.sys.mockExec(() => "");
+
+			// Mock pak
+			const pakInstall = jest.fn().mockResolvedValue({ success: false, stderr: "NOOOO" });
+			(detectPackageManager as jest.Mock).mockReturnValue({
+				install: pakInstall,
+			});
+
+			await pkgPlugin.executeStage(context, DefaultStages.commit);
+
+			expect(context.cli.log).toHaveBeenCalledWith(
+				expect.stringMatching(/updating lockfile/i),
+			);
+			expect(pakInstall).toHaveBeenCalled();
+			expect(context.errors).toContainEqual(
+				expect.stringMatching("Updating lockfile failed: NOOOO"),
+			);
 		});
 	});
 });
