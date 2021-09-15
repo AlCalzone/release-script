@@ -213,7 +213,7 @@ This is the changelog.`);
 			}
 		});
 
-		it("does not push in lerna mode", async () => {
+		it("also pushes in lerna mode", async () => {
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({ plugins: [gitPlugin] });
 			context.setData("lerna", true);
@@ -224,7 +224,7 @@ This is the changelog.`);
 			await gitPlugin.executeStage(context, DefaultStages.push);
 			const expectedCommands = [`git push`, `git push --tags`];
 			for (const cmd of expectedCommands) {
-				expect(context.sys.execRaw).not.toHaveBeenCalledWith(
+				expect(context.sys.execRaw).toHaveBeenCalledWith(
 					expect.stringContaining(cmd),
 					expect.anything(),
 				);

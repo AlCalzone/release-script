@@ -173,34 +173,23 @@ ${context.getData("changelog_new")}`;
 		}
 
 		for (const [cmd, ...args] of commands) {
-			if (context.argv.dryRun) {
-				context.cli.logCommand(cmd, args);
-			} else {
+			context.cli.logCommand(cmd, args);
+			if (!context.argv.dryRun) {
 				await context.sys.exec(cmd, args, { cwd: context.cwd });
 			}
 		}
 	}
 
 	private async executePushStage(context: Context): Promise<void> {
-		const lerna = context.hasData("lerna") && !!context.getData("lerna");
+		const remote = context.argv.remote as string | undefined;
+		const remoteStr = remote && remote !== "origin" ? ` ${remote.split("/").join(" ")}` : "";
 
-		if (lerna) {
-			if (context.argv.verbose) {
-				context.cli.log(`Lerna mode, skipping manual push`);
-			}
-		} else {
-			const remote = context.argv.remote as string | undefined;
-			const remoteStr =
-				remote && remote !== "origin" ? ` ${remote.split("/").join(" ")}` : "";
+		const commands = [`git push${remoteStr}`, `git push${remoteStr} --tags`];
 
-			const commands = [`git push${remoteStr}`, `git push${remoteStr} --tags`];
-
-			for (const command of commands) {
-				if (context.argv.dryRun) {
-					context.cli.logCommand(command);
-				} else {
-					await context.sys.execRaw(command, { cwd: context.cwd });
-				}
+		for (const command of commands) {
+			context.cli.logCommand(command);
+			if (!context.argv.dryRun) {
+				await context.sys.execRaw(command, { cwd: context.cwd });
 			}
 		}
 	}

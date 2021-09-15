@@ -35,26 +35,20 @@ class LernaPlugin implements Plugin {
 		}
 
 		// Validate lerna options
-		let hasErrors = false;
 		if (json?.command?.version?.amend != undefined) {
 			context.cli.warn(
 				`The option "amend" in lerna.json is unnecessary and should be removed.`,
 			);
 		}
-		if (json?.command?.version?.push === true) {
+		if (json?.command?.version?.push != undefined) {
 			context.cli.warn(
-				`The option "push: true" in lerna.json is unnecessary and should be removed.`,
+				`The option "push" in lerna.json is unnecessary and should be removed.`,
 			);
-		} else if (json?.command?.version?.push === false) {
-			context.cli.error(
-				`The option "push: false" in lerna.json prevents the release script from working must be removed.`,
-			);
-			hasErrors = true;
 		}
 
 		context.setData("version", json.version);
 		context.setData("lerna", true);
-		if (!hasErrors) context.cli.log(`lerna.json ok ${context.cli.colors.green("✔")}`);
+		context.cli.log(`lerna.json ok ${context.cli.colors.green("✔")}`);
 	}
 
 	private async executeCommitStage(context: Context): Promise<void> {
@@ -62,9 +56,8 @@ class LernaPlugin implements Plugin {
 			"lerna",
 			["version", context.getData<string>("version_new"), "--amend", "--yes"],
 		] as const;
-		if (context.argv.dryRun) {
-			context.cli.logCommand(...cmd);
-		} else {
+		context.cli.log("Bumping monorepo versions");
+		if (!context.argv.dryRun) {
 			await context.sys.exec(...cmd, { cwd: context.cwd });
 		}
 	}
