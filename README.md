@@ -8,6 +8,7 @@ Automate the monotonous tasks when it comes to releasing new versions of your pr
 -   Add the changelog to the release commit and create a tag for it.
 -   Support for monorepos managed with `lerna`
 -   Support for custom scripts during the release lifecycle
+-   Check licenses for outdated copyrights
 -   Dry runs and checking for errors
 -   **ioBroker only**:
     -   Bump the version in `io-package.json`
