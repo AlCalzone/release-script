@@ -50,7 +50,14 @@ class LernaPlugin implements Plugin {
 		// We need to stash the changelog changes or lerna won't let us version
 		const commands = [
 			["git", "stash"],
-			["lerna", "version", context.getData<string>("version_new"), "--no-push", "--yes"],
+			[
+				"lerna",
+				"version",
+				context.getData<string>("version_new"),
+				"--no-push",
+				"--no-git-tag-version",
+				"--yes",
+			],
 			["git", "stash", "pop"],
 		];
 

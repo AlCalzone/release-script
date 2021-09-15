@@ -167,10 +167,8 @@ ${context.getData("changelog_new")}`;
 		const commands = [
 			["git", "add", "-A", "--", ":(exclude).commitmessage"],
 			["git", "commit", ...(lerna ? ["--amend"] : []), "-F", ".commitmessage"],
+			["git", "tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`],
 		];
-		if (!lerna) {
-			commands.push(["git", "tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`]);
-		}
 
 		for (const [cmd, ...args] of commands) {
 			context.cli.logCommand(cmd, args);

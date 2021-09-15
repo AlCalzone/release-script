@@ -159,7 +159,7 @@ This is the changelog.`);
 			}
 		});
 
-		it("does not tag in lerna mode", async () => {
+		it("does also tag in lerna mode", async () => {
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({ plugins: [gitPlugin], cwd: testFSRoot });
 			const newVersion = "1.2.3";
@@ -171,7 +171,7 @@ This is the changelog.`);
 			context.sys.mockExec(() => "");
 
 			await gitPlugin.executeStage(context, DefaultStages.commit);
-			expect(context.sys.exec).not.toHaveBeenCalledWith(
+			expect(context.sys.exec).toHaveBeenCalledWith(
 				"git",
 				["tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`],
 				expect.anything(),
