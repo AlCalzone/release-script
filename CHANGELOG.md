@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## 3.0.0-alpha.4 (2021-09-15)
+## 3.0.0-alpha.5 (2021-09-15)
 * Split into plugins
 * Interactive version chooser
 * Simplified `monorepo` configuration with `lerna`

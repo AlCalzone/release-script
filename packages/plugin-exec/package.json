@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "3.0.0-alpha.4",
+  "version": "3.0.0-alpha.5",
   "description": "Plugin for Al Calzone's release script: execute user scripts",
   "keywords": [],
   "license": "MIT",
@@ -37,11 +37,11 @@
     "node": ">=12.20"
   },
   "dependencies": {
-    "@alcalzone/release-script-core": "3.0.0-alpha.4",
+    "@alcalzone/release-script-core": "3.0.0-alpha.5",
     "alcalzone-shared": "^4.0.0"
   },
   "devDependencies": {
-    "@alcalzone/release-script-testing": "3.0.0-alpha.4",
+    "@alcalzone/release-script-testing": "3.0.0-alpha.5",
     "jest-extended": "^0.11.5",
     "typescript": "*"
   },
