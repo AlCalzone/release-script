@@ -47,13 +47,18 @@ class LernaPlugin implements Plugin {
 	}
 
 	private async executeCommitStage(context: Context): Promise<void> {
-		const cmd = [
-			"lerna",
-			["version", context.getData<string>("version_new"), "--no-push", "--yes"],
-		] as const;
+		// We need to stash the changelog changes or lerna won't let us version
+		const commands = [
+			["git", "stash"],
+			["lerna", "version", context.getData<string>("version_new"), "--no-push", "--yes"],
+			["git", "stash", "pop"],
+		];
+
 		context.cli.log("Bumping monorepo versions");
-		if (!context.argv.dryRun) {
-			await context.sys.exec(...cmd, { cwd: context.cwd });
+		for (const [cmd, ...args] of commands) {
+			if (!context.argv.dryRun) {
+				await context.sys.exec(cmd, args, { cwd: context.cwd });
+			}
 		}
 	}
 
