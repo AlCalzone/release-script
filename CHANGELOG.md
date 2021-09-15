@@ -4,8 +4,9 @@
     ## **WORK IN PROGRESS**
 -->
 
-## 3.0.0-alpha.0 (2021-09-15)
+## **WORK IN PROGRESS**
 * Split into plugins
+* Interactive version chooser
 * Simplified `monorepo` configuration with `lerna`
 * BREAKING: Removed native `yarn v2+` workspaces support. Use `lerna` for now.
 * BREAKING: Some configuration/CLI options changed.
