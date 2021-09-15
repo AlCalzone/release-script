@@ -4,7 +4,10 @@
     ## **WORK IN PROGRESS**
 -->
 ## **WORK IN PROGRESS**
-* Some changes
+* Split into plugins
+* Simplified `monorepo` configuration with `lerna`
+* BREAKING: Removed native `yarn v2+` workspaces support. Use `lerna` for now.
+* BREAKING: Some configuration/CLI options changed.
 
 ## 2.2.1 (2021-07-26)
 * The script now detects a missing git identity and provides help on how to configure it
