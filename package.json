@@ -52,7 +52,7 @@
     "coverage:ci": "yarn test:ci --collect-coverage",
     "coverage": "yarn test:ts --collect-coverage",
     "lint": "eslint --ext .ts \"packages/*/src/**/*.ts\"",
-    "release": "node packages/release-script/bin/release.js",
+    "release": "ts-node-transpile-only packages/release-script/src/index.ts",
     "commit": "git-cz",
     "postinstall": "husky install"
   },
