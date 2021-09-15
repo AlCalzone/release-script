@@ -1,6 +1,5 @@
 {
   "name": "@alcalzone/release-script-plugin-changelog",
-  "private": true,
   "publishConfig": {
     "access": "public"
   },

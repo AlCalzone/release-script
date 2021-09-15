@@ -60,7 +60,7 @@ class LernaPlugin implements Plugin {
 	private async executeCommitStage(context: Context): Promise<void> {
 		const cmd = [
 			"lerna",
-			["version", context.getData<string>("version_new"), "--amend"],
+			["version", context.getData<string>("version_new"), "--amend", "--yes"],
 		] as const;
 		if (context.argv.dryRun) {
 			context.cli.logCommand(...cmd);
