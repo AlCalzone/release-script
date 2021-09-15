@@ -166,7 +166,7 @@ ${context.getData("changelog_new")}`;
 		const newVersion = context.getData<string>("version_new");
 		const commands = [
 			["git", "add", "-A", "--", ":(exclude).commitmessage"],
-			["git", "commit", "-F", ".commitmessage"],
+			["git", "commit", ...(lerna ? ["--amend"] : []), "-F", ".commitmessage"],
 		];
 		if (!lerna) {
 			commands.push(["git", "tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`]);

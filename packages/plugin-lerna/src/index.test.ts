@@ -82,7 +82,7 @@ describe("Lerna plugin", () => {
 			});
 		});
 
-		it("warns if --amend is set in lerna.json", async () => {
+		it("errors if --amend is set in lerna.json", async () => {
 			const lernaPlugin = new LernaPlugin();
 			const context = createMockContext({
 				plugins: [lernaPlugin],
@@ -101,7 +101,7 @@ describe("Lerna plugin", () => {
 			});
 
 			await lernaPlugin.executeStage(context, DefaultStages.check);
-			expect(context.warnings).toContainEqual(expect.stringMatching(`"amend" in lerna.json`));
+			expect(context.errors).toContainEqual(expect.stringMatching(`"amend" in lerna.json`));
 		});
 
 		it("warns if --push is set in lerna.json", async () => {

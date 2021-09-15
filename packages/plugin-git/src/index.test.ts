@@ -172,7 +172,27 @@ This is the changelog.`);
 
 			await gitPlugin.executeStage(context, DefaultStages.commit);
 			expect(context.sys.exec).not.toHaveBeenCalledWith(
-				["git", "tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`],
+				"git",
+				["tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`],
+				expect.anything(),
+			);
+		});
+
+		it("amends the commit in lerna mode", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({ plugins: [gitPlugin], cwd: testFSRoot });
+			const newVersion = "1.2.3";
+			context.setData("version_new", newVersion);
+			context.setData("changelog_new", `This is the changelog.`);
+			context.setData("lerna", true);
+
+			// Don't throw when calling system commands
+			context.sys.mockExec(() => "");
+
+			await gitPlugin.executeStage(context, DefaultStages.commit);
+			expect(context.sys.exec).toHaveBeenCalledWith(
+				"git",
+				["commit", "--amend", "-F", ".commitmessage"],
 				expect.anything(),
 			);
 		});

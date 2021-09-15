@@ -11,10 +11,7 @@ class LernaPlugin implements Plugin {
 	public readonly stageBefore = {
 		// The package.json plugin needs to know if we're in lerna mode
 		check: ["package"],
-	};
-
-	public readonly stageAfter = {
-		// Lerna amends the commit made by the git plugin
+		// The git plugin amends the commit made by lerna
 		commit: ["git"],
 	};
 
@@ -36,9 +33,7 @@ class LernaPlugin implements Plugin {
 
 		// Validate lerna options
 		if (json?.command?.version?.amend != undefined) {
-			context.cli.warn(
-				`The option "amend" in lerna.json is unnecessary and should be removed.`,
-			);
+			context.cli.error(`The option "amend" in lerna.json must be removed.`);
 		}
 		if (json?.command?.version?.push != undefined) {
 			context.cli.warn(
@@ -54,7 +49,7 @@ class LernaPlugin implements Plugin {
 	private async executeCommitStage(context: Context): Promise<void> {
 		const cmd = [
 			"lerna",
-			["version", context.getData<string>("version_new"), "--amend", "--yes"],
+			["version", context.getData<string>("version_new"), "--no-push", "--yes"],
 		] as const;
 		context.cli.log("Bumping monorepo versions");
 		if (!context.argv.dryRun) {

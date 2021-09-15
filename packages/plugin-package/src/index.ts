@@ -9,7 +9,7 @@ import type { Argv } from "yargs";
 
 class PackagePlugin implements Plugin {
 	public readonly id = "package";
-	public readonly stages = [DefaultStages.check, DefaultStages.edit];
+	public readonly stages = [DefaultStages.check, DefaultStages.edit, DefaultStages.commit];
 
 	public defineCLIOptions(yargs: Argv<any>): Argv<any> {
 		return yargs.options({
@@ -22,9 +22,17 @@ class PackagePlugin implements Plugin {
 		});
 	}
 
+	// The lockfile needs to be synchronized after bumping, but before the final commit
 	public readonly stageBefore = {
-		// The lockfile needs to be synchronized before committing
 		commit: ["git"],
+	};
+	public readonly stageAfter = {
+		commit: (context: Context): string[] => {
+			// In lerna mode, we need to update the lockfile after bumping, so we do that in non-lerna mode too.
+			const lerna = context.hasData("lerna") && !!context.getData("lerna");
+			if (lerna) return ["lerna"];
+			return [];
+		},
 	};
 
 	private async executeCheckStage(context: Context): Promise<void> {
