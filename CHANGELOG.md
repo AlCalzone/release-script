@@ -3,7 +3,8 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+
+## 3.0.0-alpha.0 (2021-09-15)
 * Split into plugins
 * Simplified `monorepo` configuration with `lerna`
 * BREAKING: Removed native `yarn v2+` workspaces support. Use `lerna` for now.
