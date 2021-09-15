@@ -28,6 +28,9 @@
 			"path": "packages/plugin-license/tsconfig.build.json"
 		},
 		{
+			"path": "packages/plugin-manual-review/tsconfig.build.json"
+		},
+		{
 			"path": "packages/plugin-package/tsconfig.build.json"
 		},
 		{

@@ -101,6 +101,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@alcalzone/release-script-plugin-manual-review@workspace:packages/plugin-manual-review":
+  version: 0.0.0-use.local
+  resolution: "@alcalzone/release-script-plugin-manual-review@workspace:packages/plugin-manual-review"
+  dependencies:
+    "@alcalzone/release-script-core": 3.0.0
+    "@alcalzone/release-script-testing": 3.0.0
+    jest-extended: ^0.11.5
+    typescript: "*"
+  languageName: unknown
+  linkType: soft
+
 "@alcalzone/release-script-plugin-package@3.0.0, @alcalzone/release-script-plugin-package@workspace:packages/plugin-package":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-package@workspace:packages/plugin-package"

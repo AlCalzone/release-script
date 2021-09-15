@@ -5,6 +5,7 @@
 -->
 ## **WORK IN PROGRESS**
 * New plugin `license` to check for outdated license years
+* New plugin `manual-review` to do manual changes before committing
 
 ## 3.0.0 (2021-09-15)
 * Split into plugins

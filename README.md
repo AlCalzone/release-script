@@ -217,11 +217,12 @@ Since version 3, the release script is separated into several plugins, making it
 
 If you need some of these plugins, you have to install and them separately:
 
-| Plugin name | Description                               |
-| ----------- | ----------------------------------------- |
-| `iobroker`  | Update ioBroker's `io-package.json`       |
-| `lerna`     | Monorepo support with `lerna`             |
-| `license`   | Check for outdated years in license files |
+| Plugin name     | Description                                                                        |
+| --------------- | ---------------------------------------------------------------------------------- |
+| `iobroker`      | Update ioBroker's `io-package.json`                                                |
+| `lerna`         | Monorepo support with `lerna`                                                      |
+| `license`       | Check for outdated years in license files                                          |
+| `manual-review` | Asks you to review the changes before committing and lets you do additional edits. |
 
 To do so, add them as a `devDependency`:
 
@@ -344,6 +345,10 @@ By default, the files `LICENSE`, `README` with and without `.md` extension are c
 ```bash
 npm run release patch -- --license "**/LICENSE" "packages/*/README.md"
 ```
+
+### `manual-review` plugin options
+
+_none_
 
 ## Workflow file for automatic release
 
