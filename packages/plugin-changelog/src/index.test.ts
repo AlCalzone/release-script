@@ -334,5 +334,38 @@ ${fixtures.changelog_old_testParse1}
 
 ${fixtures.changelog_old_testParse2}`);
 		});
+
+		it("removes unnecessary blank linkes from the changelog", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+			});
+
+			context.setData("changelog_filename", "CHANGELOG.md");
+			context.setData("changelog_location", "changelog");
+			context.setData("changelog_before", fixtures.changelog_testParseHeader + "\n\n\n");
+			context.setData("changelog_entries", [
+				fixtures.changelog_testParse1,
+				fixtures.changelog_testParse2,
+				fixtures.changelog_testParse3,
+			]);
+			context.setData("changelog_after", "\n\n\n" + fixtures.changelog_old_testParseFooter);
+			context.setData("changelog_entry_prefix", "##");
+			context.setData("version_new", "2.3.4");
+
+			await changelogPlugin.executeStage(context, DefaultStages.edit);
+
+			const fileContent = await fs.readFile(path.join(testFSRoot, "CHANGELOG.md"), "utf8");
+
+			expect(fileContent).toBe(`${fixtures.changelog_testParseHeader}
+${fixtures.changelog_testReplaced}
+
+${fixtures.changelog_testParse2}
+
+${fixtures.changelog_testParse3}
+
+${fixtures.changelog_old_testParseFooter}`);
+		});
 	});
 });

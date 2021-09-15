@@ -205,9 +205,9 @@ ${changelogPlaceholder}`,
 
 	private async executeEditStage(context: Context): Promise<void> {
 		const changelogFilename = context.getData<string>("changelog_filename");
-		const changelogBefore = context.getData<string>("changelog_before");
+		const changelogBefore = context.getData<string>("changelog_before").trimEnd();
 		const changelogEntries = context.getData<string[]>("changelog_entries");
-		const changelogAfter = context.getData<string>("changelog_after");
+		const changelogAfter = context.getData<string>("changelog_after").trimStart();
 		const prefix = context.getData<string>("changelog_entry_prefix");
 		const newVersion = context.getData<string>("version_new");
 
@@ -231,8 +231,8 @@ ${changelogPlaceholder}`,
 			const entriesOld = normalizedEntries
 				.slice(numNew)
 				.map((e) => prefix.slice(1) + e + "\n\n");
-			const changelogOldBefore = context.getData<string>("changelog_old_before");
-			const changelogOldAfter = context.getData<string>("changelog_old_after");
+			const changelogOldBefore = context.getData<string>("changelog_old_before").trimEnd();
+			const changelogOldAfter = context.getData<string>("changelog_old_after").trimStart();
 
 			context.cli.log(`Updating changelog in ${changelogFilename}`);
 			await fs.writeFile(
