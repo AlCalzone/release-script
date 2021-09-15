@@ -160,13 +160,11 @@ ${context.getData("changelog_new")}`;
 			await fs.writeFile(path.join(context.cwd, ".commitmessage"), commitMessage);
 		}
 
-		const lerna = context.hasData("lerna") && !!context.getData("lerna");
-
 		// And commit stuff
 		const newVersion = context.getData<string>("version_new");
 		const commands = [
 			["git", "add", "-A", "--", ":(exclude).commitmessage"],
-			["git", "commit", ...(lerna ? ["--amend"] : []), "-F", ".commitmessage"],
+			["git", "commit", "-F", ".commitmessage"],
 			["git", "tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`],
 		];
 

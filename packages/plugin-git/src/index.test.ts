@@ -178,7 +178,7 @@ This is the changelog.`);
 			);
 		});
 
-		it("amends the commit in lerna mode", async () => {
+		it("does not amend the commit, not even in lerna mode", async () => {
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({ plugins: [gitPlugin], cwd: testFSRoot });
 			const newVersion = "1.2.3";
@@ -190,9 +190,9 @@ This is the changelog.`);
 			context.sys.mockExec(() => "");
 
 			await gitPlugin.executeStage(context, DefaultStages.commit);
-			expect(context.sys.exec).toHaveBeenCalledWith(
+			expect(context.sys.exec).not.toHaveBeenCalledWith(
 				"git",
-				["commit", "--amend", "-F", ".commitmessage"],
+				expect.arrayContaining(["--amend"]),
 				expect.anything(),
 			);
 		});
