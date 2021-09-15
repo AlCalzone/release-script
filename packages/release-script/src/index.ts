@@ -152,7 +152,7 @@ export async function main(): Promise<void> {
 					required: false,
 				})
 				.positional("preid", {
-					describe: "The prerelease identifier. Only for pre... bumps.",
+					describe: "The prerelease identifier. Only for pre* bumps.",
 					required: false,
 					default: "alpha",
 				}),

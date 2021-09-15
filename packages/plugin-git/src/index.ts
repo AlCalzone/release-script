@@ -88,7 +88,7 @@ class GitPlugin implements Plugin {
 				defaultDescription: "The remote the current branch is tracking",
 			},
 			includeUnstaged: {
-				alias: "all",
+				alias: ["all", "A"],
 				type: "boolean",
 				description: "Whether unstaged changes should be allowed",
 				default: false,

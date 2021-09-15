@@ -307,7 +307,9 @@ npm run release -- -x.commit "echo Hello" -x.after_push "echo 1" "echo 2" "echo 
 
 ### `lerna` plugin options
 
-_none_
+#### Publish all packages (`--publishAll`)
+
+By default, `lerna` only bumps and publishes changed packages. With this flag, all non-private packages are re-published under a new version, even if they had no changes.
 
 ### `ioBroker` plugin options
 
