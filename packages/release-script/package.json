@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "3.0.0-alpha.2",
+  "version": "3.0.0-alpha.3",
   "description": "Release script to automatically increment version numbers and push git tags of Node.js projects",
   "keywords": [],
   "license": "MIT",
@@ -38,12 +38,12 @@
     "node": ">=12.20"
   },
   "dependencies": {
-    "@alcalzone/release-script-core": "3.0.0-alpha.2",
-    "@alcalzone/release-script-plugin-changelog": "3.0.0-alpha.2",
-    "@alcalzone/release-script-plugin-exec": "3.0.0-alpha.2",
-    "@alcalzone/release-script-plugin-git": "3.0.0-alpha.2",
-    "@alcalzone/release-script-plugin-package": "3.0.0-alpha.2",
-    "@alcalzone/release-script-plugin-version": "3.0.0-alpha.2",
+    "@alcalzone/release-script-core": "3.0.0-alpha.3",
+    "@alcalzone/release-script-plugin-changelog": "3.0.0-alpha.3",
+    "@alcalzone/release-script-plugin-exec": "3.0.0-alpha.3",
+    "@alcalzone/release-script-plugin-git": "3.0.0-alpha.3",
+    "@alcalzone/release-script-plugin-package": "3.0.0-alpha.3",
+    "@alcalzone/release-script-plugin-version": "3.0.0-alpha.3",
     "alcalzone-shared": "^4.0.0",
     "axios": "^0.21.4",
     "colors": "^1.4.0",
@@ -54,7 +54,7 @@
     "yargs": "^17.1.1"
   },
   "devDependencies": {
-    "@alcalzone/release-script-testing": "3.0.0-alpha.2",
+    "@alcalzone/release-script-testing": "3.0.0-alpha.3",
     "@types/yargs": "^17.0.2",
     "typescript": "*"
   },
