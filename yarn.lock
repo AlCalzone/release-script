@@ -52,7 +52,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@alcalzone/release-script-plugin-git@3.0.0, @alcalzone/release-script-plugin-git@workspace:packages/plugin-git":
+"@alcalzone/release-script-plugin-git@3.1.0, @alcalzone/release-script-plugin-git@workspace:packages/plugin-git":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-git@workspace:packages/plugin-git"
   dependencies:
@@ -201,7 +201,7 @@ __metadata:
     "@alcalzone/release-script-core": 3.0.0
     "@alcalzone/release-script-plugin-changelog": 3.0.0
     "@alcalzone/release-script-plugin-exec": 3.0.0
-    "@alcalzone/release-script-plugin-git": 3.0.0
+    "@alcalzone/release-script-plugin-git": 3.1.0
     "@alcalzone/release-script-plugin-package": 3.0.0
     "@alcalzone/release-script-plugin-version": 3.0.0
     "@alcalzone/release-script-testing": 3.0.0
