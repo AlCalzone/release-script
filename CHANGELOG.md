@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* New plugin `license` to check for outdated license years
+
 ## 3.0.0 (2021-09-15)
 * Split into plugins
 * Interactive version chooser

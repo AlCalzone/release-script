@@ -216,10 +216,11 @@ Since version 3, the release script is separated into several plugins, making it
 
 If you need some of these plugins, you have to install and them separately:
 
-| Plugin name | Description                         |
-| ----------- | ----------------------------------- |
-| `iobroker`  | Update ioBroker's `io-package.json` |
-| `lerna`     | Monorepo support with `lerna`       |
+| Plugin name | Description                               |
+| ----------- | ----------------------------------------- |
+| `iobroker`  | Update ioBroker's `io-package.json`       |
+| `lerna`     | Monorepo support with `lerna`             |
+| `license`   | Check for outdated years in license files |
 
 To do so, add them as a `devDependency`:
 
@@ -332,6 +333,16 @@ npm run release patch -- --no-workflow-check
 #### Limit the number of news in `io-package.json` (`--numNews` or `-nn`)
 
 By default the most recent 7 news entries are kept in `io-package.json`. Using this option, you can change the limit.
+
+### `license` plugin options
+
+#### Change where to look for license files to check (`--license`)
+
+By default, the files `LICENSE`, `README` with and without `.md` extension are checked (glob `"{LICENSE,README}{,.md}"`). Using this option, you can define an array of glob patterns to change the search paths.
+
+```bash
+npm run release patch -- --license "**/LICENSE" "packages/*/README.md"
+```
 
 ## Workflow file for automatic release
 

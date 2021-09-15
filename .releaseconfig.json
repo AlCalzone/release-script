@@ -1,5 +1,5 @@
 {
-	"plugins": ["lerna"],
+	"plugins": ["lerna", "license"],
 	"exec": {
 		"before_commit": "yarn run build"
 	}

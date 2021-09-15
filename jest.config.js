@@ -8,6 +8,7 @@ module.exports = {
 		"<rootDir>/packages/plugin-git/src",
 		"<rootDir>/packages/plugin-iobroker/src",
 		"<rootDir>/packages/plugin-lerna/src",
+		"<rootDir>/packages/plugin-license/src",
 		"<rootDir>/packages/plugin-package/src",
 		"<rootDir>/packages/plugin-version/src",
 		// Add others as necessary
@@ -23,6 +24,7 @@ module.exports = {
 		"^@alcalzone/release-script-plugin-iobroker(.*)":
 			"<rootDir>/packages/plugin-iobroker/src$1",
 		"^@alcalzone/release-script-plugin-lerna(.*)": "<rootDir>/packages/plugin-lerna/src$1",
+		"^@alcalzone/release-script-plugin-license(.*)": "<rootDir>/packages/plugin-license/src$1",
 		"^@alcalzone/release-script-plugin-package(.*)": "<rootDir>/packages/plugin-package/src$1",
 		"^@alcalzone/release-script-plugin-version(.*)": "<rootDir>/packages/plugin-version/src$1",
 		"^@alcalzone/release-script-testing(.*)": "<rootDir>/packages/testing/src$1",
