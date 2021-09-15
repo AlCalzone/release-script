@@ -5,7 +5,7 @@
 -->
 
 
-## 3.0.0-alpha.1 (2021-09-15)
+## **WORK IN PROGRESS**
 * Split into plugins
 * Interactive version chooser
 * Simplified `monorepo` configuration with `lerna`
