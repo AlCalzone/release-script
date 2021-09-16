@@ -324,6 +324,40 @@ The release script expects `io-package.json` in the package root. If that is not
 npm run release patch -- -io packages/js-controller
 ```
 
+#### Avoid prerelease versions in `io-package.json` (`--ioPackageNoPrerelease`)
+
+Usually, the version in `io-package.json` and `package.json` must match and the script will raise an error if they don't.
+
+```jsonc
+// package.json:
+"version": "1.2.4",
+
+// io-package.json:
+"common": {
+  "version": "1.2.3" // not OK ❌
+  // ...
+}
+```
+
+However, if you don't want to put a prerelease version like `v1.2.3-alpha.0-abcdefg` in `io-package.json`, you can enable this flag:
+
+```bash
+npm run release patch -- --ioPackageNoPrerelease
+```
+
+In this case, only the major/minor/patch part is used for `io-package.json`:
+
+```jsonc
+// package.json:
+"version": "1.2.3-alpha.0-abcdefg",
+
+// io-package.json:
+"common": {
+  "version": "1.2.3" // OK ✔
+  // ...
+}
+```
+
 #### Skip the release workflow check
 
 The release script tries to find common errors in the ioBroker Github Actions release workflow file. If the check results in a false positive, you can disable this check with the `--no-workflow-check` option.

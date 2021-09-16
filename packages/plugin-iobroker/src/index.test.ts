@@ -38,6 +38,10 @@ const fixtures = {
 		name: "test-adapter",
 		common: { version: "1.2.4" },
 	}),
+	ioPackage_prereleaseVersion: JSON.stringify({
+		name: "test-adapter",
+		common: { version: "1.2.4" },
+	}),
 	ioPackage_tooManyNews: JSON.stringify({
 		name: "test-adapter",
 		common: {
@@ -89,6 +93,7 @@ const fixtures = {
 	),
 
 	package_version: "1.2.3",
+	package_version_prerelease: "1.2.4-alpha.0",
 	test_workflow: `
   deploy:
     needs: [lint, unit-tests]
@@ -187,6 +192,24 @@ describe("ioBroker plugin", () => {
 			});
 			await iobPlugin.executeStage(context, DefaultStages.check);
 			expect(context.errors).toContainEqual(expect.stringMatching(/version mismatch/i));
+		});
+
+		it("unless ioPackageNoPrerelease is true and the main part matches", async () => {
+			const iobPlugin = new IoBrokerPlugin();
+			const context = createMockContext({
+				plugins: [iobPlugin],
+				cwd: testFSRoot,
+				argv: {
+					ioPackageNoPrerelease: true,
+				},
+			});
+			context.setData("version", fixtures.package_version_prerelease);
+
+			await testFS.create({
+				"io-package.json": fixtures.ioPackage_prereleaseVersion,
+			});
+			await iobPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
 		});
 
 		it("happy path 1", async () => {

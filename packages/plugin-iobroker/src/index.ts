@@ -8,6 +8,16 @@ import type { Argv } from "yargs";
 import { cleanChangelogForNews, limitKeys, prependKey } from "./tools";
 import { translateText } from "./translate";
 
+function getDesiredIoPackVersion(context: Context): string {
+	const version = context.getData<string>("version");
+	if (context.argv.ioPackageNoPrerelease) {
+		const s = semver.parse(version)!;
+		return `${s.major}.${s.minor}.${s.patch}`;
+	} else {
+		return version;
+	}
+}
+
 class IoBrokerPlugin implements Plugin {
 	public readonly id = "iobroker";
 	public readonly stages = [
@@ -42,6 +52,11 @@ class IoBrokerPlugin implements Plugin {
 				description: `How many news entries should be kept in io-package.json`,
 				default: 7,
 			},
+			ioPackageNoPrerelease: {
+				description: "Remove prerelease identifiers from the version in io-package.json",
+				type: "boolean",
+				default: false,
+			},
 		});
 	}
 
@@ -64,7 +79,8 @@ class IoBrokerPlugin implements Plugin {
 			context.cli.error(`Invalid version "${ioPackVersion}" in io-package.json!`);
 		} else {
 			const packVersion = context.getData<string>("version");
-			if (ioPackVersion !== packVersion) {
+			const desiredVersion = getDesiredIoPackVersion(context);
+			if (ioPackVersion !== desiredVersion) {
 				context.cli.error(
 					`Version mismatch between io-package.json (${ioPackVersion}) and package.json (${packVersion})!`,
 				);
