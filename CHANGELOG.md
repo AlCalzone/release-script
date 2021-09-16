@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 3.1.1 (2021-09-16)
 * Execute `manual-review` plugin at the start of the commit phase instead of at the end of the edit phase.
 
 ## 3.1.0 (2021-09-15)
