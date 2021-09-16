@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* Execute `manual-review` plugin at the start of the commit phase instead of at the end of the edit phase.
+
 ## 3.1.0 (2021-09-15)
 * New plugin `license` to check for outdated license years
 * New plugin `manual-review` to do manual changes before committing

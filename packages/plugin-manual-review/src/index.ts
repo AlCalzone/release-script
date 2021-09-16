@@ -3,11 +3,11 @@ import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/type
 
 class ManualReviewPlugin implements Plugin {
 	public readonly id = "manual-review";
-	public readonly stages = [DefaultStages.edit];
+	public readonly stages = [DefaultStages.commit];
 
 	// dependencies?: string[] | undefined;
-	public readonly stageAfter = {
-		edit: "*" as const,
+	public readonly stageBefore = {
+		commit: "*" as const,
 	};
 	// stageBefore?: Record<string, ConstOrDynamic<string[]>> | undefined;
 
