@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 3.2.0 (2021-09-16)
 * `iobroker`: Add flag to prevent prerelease versions in `io-package.json`
 
 ## 3.1.1 (2021-09-16)
