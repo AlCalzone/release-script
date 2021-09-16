@@ -27,6 +27,9 @@ export interface Context {
 		bump?: string;
 		preid?: string;
 
+		/** Answer all (applicable) yes/no prompts with yes */
+		yes: boolean;
+
 		[arg: string]: string | number | boolean | string[] | number[] | boolean[] | undefined;
 	};
 

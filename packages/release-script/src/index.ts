@@ -180,6 +180,12 @@ export async function main(): Promise<void> {
 				description: "Enable debug output",
 				default: false,
 			},
+			yes: {
+				alias: "y",
+				type: "boolean",
+				description: "Answer all (applicable) yes/no prompts with yes",
+				default: false,
+			},
 		});
 
 	// We do two-pass parsing:

@@ -38,7 +38,9 @@
   },
   "dependencies": {
     "@alcalzone/release-script-core": "3.0.0",
-    "semver": "^7.3.5"
+    "alcalzone-shared": "^4.0.0",
+    "semver": "^7.3.5",
+    "tiny-glob": "^0.2.9"
   },
   "devDependencies": {
     "@alcalzone/release-script-testing": "3.0.0",

@@ -40,8 +40,8 @@ Together with the corresponding **Github Actions** workflow (more on that below)
     ## Changelog
 
     <!--
-    	Placeholder for the next version (at the beginning of the line):
-    	### **WORK IN PROGRESS**
+      Placeholder for the next version (at the beginning of the line):
+      ### **WORK IN PROGRESS**
     -->
     ```
 
@@ -51,8 +51,8 @@ Together with the corresponding **Github Actions** workflow (more on that below)
     # Changelog
 
     <!--
-    	Placeholder for the next version (at the beginning of the line):
-    	## **WORK IN PROGRESS**
+      Placeholder for the next version (at the beginning of the line):
+      ## **WORK IN PROGRESS**
     -->
     ```
 
@@ -203,6 +203,14 @@ Can help debug the release process. Example:
 npm run release -- -V
 ```
 
+#### Answer all applicable yes/no prompts with yes (`--yes` or `-y`)
+
+Example:
+
+```
+npm run release minor -- --yes
+```
+
 ## Plugins
 
 Since version 3, the release script is separated into several plugins, making it easy to extend it with custom checks. The following plugins are installed and loaded by default and don't need to be installed separately:
@@ -281,7 +289,29 @@ After bumping the version, the lockfile is normally synchronized with `package.j
 
 ### `version` plugin options
 
-_none_
+#### Replace the version in additional files (`--versionFiles`)
+
+To replace the version in additional files, you can use the `--versionFiles` option. It is recommended to define it via a configuration file. The option expects an array of tuples containing glob patterns to match files and one or more regular expressions to match the version to be replaced.
+
+> In order for this to work, the regular expressions must surround the version to replace with lookbehind `(?<=BEFORE_VERSION)` and lookahead `(?=AFTER_VERSION)` assertions. Additional backslashes are needed to escape the special characters because of JSON.
+
+<!-- prettier-ignore -->
+```jsonc
+{
+	"versionFiles": [
+		// Match `>Version: VERSION<` in html files in the widget folder
+		// and replace VERSION with the new version
+		["widget/*.html", "(?<=\\>Version: )(.*?)(?=<)"],
+		// Check all files in the template folder and its subdirectories
+		["templates/**/*.*", [
+			// Match `"version": "VERSION",` and replace VERSION with the new version
+			"(?<=\"version\": \")(.*?)(?=\",)",
+			// Match `Version: "VERSION"` and replace VERSION with the new version
+			"(?<=Version: \")(.*?)(?=\")"
+		]]
+  ]
+}
+```
 
 ### `exec` plugin options
 

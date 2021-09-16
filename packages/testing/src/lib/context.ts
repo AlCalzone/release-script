@@ -63,6 +63,7 @@ export const defaultContextOptions: Omit<
 		remote: "origin",
 		verbose: false,
 		plugins: [],
+		yes: false,
 	},
 	plugins: [],
 	sys: new MockSystem(),
