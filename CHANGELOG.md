@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* Fix: actually execute `manual-review` plugin
+
 ## 3.3.0 (2021-09-16)
 * `version` plugin: Support glob/regex based replace in additional files
 

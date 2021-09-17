@@ -12,7 +12,7 @@ class ManualReviewPlugin implements Plugin {
 	// stageBefore?: Record<string, ConstOrDynamic<string[]>> | undefined;
 
 	async executeStage(context: Context, stage: Stage): Promise<void> {
-		if (stage.id === "edit" && !context.argv.dryRun) {
+		if (stage.id === "commit" && !context.argv.dryRun) {
 			context.cli.log("Please review the changes and correct them manually if necessary.");
 			let result: boolean;
 			do {
