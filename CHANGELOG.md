@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* `changelog plugin`: parse subsections correctly
+
 ## 3.3.1 (2021-09-17)
 * Fix: actually execute `manual-review` plugin
 

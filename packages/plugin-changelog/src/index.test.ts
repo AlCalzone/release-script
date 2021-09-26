@@ -50,6 +50,16 @@ stuff
 	changelog_old_testParse2: `## 0.0.1 Older release
 * Did something else`,
 	changelog_old_testParseFooter: `# Unrelated stuff`,
+
+	changelog_subsectionsParseHeader: `# Changelog`,
+	changelog_subsectionsParse1: `## __WORK IN PROGRESS__
+### Subsection 1
+* New entry 1
+* New entry 2`,
+	changelog_subsectionsParse2: `## v0.0.1 Old stuff
+### Subsection 2
+* New entry 4
+* New entry 5`,
 };
 
 describe("Changelog plugin", () => {
@@ -214,6 +224,41 @@ ${fixtures.changelog_old_testParseFooter}`,
 
 			const currentChangelog = context.getData<string[]>("changelog_new");
 			expect(currentChangelog).toBe(`* New entry 1
+* New entry 2`);
+		});
+
+		it("correctly handles changelogs with sub-sections", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+			});
+
+			await testFS.create({
+				"CHANGELOG.md": `${fixtures.changelog_subsectionsParseHeader}
+${fixtures.changelog_subsectionsParse1}
+
+${fixtures.changelog_subsectionsParse2}`,
+			});
+
+			await changelogPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+
+			const headline = context.getData<string[]>("changelog_before");
+			expect(headline).toBe(fixtures.changelog_subsectionsParseHeader + "\n");
+
+			const entries = context.getData<string[]>("changelog_entries");
+			expect(entries).toEqual([
+				fixtures.changelog_subsectionsParse1,
+				fixtures.changelog_subsectionsParse2,
+			]);
+
+			const footer = context.getData<string[]>("changelog_after");
+			expect(footer).toBe("");
+
+			const currentChangelog = context.getData<string[]>("changelog_new");
+			expect(currentChangelog).toBe(`### Subsection 1
+* New entry 1
 * New entry 2`);
 		});
 	});

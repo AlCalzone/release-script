@@ -56,7 +56,13 @@ export function parseChangelogFile(
 	const entries: string[] = [];
 	while ((matchStart = changelogEntryRegex.exec(changelog))) {
 		let entry = changelog.slice(matchStart.index);
-		const nextHeadlineRegex = new RegExp(`^${entryPrefix.slice(1)}`, "gm");
+		// The next headline must start with the same or lower amount of prefix chars as the current one
+		const nextHeadlineRegex = new RegExp(
+			`^${entryPrefix[0]}{${entryPrefix.length - 1},${entryPrefix.length}}(?!${
+				entryPrefix[0]
+			})`,
+			"gm",
+		);
 		const matchEnd = nextHeadlineRegex.exec(entry.slice(matchStart[0].length));
 		if (matchEnd) {
 			entry = entry.slice(0, matchStart[0].length + matchEnd.index);
