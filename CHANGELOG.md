@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 3.3.2 (2021-09-26)
 * `changelog plugin`: parse subsections correctly
 
 ## 3.3.1 (2021-09-17)
