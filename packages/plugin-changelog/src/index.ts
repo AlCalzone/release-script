@@ -91,11 +91,14 @@ export function parseChangelogFile(
 
 class ChangelogPlugin implements Plugin {
 	public readonly id = "changelog";
-	public readonly stages = [
-		DefaultStages.check,
-		DefaultStages.edit,
-		// Add others as necessary
-	];
+
+	public stages(context: Context): Stage[] {
+		const ret = [DefaultStages.check, DefaultStages.edit];
+		if (context.argv.addPlaceholder) {
+			ret.push(DefaultStages.cleanup);
+		}
+		return ret;
+	}
 
 	public defineCLIOptions(yargs: Argv<any>): Argv<any> {
 		return yargs.options({
@@ -104,6 +107,11 @@ class ChangelogPlugin implements Plugin {
 				type: "number",
 				description: `How many changelog entries should be kept in README.md. Only applies when README.md and CHANGELOG_OLD.md exist.`,
 				default: 5,
+			},
+			addPlaceholder: {
+				type: "boolean",
+				description: `Add an empty placeholder to the changelog after a release.`,
+				default: false,
 			},
 		});
 	}
@@ -263,6 +271,19 @@ ${changelogPlaceholder}`,
 		}
 	}
 
+	private async executeCleanupStage(context: Context): Promise<void> {
+		const changelogFilename = context.getData<string>("changelog_filename");
+		const changelogBefore = context.getData<string>("changelog_before").trimEnd();
+		const prefix = context.getData<string>("changelog_entry_prefix");
+
+		const changelogPath = path.join(context.cwd, changelogFilename);
+		let fileContent = await fs.readFile(changelogPath, "utf8");
+		fileContent = `${fileContent.slice(0, changelogBefore.length)}
+${prefix} ${changelogMarkers[0]}
+${fileContent.slice(changelogBefore.length)}`; // The part after the new placeholder contains a leading newline, so we don't need an extra one here
+		await fs.writeFile(changelogPath, fileContent);
+	}
+
 	async executeStage(context: Context, stage: Stage): Promise<void> {
 		if (stage.id === "check") {
 			await this.executeCheckStage(context);
@@ -271,6 +292,12 @@ ${changelogPlaceholder}`,
 				context.cli.log("Dry run, would update changelog");
 			} else {
 				await this.executeEditStage(context);
+			}
+		} else if (stage.id === "cleanup" && context.argv.addPlaceholder) {
+			if (context.argv.dryRun) {
+				context.cli.log("Dry run, would add placeholder to changelog");
+			} else {
+				await this.executeCleanupStage(context);
 			}
 		}
 	}
