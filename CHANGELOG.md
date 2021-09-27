@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## 3.4.0 (2021-09-27)
+* `changelog plugin`: Add option to add empty placeholder after a release
+
 ## 3.3.2 (2021-09-26)
 * `changelog plugin`: parse subsections correctly
 
