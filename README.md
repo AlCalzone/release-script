@@ -281,6 +281,10 @@ npm run release patch -- -r upstream/master
 
 Only applies when the changelog is in `README.md` and a `CHANGELOG_OLD.md` exists. By default the most recent 5 entries are kept in `README.md`.
 
+#### Add a new placeholder after a successful release (`--addPlaceholder`)
+
+If you want the release script to add a new empty placeholder to the changelog after a release, this option is for you. By default, this is disabled.
+
 ### `package` plugin options
 
 #### Don't synchronize the lockfile (`--no-update-lockfile`)

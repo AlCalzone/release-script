@@ -413,4 +413,89 @@ ${fixtures.changelog_testParse3}
 ${fixtures.changelog_old_testParseFooter}`);
 		});
 	});
+
+	describe("cleanup stage", () => {
+		let testFS: TestFS;
+		let testFSRoot: string;
+		beforeEach(async () => {
+			testFS = new TestFS();
+			testFSRoot = await testFS.getRoot();
+		});
+		afterEach(async () => {
+			await testFS.remove();
+		});
+
+		it("updates CHANGELOG.md correctly if addPlaceholder is true", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+				argv: {
+					addPlaceholder: true,
+				},
+			});
+			context.setData("changelog_entry_prefix", "##");
+			context.setData("changelog_filename", "CHANGELOG.md");
+			context.setData("changelog_location", "changelog");
+			context.setData("changelog_before", fixtures.changelog_testParseHeader + "\n\n\n");
+
+			const fileContent = `${fixtures.changelog_testParseHeader}
+${fixtures.changelog_testReplaced}
+
+${fixtures.changelog_testParse2}
+
+${fixtures.changelog_testParse3}
+
+${fixtures.changelog_old_testParseFooter}`;
+			await testFS.create({
+				"CHANGELOG.md": fileContent,
+			});
+
+			const expected = `${fixtures.changelog_testParseHeader}
+## **WORK IN PROGRESS**
+
+${fixtures.changelog_testReplaced}
+
+${fixtures.changelog_testParse2}
+
+${fixtures.changelog_testParse3}
+
+${fixtures.changelog_old_testParseFooter}`;
+
+			await changelogPlugin.executeStage(context, DefaultStages.cleanup);
+
+			const afterCleanup = await fs.readFile(path.join(testFSRoot, "CHANGELOG.md"), "utf8");
+
+			expect(afterCleanup).toBe(expected);
+		});
+
+		it("leaves CHANGELOG.md alone if it isn't", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+			});
+			context.setData("changelog_entry_prefix", "##");
+			context.setData("changelog_filename", "CHANGELOG.md");
+			context.setData("changelog_location", "changelog");
+			context.setData("changelog_before", fixtures.changelog_testParseHeader + "\n\n\n");
+
+			const fileContent = `${fixtures.changelog_testParseHeader}
+${fixtures.changelog_testReplaced}
+
+${fixtures.changelog_testParse2}
+
+${fixtures.changelog_testParse3}
+
+${fixtures.changelog_old_testParseFooter}`;
+			await testFS.create({
+				"CHANGELOG.md": fileContent,
+			});
+
+			await changelogPlugin.executeStage(context, DefaultStages.cleanup);
+
+			const afterCleanup = await fs.readFile(path.join(testFSRoot, "CHANGELOG.md"), "utf8");
+			expect(afterCleanup).toBe(fileContent);
+		});
+	});
 });
