@@ -153,6 +153,7 @@ class ChangelogPlugin implements Plugin {
 
 		// Parse changelog entries
 		const parsed = parseChangelogFile(changelog, changelogPlaceholderPrefix);
+		const changelogHasFinalNewline = changelog.replace(/(\r|\n|\r\n)/g, "\n").endsWith("\n");
 		let parsedOld: typeof parsed | undefined;
 		if (changelogOld) {
 			parsedOld = parseChangelogFile(changelogOld, changelogPlaceholderPrefix.substr(1));
@@ -163,12 +164,17 @@ class ChangelogPlugin implements Plugin {
 		context.setData("changelog_filename", changelogFilename);
 		context.setData("changelog_before", parsed.before);
 		context.setData("changelog_after", parsed.after);
+		context.setData("changelog_final_newline", changelogHasFinalNewline);
 		context.setData("changelog_location", changelogLocation);
 		context.setData("changelog_entry_prefix", changelogPlaceholderPrefix);
 
 		if (parsedOld) {
 			context.setData("changelog_old_before", parsedOld.before);
 			context.setData("changelog_old_after", parsedOld.after);
+			const changelogOldHasFinalNewline = changelogOld!
+				.replace(/(\r|\n|\r\n)/g, "\n")
+				.endsWith("\n");
+			context.setData("changelog_old_final_newline", changelogOldHasFinalNewline);
 		}
 
 		// check if the changelog contains exactly 1 occurence of the changelog placeholder
@@ -222,11 +228,15 @@ ${changelogPlaceholder}`,
 		const changelogBefore = context.getData<string>("changelog_before").trimEnd();
 		const changelogEntries = context.getData<string[]>("changelog_entries");
 		const changelogAfter = context.getData<string>("changelog_after").trimStart();
+		const changelogHasFinalNewline = context.getData<boolean>("changelog_final_newline");
 		const prefix = context.getData<string>("changelog_entry_prefix");
 		const newVersion = context.getData<string>("version_new");
 
 		const hasChangelogOld =
 			context.hasData("changelog_old_before") && context.hasData("changelog_old_after");
+		const changelogOldHasFinalNewline =
+			context.hasData("changelog_old_final_newline") &&
+			context.getData<boolean>("changelog_old_final_newline");
 
 		// Replace the changelog placeholder and keep the free text
 		const placeholderRegex = buildChangelogPlaceholderRegex(prefix)();
@@ -251,13 +261,15 @@ ${changelogPlaceholder}`,
 			context.cli.log(`Updating changelog in ${changelogFilename}`);
 			await fs.writeFile(
 				path.join(context.cwd, changelogFilename),
-				(changelogBefore + "\n" + entriesNew.join("") + changelogAfter).trim(),
+				(changelogBefore + "\n" + entriesNew.join("") + changelogAfter).trim() +
+					(changelogHasFinalNewline ? "\n" : ""),
 			);
 
 			context.cli.log(`Updating changelog in CHANGELOG_OLD.md`);
 			await fs.writeFile(
 				path.join(context.cwd, "CHANGELOG_OLD.md"),
-				(changelogOldBefore + "\n" + entriesOld.join("") + changelogOldAfter).trim(),
+				(changelogOldBefore + "\n" + entriesOld.join("") + changelogOldAfter).trim() +
+					(changelogOldHasFinalNewline ? "\n" : ""),
 			);
 		} else {
 			const normalizedEntries = changelogEntries
@@ -266,7 +278,8 @@ ${changelogPlaceholder}`,
 			context.cli.log(`Updating changelog in ${changelogFilename}`);
 			await fs.writeFile(
 				path.join(context.cwd, changelogFilename),
-				(changelogBefore + "\n" + normalizedEntries.join("") + changelogAfter).trim(),
+				(changelogBefore + "\n" + normalizedEntries.join("") + changelogAfter).trim() +
+					(changelogHasFinalNewline ? "\n" : ""),
 			);
 		}
 	}
