@@ -39,14 +39,40 @@ class ExecPlugin implements Plugin {
 				if (stage in DefaultStages) {
 					stages.set(stage, (DefaultStages as any)[stage]);
 				} else if (stage.startsWith("before_")) {
+					const beforeStage = stage.substr(7);
+					const afterStages = Object.values(DefaultStages)
+						.filter((s) => s.before?.includes(beforeStage))
+						.map((s) => s.id);
+					// Make sure the before_xxx stages come after the previous stage and their after_xxx stages
+					afterStages.push(...((DefaultStages as any)[beforeStage]?.after ?? []));
+					for (const afterStage of afterStages) {
+						if (`after_${afterStage}` in commands) {
+							afterStages.push(`after_${afterStage}`);
+						}
+					}
+
 					stages.set(stage, {
 						id: stage,
-						before: [stage.substr(7)],
+						before: [beforeStage],
+						after: afterStages.length ? afterStages : undefined,
 					});
 				} else if (stage.startsWith("after_")) {
+					const afterStage = stage.substr(6);
+					const beforeStages = Object.values(DefaultStages)
+						.filter((s) => s.after?.includes(afterStage))
+						.map((s) => s.id);
+					// Make sure the after_xxx stages come before the next stage and their before_xxx stages
+					beforeStages.push(...((DefaultStages as any)[afterStage]?.before ?? []));
+					for (const beforeStage of beforeStages) {
+						if (`before_${beforeStage}` in commands) {
+							beforeStages.push(`before_${beforeStage}`);
+						}
+					}
+
 					stages.set(stage, {
 						id: stage,
-						after: [stage.substr(6)],
+						before: beforeStages.length ? beforeStages : undefined,
+						after: [afterStage],
 					});
 				} else {
 					stages.set(stage, {

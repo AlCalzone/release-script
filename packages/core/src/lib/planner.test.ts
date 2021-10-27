@@ -360,3 +360,138 @@ describe("execute", () => {
 		]);
 	});
 });
+
+describe("regression tests", () => {
+	it("Issue #104: after_edit should happen between edit and commit", async () => {
+		const chosenPlugins = [
+			// These plugins must always be loaded
+			"git",
+			"package",
+			"exec",
+			"version",
+			"changelog",
+		];
+		const allPlugins: Plugin[] = await Promise.all(
+			chosenPlugins.map(
+				async (plugin) =>
+					new (
+						await import(`@alcalzone/release-script-plugin-${plugin}`)
+					).default(),
+			),
+		);
+		const plugins = resolvePlugins(allPlugins, chosenPlugins);
+
+		const context = {
+			cwd: process.cwd(),
+			argv: {
+				exec: {
+					after_edit: "echo after_edit",
+				} as any,
+			},
+			plugins,
+			warnings: [],
+			errors: [],
+		} as unknown as Context;
+
+		// Initialize plugins
+		for (const plugin of plugins) {
+			await plugin.init?.(context);
+		}
+
+		// Execute stages
+		const result = (await planStages(context)).map((s) => s.id);
+		expect(result).toEqual(["check", "edit", "after_edit", "commit", "push", "cleanup"]);
+	});
+
+	it("Issue #104: before_commit should happen between edit and commit", async () => {
+		const chosenPlugins = [
+			// These plugins must always be loaded
+			"git",
+			"package",
+			"exec",
+			"version",
+			"changelog",
+		];
+		const allPlugins: Plugin[] = await Promise.all(
+			chosenPlugins.map(
+				async (plugin) =>
+					new (
+						await import(`@alcalzone/release-script-plugin-${plugin}`)
+					).default(),
+			),
+		);
+		const plugins = resolvePlugins(allPlugins, chosenPlugins);
+
+		const context = {
+			cwd: process.cwd(),
+			argv: {
+				exec: {
+					before_commit: "echo before_commit",
+				} as any,
+			},
+			plugins,
+			warnings: [],
+			errors: [],
+		} as unknown as Context;
+
+		// Initialize plugins
+		for (const plugin of plugins) {
+			await plugin.init?.(context);
+		}
+
+		// Execute stages
+		const result = (await planStages(context)).map((s) => s.id);
+		expect(result).toEqual(["check", "edit", "before_commit", "commit", "push", "cleanup"]);
+	});
+
+	it("Issue #104: before_commit should happen between after_edit and commit", async () => {
+		const chosenPlugins = [
+			// These plugins must always be loaded
+			"git",
+			"package",
+			"exec",
+			"version",
+			"changelog",
+		];
+		const allPlugins: Plugin[] = await Promise.all(
+			chosenPlugins.map(
+				async (plugin) =>
+					new (
+						await import(`@alcalzone/release-script-plugin-${plugin}`)
+					).default(),
+			),
+		);
+		const plugins = resolvePlugins(allPlugins, chosenPlugins);
+
+		const context = {
+			cwd: process.cwd(),
+			argv: {
+				exec: {
+					// These are defined in the incorrect order on purpose
+					before_commit: "echo before_commit",
+					after_edit: "echo after_edit",
+				} as any,
+			},
+			plugins,
+			warnings: [],
+			errors: [],
+		} as unknown as Context;
+
+		// Initialize plugins
+		for (const plugin of plugins) {
+			await plugin.init?.(context);
+		}
+
+		// Execute stages
+		const result = (await planStages(context)).map((s) => s.id);
+		expect(result).toEqual([
+			"check",
+			"edit",
+			"after_edit",
+			"before_commit",
+			"commit",
+			"push",
+			"cleanup",
+		]);
+	});
+});
