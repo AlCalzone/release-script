@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 3.4.1 (2021-10-27)
 * `changelog` plugin: Detect and preserve final newlines in the README and changelog
 * `exec` plugin: Ensure correct order of before/after stages
 
