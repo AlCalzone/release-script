@@ -216,11 +216,15 @@ ${fixtures.changelog_old_testParseFooter}`,
 
 			const footer = context.getData<string[]>("changelog_after");
 			expect(footer).toBe("");
+			const finalNewline = context.getData<boolean>("changelog_final_newline");
+			expect(finalNewline).toBe(false);
 
 			const headlineOld = context.getData<string[]>("changelog_old_before");
 			expect(headlineOld).toBe(fixtures.changelog_old_testParseHeader + "\n");
 			const footer_old = context.getData<string[]>("changelog_old_after");
 			expect(footer_old).toBe(fixtures.changelog_old_testParseFooter);
+			const finalNewlineOld = context.getData<boolean>("changelog_old_final_newline");
+			expect(finalNewlineOld).toBe(false);
 
 			const currentChangelog = context.getData<string[]>("changelog_new");
 			expect(currentChangelog).toBe(`* New entry 1
@@ -261,6 +265,40 @@ ${fixtures.changelog_subsectionsParse2}`,
 * New entry 1
 * New entry 2`);
 		});
+
+		it("Detects final newlines correctly", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+			});
+
+			await testFS.create({
+				"README.md": `${fixtures.readme_testParseHeader}
+${fixtures.readme_testParse1}
+
+${fixtures.readme_testParse2}
+
+${fixtures.readme_testParse3}
+`, // Newline here
+				"CHANGELOG_OLD.md": `${fixtures.changelog_old_testParseHeader}
+${fixtures.changelog_old_testParse1}
+
+${fixtures.changelog_old_testParse2}
+
+${fixtures.changelog_old_testParseFooter}
+`, // Newline here
+			});
+
+			await changelogPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+
+			const finalNewline = context.getData<boolean>("changelog_final_newline");
+			expect(finalNewline).toBe(true);
+
+			const finalNewlineOld = context.getData<boolean>("changelog_old_final_newline");
+			expect(finalNewlineOld).toBe(true);
+		});
 	});
 
 	describe("edit stage", () => {
@@ -290,6 +328,7 @@ ${fixtures.changelog_subsectionsParse2}`,
 				fixtures.readme_testParse3,
 			]);
 			context.setData("changelog_after", "");
+			context.setData("changelog_final_newline", false);
 			context.setData("changelog_entry_prefix", "###");
 			context.setData("version_new", "2.3.4");
 
@@ -321,6 +360,7 @@ ${fixtures.readme_testParse3}`);
 				fixtures.changelog_testParse3,
 			]);
 			context.setData("changelog_after", "");
+			context.setData("changelog_final_newline", false);
 			context.setData("changelog_entry_prefix", "##");
 			context.setData("version_new", "2.3.4");
 
@@ -357,6 +397,7 @@ ${fixtures.changelog_testParse3}`);
 				fixtures.changelog_old_testParse2,
 			]);
 			context.setData("changelog_after", "");
+			context.setData("changelog_final_newline", false);
 			context.setData("changelog_old_before", fixtures.changelog_old_testParseHeader);
 			context.setData("changelog_old_after", "");
 			context.setData("changelog_entry_prefix", "###");
@@ -396,6 +437,7 @@ ${fixtures.changelog_old_testParse2}`);
 				fixtures.changelog_testParse3,
 			]);
 			context.setData("changelog_after", "\n\n\n" + fixtures.changelog_old_testParseFooter);
+			context.setData("changelog_final_newline", false);
 			context.setData("changelog_entry_prefix", "##");
 			context.setData("version_new", "2.3.4");
 
@@ -411,6 +453,54 @@ ${fixtures.changelog_testParse2}
 ${fixtures.changelog_testParse3}
 
 ${fixtures.changelog_old_testParseFooter}`);
+		});
+
+		it("preserves the final newline in changelog and readme", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+				argv: {
+					numChangelogEntries: 2,
+				},
+			});
+
+			context.setData("changelog_filename", "README.md");
+			context.setData("changelog_location", "readme");
+			context.setData("changelog_before", fixtures.readme_testParseHeader);
+			context.setData("changelog_entries", [
+				fixtures.readme_testParse1,
+				fixtures.readme_testParse2,
+				fixtures.readme_testParse3,
+				fixtures.changelog_old_testParse1,
+				fixtures.changelog_old_testParse2,
+			]);
+			context.setData("changelog_after", "");
+			context.setData("changelog_final_newline", true);
+			context.setData("changelog_old_before", fixtures.changelog_old_testParseHeader);
+			context.setData("changelog_old_after", "");
+			context.setData("changelog_old_final_newline", true);
+			context.setData("changelog_entry_prefix", "###");
+			context.setData("version_new", "2.3.4");
+
+			await changelogPlugin.executeStage(context, DefaultStages.edit);
+
+			const readmeContent = await fs.readFile(path.join(testFSRoot, "README.md"), "utf8");
+			const oldContent = await fs.readFile(path.join(testFSRoot, "CHANGELOG_OLD.md"), "utf8");
+
+			expect(readmeContent).toBe(`${fixtures.readme_testParseHeader}
+${fixtures.readme_testReplaced}
+
+${fixtures.readme_testParse2}
+`);
+
+			expect(oldContent).toBe(`${fixtures.changelog_old_testParseHeader}
+${fixtures.readme_testParse3.slice(1)}
+
+${fixtures.changelog_old_testParse1}
+
+${fixtures.changelog_old_testParse2}
+`);
 		});
 	});
 
