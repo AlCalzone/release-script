@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 3.4.2 (2021-12-18)
 * `package` plugin: Set package manager to `development` for updating the lockfile to prevent npm7+ from deleting `devDependencies`.
 
 ## 3.4.1 (2021-10-27)
