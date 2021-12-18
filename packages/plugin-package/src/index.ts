@@ -125,6 +125,8 @@ class PackagePlugin implements Plugin {
 					setCwdToPackageRoot: true,
 					requireLockfile: false,
 				});
+				// npm7+ deletes devDependencies unless we set this flag
+				pak.environment = "development";
 				if (!context.argv.dryRun) {
 					const result = await pak.install();
 					if (!result.success) {
