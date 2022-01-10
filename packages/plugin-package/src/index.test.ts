@@ -365,7 +365,7 @@ describe("Package plugin", () => {
 					"yarn",
 					"changed",
 					"foreach",
-					`--git-range=${pack.version}`,
+					`--git-range=v${pack.version}`,
 					"version",
 					newVersion,
 					"--deferred",

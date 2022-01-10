@@ -61,7 +61,12 @@ class PackagePlugin implements Plugin {
 						.map((line) => line.trim())
 						.filter((line) => !!line && !line.startsWith("#"))
 						.filter((line) => line.includes("path: "))
-						.map((line) => line.substring(line.indexOf("@yarnpkg/")));
+						.map((line) =>
+							line
+								.substring(line.indexOf("@yarnpkg/"))
+								.replace(/^@yarnpkg\/plugin-/, "")
+								.replace(/\.cjs$/, ""),
+						);
 					// A list of required plugins and how to import them
 					const requiredPlugins: Record<string, string> = {
 						"workspace-tools": "workspace-tools",
@@ -72,6 +77,8 @@ class PackagePlugin implements Plugin {
 					const missingPlugins = Object.keys(requiredPlugins).filter(
 						(plugin) => !yarnPlugins.includes(plugin),
 					);
+
+					// context.cli.log(`Installed yarn plugins: ${yarnPlugins.join(", ")}`);
 					if (missingPlugins.length > 0) {
 						context.cli.fatal(
 							`The current project is a monorepo, which seems to be managed with yarn. The release script requires you to install additional yarn plugins to be able to handle this:
@@ -165,7 +172,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 		// Figure out which packages changed
 		const { stdout: output } = await context.sys.exec(
 			"yarn",
-			["changed", "list", "--json", `--gitRange=${pack.version}`],
+			["changed", "list", "--json", `--git-range=v${pack.version}`],
 			{ cwd: context.cwd },
 		);
 		// The returned info contains the monorepo root
@@ -202,7 +209,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 					"yarn",
 					"changed",
 					"foreach",
-					`--git-range=${pack.version}`,
+					`--git-range=v${pack.version}`,
 					"version",
 					newVersion,
 					"--deferred",
