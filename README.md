@@ -6,7 +6,7 @@ Automate the monotonous tasks when it comes to releasing new versions of your pr
 -   Update the changelog headline with the new version and release date whenever a release is made
 -   Move old changelog entries into another file
 -   Add the changelog to the release commit and create a tag for it.
--   Support for monorepos managed with `lerna`
+-   Support for monorepos managed with `lerna` or `yarn workspaces` (using additional `yarn` plugins)
 -   Support for custom scripts during the release lifecycle
 -   Check licenses for outdated copyrights
 -   Dry runs and checking for errors
@@ -210,6 +210,37 @@ Example:
 ```
 npm run release minor -- --yes
 ```
+
+## Monorepo support
+
+You can version monorepos in two different ways.
+
+### Using the `yarn` package manager
+
+_**Note:** If possible, prefer this way. Lerna does not support some advanced Yarn features, like `workspace:*` dependency ranges._
+
+Starting with `yarn v3.1.0`, the release script can use Yarn plugins to manage versions and releases of monorepos. These plugins can be installed in your repository as follows:
+
+```bash
+yarn plugin import workspace-tools
+yarn plugin import version
+yarn plugin import https://github.com/Dcard/yarn-plugins/releases/download/latest/plugin-changed.js
+```
+
+You also need to make sure that there is a `"version"` field in the root `package.json` file.
+
+To release changed packages, simply run the following command after bumping the versions (ideally during your CI build):
+
+```bash
+# without dist-tags
+yarn workspaces foreach npm publish --tolerate-republish
+# with dist-tags
+yarn workspaces foreach npm publish --tolerate-republish --tag my-tag
+```
+
+### Using `lerna`
+
+Set up [`lerna`](https://github.com/lerna/lerna) in fixed versioning mode and install and enable the `lerna` plugin (see below). Note that this disables the use of `yarn` plugins.
 
 ## Plugins
 
