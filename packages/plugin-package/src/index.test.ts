@@ -7,6 +7,28 @@ import PackagePlugin from ".";
 
 jest.mock("@alcalzone/pak");
 
+const fixtures = {
+	yarnrc_commented_out: `
+plugins:
+  - path: .yarn/plugins/@yarnpkg/plugin-workspace-tools.cjs
+    spec: "@yarnpkg/plugin-workspace-tools"
+  - path: .yarn/plugins/@yarnpkg/plugin-changed.cjs
+    spec: "https://github.com/Dcard/yarn-plugins/releases/latest/download/plugin-changed.js"
+# commented out, but required:
+#  - path: .yarn/plugins/@yarnpkg/plugin-version.cjs
+#    spec: "@yarnpkg/plugin-version"
+`.trim(),
+	yarnrc_complete: `
+plugins:
+  - path: .yarn/plugins/@yarnpkg/plugin-workspace-tools.cjs
+    spec: "@yarnpkg/plugin-workspace-tools"
+  - path: .yarn/plugins/@yarnpkg/plugin-changed.cjs
+    spec: "https://github.com/Dcard/yarn-plugins/releases/latest/download/plugin-changed.js"
+  - path: .yarn/plugins/@yarnpkg/plugin-version.cjs
+    spec: "@yarnpkg/plugin-version"
+`.trim(),
+};
+
 describe("Package plugin", () => {
 	describe("check stage", () => {
 		let testFS: TestFS;
@@ -71,7 +93,7 @@ describe("Package plugin", () => {
 			});
 		});
 
-		it(`"errors when package scripts are outdated`, async () => {
+		it(`errors when package scripts are outdated`, async () => {
 			const pkgPlugin = new PackagePlugin();
 			const context = createMockContext({
 				plugins: [pkgPlugin],
@@ -97,6 +119,100 @@ describe("Package plugin", () => {
 			expect(context.errors).toContainEqual(expect.stringMatching(`"preversion"`));
 			expect(context.errors).toContainEqual(expect.stringMatching(`"version"`));
 			expect(context.errors).toContainEqual(expect.stringMatching(`"postversion"`));
+		});
+	});
+
+	describe("check stage (monorepo)", () => {
+		let testFS: TestFS;
+		let testFSRoot: string;
+		beforeEach(async () => {
+			testFS = new TestFS();
+			testFSRoot = await testFS.getRoot();
+		});
+		afterEach(async () => {
+			await testFS.remove();
+		});
+
+		it("raises a fatal error when neither lerna nor yarn plugins are available", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+			});
+
+			await testFS.create({
+				"package.json": JSON.stringify({
+					name: "test-package",
+					version: "1.2.3",
+					workspaces: ["packages/*"],
+				}),
+			});
+
+			await assertReleaseError(() => pkgPlugin.executeStage(context, DefaultStages.check), {
+				fatal: true,
+				messageMatches: /monorepo/i,
+			});
+		});
+
+		it("raises a fatal error when some yarn plugins are unavailable", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+			});
+
+			await testFS.create({
+				"package.json": JSON.stringify({
+					name: "test-package",
+					version: "1.2.3",
+					workspaces: ["packages/*"],
+				}),
+				".yarnrc.yml": fixtures.yarnrc_commented_out,
+			});
+
+			await assertReleaseError(() => pkgPlugin.executeStage(context, DefaultStages.check), {
+				fatal: true,
+				messageMatches: /plugin import version/i,
+			});
+		});
+
+		it("does not error when the monorepo doesn't have any sub-packages", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+			});
+
+			await testFS.create({
+				"package.json": JSON.stringify({
+					name: "test-package",
+					version: "1.2.3",
+					workspaces: [],
+				}),
+			});
+
+			await pkgPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+		});
+
+		it("does not error when lerna is available", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+			});
+			context.setData("lerna", true);
+
+			await testFS.create({
+				"package.json": JSON.stringify({
+					name: "test-package",
+					version: "1.2.3",
+					workspaces: ["packages/*"],
+				}),
+			});
+
+			await pkgPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
 		});
 	});
 
@@ -207,6 +323,59 @@ describe("Package plugin", () => {
 			const fileContent = await fs.readJson(packPath);
 			expect(fileContent).toEqual(pack);
 		});
+
+		it("defers the versioning to yarn for yarn-managed monorepos (no lerna)", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+			});
+
+			const pack = {
+				name: "test-package",
+				version: "1.2.3",
+				workspaces: ["packages/*"],
+			};
+			await testFS.create({
+				"package.json": JSON.stringify(pack, null, 2),
+				".yarnrc.yml": fixtures.yarnrc_complete,
+			});
+
+			const newVersion = "1.2.4";
+			context.setData("package.json", pack);
+			context.setData("version_new", newVersion);
+			context.setData("monorepo", "yarn");
+
+			context.sys.mockExec((cmd) =>
+				cmd.includes("changed list")
+					? `
+{"name":"@package/foo","location":"packages/foo"}
+{"name":"@package/bar","location":"packages/bar"}`
+					: "",
+			);
+
+			await pkgPlugin.executeStage(context, DefaultStages.edit);
+			expect(context.errors).toHaveLength(0);
+
+			expect(context.cli.log).toHaveBeenCalledWith(expect.stringMatching("@package/foo"));
+			expect(context.cli.log).toHaveBeenCalledWith(expect.stringMatching("@package/bar"));
+
+			const expectedCommands = [
+				[
+					"yarn",
+					"changed",
+					"foreach",
+					`--git-range=v${pack.version}`,
+					"version",
+					newVersion,
+					"--deferred",
+				],
+				["yarn", "version", "apply", "--all"],
+			];
+			for (const [cmd, ...args] of expectedCommands) {
+				expect(context.sys.exec).toHaveBeenCalledWith(cmd, args, expect.anything());
+			}
+		});
 	});
 
 	describe("commit stage", () => {
@@ -303,6 +472,40 @@ describe("Package plugin", () => {
 			expect(context.errors).toContainEqual(
 				expect.stringMatching("Updating lockfile failed: NOOOO"),
 			);
+		});
+
+		it("does nothing for yarn-managed monorepos (no lerna)", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+			});
+			// Don't throw when calling system commands
+			context.sys.mockExec(() => "");
+
+			const packPath = path.join(testFSRoot, "package.json");
+			const pack = {
+				name: "test-package",
+				version: "1.2.3",
+				workspaces: ["packages/*"],
+			};
+
+			await testFS.create({
+				"package.json": JSON.stringify(pack, null, 2),
+				".yarnrc.yml": fixtures.yarnrc_complete,
+			});
+
+			context.setData("package.json", pack);
+			context.setData("version_new", "1.2.4");
+			context.setData("monorepo", "yarn");
+
+			await pkgPlugin.executeStage(context, DefaultStages.commit);
+			expect(context.errors).toHaveLength(0);
+
+			const fileContent = await fs.readJson(packPath);
+			expect(fileContent).toEqual(pack);
+
+			expect(context.sys.execRaw).not.toHaveBeenCalled();
 		});
 	});
 });
