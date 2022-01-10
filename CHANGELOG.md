@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 3.5.0-beta.2 (2022-01-10)
 * Support managing Yarn monorepos without `lerna`
 
 ## 3.4.3 (2022-01-10)
