@@ -541,9 +541,9 @@ jobs:
       # c) For monorepos managed with yarn v3.1+ (no lerna)
       - name: Publish packages to npm
         run: |
-          yarn config set 'npmRegistries["//registry.npmjs.org/"].npmAuthToken' "${{ secrets.NPM_TOKEN }}"
+          yarn config set npmAuthToken "${{ secrets.NPM_TOKEN }}"
           yarn npm whoami
-          yarn workspaces foreach --no-private npm publish --tolerate-republish
+          yarn workspaces foreach --topological --no-private npm publish --tolerate-republish
 
       - name: Create Github Release
         uses: actions/create-release@v1
