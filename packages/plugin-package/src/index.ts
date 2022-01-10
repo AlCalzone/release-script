@@ -176,12 +176,27 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 			{ cwd: context.cwd },
 		);
 		// The returned info contains the monorepo root
-		const changedPackages: string[] = output
+		const changedPackages = output
 			.trim()
 			.split("\n")
 			.map((line) => JSON.parse(line))
-			.filter((info) => info.location !== ".")
-			.map((info) => info.name);
+			.filter((info) => info.location !== ".");
+
+		// Work around https://github.com/yarnpkg/berry/issues/3868
+		const packageJsonFiles = [".", ...changedPackages.map((info) => info.location)].map((loc) =>
+			path.join(context.cwd, loc, "package.json"),
+		);
+		const deleteStableVersions = async (): Promise<void> => {
+			for (const packPath of packageJsonFiles) {
+				try {
+					const pack = await fs.readJSON(packPath);
+					delete pack.stableVersion;
+					await fs.writeJSON(packPath, pack, { spaces: 2 });
+				} catch {
+					// ignore
+				}
+			}
+		};
 
 		if (context.argv.dryRun) {
 			context.cli.log(
@@ -190,7 +205,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 				)} to ${context.cli.colors.green(
 					newVersion!,
 				)}. The following packages would be updated:${context.cli.colors.blue(
-					changedPackages.map((info) => `\n· ${info}`).join(""),
+					changedPackages.map((info) => `\n· ${info.name}`).join(""),
 				)}`,
 			);
 		} else {
@@ -200,10 +215,11 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 				)} to ${context.cli.colors.green(
 					newVersion!,
 				)}. The following packages will be updated:${context.cli.colors.blue(
-					changedPackages.map((info) => `\n· ${info}`).join(""),
+					changedPackages.map((info) => `\n· ${info.name}`).join(""),
 				)}`,
 			);
 
+			await deleteStableVersions();
 			const commands = [
 				[
 					"yarn",
@@ -220,6 +236,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 				context.cli.logCommand(cmd, args);
 				await context.sys.exec(cmd, args, { cwd: context.cwd });
 			}
+			await deleteStableVersions();
 		}
 	}
 
