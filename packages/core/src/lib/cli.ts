@@ -24,7 +24,8 @@ export interface CLI {
 	clearLines(lines: number): void;
 
 	prefix: string;
-	colors: typeof import("colors/safe");
+	colors: typeof import("picocolors");
+	stripColors: (str: string) => string;
 
 	// TODO: Ask the user something
 }
@@ -33,4 +34,18 @@ export interface SelectOption {
 	value: string;
 	label: string;
 	hint?: string;
+}
+
+// Shamelessly copied from https://github.com/chalk/ansi-regex
+const ansiRegex = (() => {
+	const pattern = [
+		"[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)",
+		"(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))",
+	].join("|");
+
+	return new RegExp(pattern, "g");
+})();
+
+export function stripColors(str: string): string {
+	return str.replace(ansiRegex, "");
 }

@@ -9,10 +9,11 @@ import {
 	ReleaseError,
 	resolvePlugins,
 	SelectOption,
+	stripColors,
 } from "@alcalzone/release-script-core";
 import { distinct } from "alcalzone-shared/arrays";
-import colors from "colors/safe";
 import { prompt } from "enquirer";
+import colors from "picocolors";
 import yargs from "yargs";
 
 function colorizeTextAndTags(
@@ -131,6 +132,7 @@ class CLI implements ICLI {
 	// eslint-disable-next-line @typescript-eslint/no-inferrable-types
 	public prefix: string = "";
 	public readonly colors = colors;
+	public readonly stripColors = stripColors;
 }
 
 export async function main(): Promise<void> {
