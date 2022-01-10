@@ -72,6 +72,5 @@
   "bugs": {
     "url": "https://github.com/AlCalzone/release-script/issues"
   },
-  "readmeFilename": "README.md",
-  "stableVersion": "3.4.3"
+  "readmeFilename": "README.md"
 }
