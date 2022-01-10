@@ -229,13 +229,13 @@ yarn plugin import https://github.com/Dcard/yarn-plugins/releases/latest/downloa
 
 You also need to make sure that there is a `"version"` field in the root `package.json` file.
 
-To release changed packages, simply run the following command after bumping the versions (ideally during your CI build):
+To release changed packages, simply run the following command after bumping the versions (ideally during your CI build). This assumes that the root workspace is private and should not be published:
 
 ```bash
 # without dist-tags
-yarn workspaces foreach npm publish --tolerate-republish
+yarn workspaces foreach --no-private npm publish --tolerate-republish
 # with dist-tags
-yarn workspaces foreach npm publish --tolerate-republish --tag my-tag
+yarn workspaces foreach --no-private npm publish --tolerate-republish --tag my-tag
 ```
 
 ### Using `lerna`
@@ -524,20 +524,26 @@ jobs:
       # - name: Create a clean build
       #   run: npx gulp build
 
+      # How to release packages to npm depends on the package type.
+      # Choose one of these possibilities and or comment out the others:
+      # a) For normal packages (no monorepo):
       - name: Publish package to npm
         run: |
           npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
           npm whoami
           npm publish
-      # To publish multiple packages from monorepos at once, you need to Replace
-      # the previous command with one of the following:
-      #
-      # * When using lerna (requires lerna to be installed globally):
-      #   lerna publish from-package --yes
-      # * When using lerna with yarn (doesn't require a global install):
-      #   yarn lerna publish from-package --yes
-      # * When using yarn v3.1+ (lerna not required)
-      #   yarn workspaces foreach npm publish --tolerate-republish
+      # b) For monorepos managed with lerna (requires lerna to be installed globally)
+      - name: Publish packages to npm
+        run: |
+          npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+          npm whoami
+          lerna publish from-package --yes
+      # c) For monorepos managed with yarn v3.1+ (no lerna)
+      - name: Publish packages to npm
+        run: |
+          yarn config set 'npmRegistries["//registry.npmjs.org/"].npmAuthToken' "${{ secrets.NPM_TOKEN }}"
+          yarn npm whoami
+          yarn workspaces foreach --no-private npm publish --tolerate-republish
 
       - name: Create Github Release
         uses: actions/create-release@v1
