@@ -529,6 +529,15 @@ jobs:
           npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
           npm whoami
           npm publish
+      # To publish multiple packages from monorepos at once, you need to Replace
+      # the previous command with one of the following:
+      #
+      # * When using lerna (requires lerna to be installed globally):
+      #   lerna publish from-package --yes
+      # * When using lerna with yarn (doesn't require a global install):
+      #   yarn lerna publish from-package --yes
+      # * When using yarn v3.1+ (lerna not required)
+      #   yarn workspaces foreach npm publish --tolerate-republish
 
       - name: Create Github Release
         uses: actions/create-release@v1
