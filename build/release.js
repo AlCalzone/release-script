@@ -53,7 +53,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const strings_1 = require("alcalzone-shared/strings");
 const typeguards_1 = require("alcalzone-shared/typeguards");
 const child_process_1 = require("child_process");
-const safe_1 = __importDefault(require("colors/safe"));
+const picocolors_1 = __importDefault(require("picocolors"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const semver = __importStar(require("semver"));
@@ -65,7 +65,7 @@ const gitStatus_1 = require("./gitStatus");
 const rootDir = process.cwd();
 function fail(reason) {
     console.error("");
-    console.error(safe_1.default.red("ERROR: " + reason));
+    console.error(picocolors_1.default.red("ERROR: " + reason));
     console.error("");
     process.exit(1);
 }
@@ -132,55 +132,55 @@ const CHANGELOG_PLACEHOLDER_REGEX = new RegExp(`^${CHANGELOG_PLACEHOLDER_PREFIX}
 // check if the changelog contains exactly 1 occurence of the changelog placeholder
 switch ((changelog.match(CHANGELOG_PLACEHOLDER_REGEX) || []).length) {
     case 0:
-        fail(safe_1.default.red(`Cannot continue, the changelog placeholder is missing from ${changelogFilename}!\n` +
+        fail(picocolors_1.default.red(`Cannot continue, the changelog placeholder is missing from ${changelogFilename}!\n` +
             "Please add the following line to your changelog:\n" +
             CHANGELOG_PLACEHOLDER));
     case 1:
         break; // all good
     default:
-        fail(safe_1.default.red(`Cannot continue, there is more than one changelog placeholder in ${changelogFilename}!`));
+        fail(picocolors_1.default.red(`Cannot continue, there is more than one changelog placeholder in ${changelogFilename}!`));
 }
 // Check if there is a changelog for the current version
 const currentChangelog = tools_1.extractCurrentChangelog(changelog, CHANGELOG_PLACEHOLDER_PREFIX, CHANGELOG_PLACEHOLDER_REGEX);
 if (!currentChangelog) {
-    fail(safe_1.default.red("Cannot continue, the changelog for the next version is empty!"));
+    fail(picocolors_1.default.red("Cannot continue, the changelog for the next version is empty!"));
 }
 // check if there are untracked changes
 const branchStatus = gitStatus_1.gitStatus(rootDir);
 if (branchStatus === "diverged") {
     if (!parseArgs_1.isDryRun) {
-        fail(safe_1.default.red("Cannot continue, both the remote and the local repo have different changes! Please merge the remote changes first."));
+        fail(picocolors_1.default.red("Cannot continue, both the remote and the local repo have different changes! Please merge the remote changes first."));
     }
     else {
-        console.log(safe_1.default.red("This is a dry run. The full run would fail due to a diverged branch\n"));
+        console.log(picocolors_1.default.red("This is a dry run. The full run would fail due to a diverged branch\n"));
     }
 }
 else if (branchStatus === "behind") {
     if (!parseArgs_1.isDryRun) {
-        fail(safe_1.default.red(`Cannot continue, the local branch is behind the remote changes! Please include them first, e.g. with "git pull".`));
+        fail(picocolors_1.default.red(`Cannot continue, the local branch is behind the remote changes! Please include them first, e.g. with "git pull".`));
     }
     else {
-        console.log(safe_1.default.red("This is a dry run. The full run would fail due to the local branch being behind\n"));
+        console.log(picocolors_1.default.red("This is a dry run. The full run would fail due to the local branch being behind\n"));
     }
 }
 else if (branchStatus === "ahead" || branchStatus === "up-to-date") {
     // all good
     if (!parseArgs_1.lerna) {
-        console.log(safe_1.default.green("git status is good - I can continue..."));
+        console.log(picocolors_1.default.green("git status is good - I can continue..."));
     }
 }
 else if (branchStatus === "uncommitted" && !parseArgs_1.lerna) {
     if (!parseArgs_1.isDryRun && !parseArgs_1.allChanges) {
-        fail(safe_1.default.red(`Cannot continue, the local branch has uncommitted changes! Add them to a separate commit first or add the "--all" option to include them in the release commit.`));
+        fail(picocolors_1.default.red(`Cannot continue, the local branch has uncommitted changes! Add them to a separate commit first or add the "--all" option to include them in the release commit.`));
     }
     else {
         if (parseArgs_1.allChanges) {
-            console.warn(safe_1.default.yellow(`Your branch has uncommitted changes that will be included in the release commit!
+            console.warn(picocolors_1.default.yellow(`Your branch has uncommitted changes that will be included in the release commit!
 Consider adding them to a separate commit first.
 `));
         }
         else {
-            console.log(safe_1.default.red(`This is a dry run. The full run would fail due to uncommitted changes.
+            console.log(picocolors_1.default.red(`This is a dry run. The full run would fail due to uncommitted changes.
 Add them to a separate commit first or add the "--all" option to include them in the release commit.
 `));
         }
@@ -222,7 +222,7 @@ else {
         else {
             newVersion = semver.inc(oldVersion, releaseType);
         }
-        console.log(`bumping version ${safe_1.default.blue(oldVersion)} to ${safe_1.default.gray(releaseType)} version ${safe_1.default.green(newVersion)}\n`);
+        console.log(`bumping version ${picocolors_1.default.blue(oldVersion)} to ${picocolors_1.default.gray(releaseType)} version ${picocolors_1.default.green(newVersion)}\n`);
     }
     else {
         // increment to specific version
@@ -244,11 +244,11 @@ else {
 }
 (() => __awaiter(void 0, void 0, void 0, function* () {
     if (parseArgs_1.isDryRun) {
-        console.log(safe_1.default.yellow("dry run:") + " not updating package files");
+        console.log(picocolors_1.default.yellow("dry run:") + " not updating package files");
     }
     else {
         if (!parseArgs_1.lerna) {
-            console.log(`updating package.json from ${safe_1.default.blue(pack.version)} to ${safe_1.default.green(newVersion)}`);
+            console.log(`updating package.json from ${picocolors_1.default.blue(pack.version)} to ${picocolors_1.default.green(newVersion)}`);
             pack.version = newVersion;
             fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
         }
@@ -278,7 +278,7 @@ else {
 
 ${newChangelog}`);
         if (hasIoPack) {
-            console.log(`updating io-package.json from ${safe_1.default.blue(ioPack.common.version)} to ${safe_1.default.green(newVersion)}`);
+            console.log(`updating io-package.json from ${picocolors_1.default.blue(ioPack.common.version)} to ${picocolors_1.default.green(newVersion)}`);
             ioPack.common.version = newVersion;
             if (newVersion in ioPack.common.news) {
                 console.log(`current news is already in io-package.json`);
@@ -329,14 +329,14 @@ ${newChangelog}`);
         execQueue.unshift(...parseArgs_1.scripts.beforePush);
     }
     if (parseArgs_1.isDryRun) {
-        console.log(safe_1.default.yellow("dry run:") + " I would execute this:");
+        console.log(picocolors_1.default.yellow("dry run:") + " I would execute this:");
         for (const command of execQueue) {
             console.log("  " + command);
         }
     }
     else {
         for (const command of execQueue) {
-            console.log(`executing "${safe_1.default.blue(command)}" ...`);
+            console.log(`executing "${picocolors_1.default.blue(command)}" ...`);
             child_process_1.execSync(command, { cwd: rootDir });
         }
         // Delete the commit message file again
@@ -348,7 +348,7 @@ ${newChangelog}`);
         }
     }
     console.log("");
-    console.log(safe_1.default.green("done!"));
+    console.log(picocolors_1.default.green("done!"));
     console.log("");
     process.exit(0);
 }))().catch((e) => {
