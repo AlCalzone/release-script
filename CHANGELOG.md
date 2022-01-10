@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 2.2.2 (2022-01-10)
 * Replace `colors` dependency with `picocolors`
 
 ## 2.2.1 (2021-07-26)
