@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "3.4.3",
+  "version": "3.5.0-beta.0",
   "description": "Plugin for Al Calzone's release script: npm package files",
   "keywords": [],
   "license": "MIT",
@@ -60,5 +60,6 @@
   "bugs": {
     "url": "https://github.com/AlCalzone/release-script/issues"
   },
-  "readmeFilename": "README.md"
+  "readmeFilename": "README.md",
+  "stableVersion": "3.4.3"
 }
