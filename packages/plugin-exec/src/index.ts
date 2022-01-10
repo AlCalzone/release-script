@@ -114,7 +114,7 @@ class ExecPlugin implements Plugin {
 				const promise = context.sys.execRaw(command, { cwd: context.cwd });
 				promise.stdout?.on("data", (data) => {
 					context.cli.log(
-						colors.grey(colors.stripColors(data.toString().replace(/\r?\n$/, ""))),
+						colors.gray(context.cli.stripColors(data.toString().replace(/\r?\n$/, ""))),
 					);
 				});
 				await promise;

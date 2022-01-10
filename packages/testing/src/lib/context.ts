@@ -1,7 +1,15 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import { CLI, Context, exec, execRaw, ReleaseError, System } from "@alcalzone/release-script-core";
-import colors from "colors/safe";
+import {
+	CLI,
+	Context,
+	exec,
+	execRaw,
+	ReleaseError,
+	stripColors,
+	System,
+} from "@alcalzone/release-script-core";
 import type { ExecaReturnValue } from "execa";
+import colors from "picocolors";
 
 class MockSystem implements System {
 	public exec: jest.MockedFunction<System["exec"]> = jest.fn();
@@ -94,6 +102,7 @@ export function createMockContext(
 			ask: jest.fn(),
 			clearLines: jest.fn(),
 			colors,
+			stripColors,
 			prefix: "",
 		},
 		warnings: [],

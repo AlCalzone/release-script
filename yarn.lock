@@ -21,8 +21,8 @@ __metadata:
   resolution: "@alcalzone/release-script-core@workspace:packages/core"
   dependencies:
     "@types/yargs": ^17.0.2
-    colors: ^1.4.0
     execa: ^5.1.1
+    picocolors: 1.0.0
     typescript: "*"
     yargs: ^17.1.1
   languageName: unknown
@@ -188,8 +188,8 @@ __metadata:
   resolution: "@alcalzone/release-script-testing@workspace:packages/testing"
   dependencies:
     "@alcalzone/release-script-core": 3.4.1
-    colors: ^1.4.0
     execa: "*"
+    picocolors: 1.0.0
     typescript: "*"
   peerDependencies:
     execa: "*"
@@ -210,9 +210,9 @@ __metadata:
     "@types/yargs": ^17.0.2
     alcalzone-shared: ^4.0.0
     axios: ^0.21.4
-    colors: ^1.4.0
     enquirer: ^2.3.6
     fs-extra: ^10.0.0
+    picocolors: 1.0.0
     semver: ^7.3.5
     source-map-support: ^0.5.20
     typescript: "*"
@@ -4506,13 +4506,6 @@ __metadata:
   version: 1.4.0
   resolution: "colorette@npm:1.4.0"
   checksum: 01c3c16058b182a4ab4c126a65a75faa4d38a20fa7c845090b25453acec6c371bb2c5dceb0a2338511f17902b9d1a9af0cadd8509c9403894b79311032c256c3
-  languageName: node
-  linkType: hard
-
-"colors@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "colors@npm:1.4.0"
-  checksum: 98aa2c2418ad87dedf25d781be69dc5fc5908e279d9d30c34d8b702e586a0474605b3a189511482b9d5ed0d20c867515d22749537f7bc546256c6014f3ebdcec
   languageName: node
   linkType: hard
 
@@ -9448,6 +9441,13 @@ __metadata:
   version: 2.1.0
   resolution: "performance-now@npm:2.1.0"
   checksum: 534e641aa8f7cba160f0afec0599b6cecefbb516a2e837b512be0adbe6c1da5550e89c78059c7fabc5c9ffdf6627edabe23eb7c518c4500067a898fa65c2b550
+  languageName: node
+  linkType: hard
+
+"picocolors@npm:1.0.0":
+  version: 1.0.0
+  resolution: "picocolors@npm:1.0.0"
+  checksum: a2e8092dd86c8396bdba9f2b5481032848525b3dc295ce9b57896f931e63fc16f79805144321f72976383fc249584672a75cc18d6777c6b757603f372f745981
   languageName: node
   linkType: hard
 
