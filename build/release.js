@@ -43,7 +43,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const strings_1 = require("alcalzone-shared/strings");
 const typeguards_1 = require("alcalzone-shared/typeguards");
 const child_process_1 = require("child_process");
-const safe_1 = __importDefault(require("colors/safe"));
+const picocolors_1 = __importDefault(require("picocolors"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const semver = __importStar(require("semver"));
@@ -61,7 +61,7 @@ const yarn_1 = require("./yarn");
     const { allChanges, isDryRun, yarnWorkspace, lerna, lernaCheck, scripts: userScripts, remote, noWorkflowCheck, } = await parseArgs_1.parseArgs();
     function fail(reason) {
         console.error("");
-        console.error(safe_1.default.red("ERROR: " + reason));
+        console.error(picocolors_1.default.red("ERROR: " + reason));
         console.error("");
         process.exit(1);
     }
@@ -87,20 +87,20 @@ const yarn_1 = require("./yarn");
     }
     // Check that git can push
     if (!git_1.checkGitIdentity(rootDir)) {
-        let message = safe_1.default.red((isDryRun
+        let message = picocolors_1.default.red((isDryRun
             ? "This is a dry run. The full run would fail because "
             : "Cannot continue because ") +
-            `no git identity is configured for the current user ${safe_1.default.bold(safe_1.default.blue(os.userInfo().username))}!`);
+            `no git identity is configured for the current user ${picocolors_1.default.bold(picocolors_1.default.blue(os.userInfo().username))}!`);
         message += `\n
 Please tell git who you are, either globally using
-	${safe_1.default.blue(`git config --global user.name "Your Name"
+	${picocolors_1.default.blue(`git config --global user.name "Your Name"
 	git config --global user.email "your@e-mail.com"`)}
 
 or only for this folder
-	${safe_1.default.blue(`git config user.name "Your Name"
+	${picocolors_1.default.blue(`git config user.name "Your Name"
 	git config user.email "your@e-mail.com"`)}
 
-Note: If the current folder belongs to a different user than ${safe_1.default.bold(safe_1.default.blue(os.userInfo().username))}, you might have to switch to that user first before changing the global config.
+Note: If the current folder belongs to a different user than ${picocolors_1.default.bold(picocolors_1.default.blue(os.userInfo().username))}, you might have to switch to that user first before changing the global config.
 `;
         if (isDryRun)
             console.log(message);
@@ -127,11 +127,11 @@ Note: If the current folder belongs to a different user than ${safe_1.default.bo
                 break;
             let line = content.substr(match.index);
             line = line.substr(0, line.indexOf("\n"));
-            fail(`The ${safe_1.default.bold("deploy")} job in ${safe_1.default.bold(`.github/workflows/test-and-release.yml`)} potentially has an error, which can cause your deploy to fail.
+            fail(`The ${picocolors_1.default.bold("deploy")} job in ${picocolors_1.default.bold(`.github/workflows/test-and-release.yml`)} potentially has an error, which can cause your deploy to fail.
 Remove this line to fix it:
-${safe_1.default.inverse(line)}
+${picocolors_1.default.inverse(line)}
 
-You can suppress this check with the ${safe_1.default.bold("--no-workflow-check")} flag.`);
+You can suppress this check with the ${picocolors_1.default.bold("--no-workflow-check")} flag.`);
         }
     }
     // If this is an ioBroker project, also bump the io-package.json
@@ -180,55 +180,55 @@ You can suppress this check with the ${safe_1.default.bold("--no-workflow-check"
     // check if the changelog contains exactly 1 occurence of the changelog placeholder
     switch ((changelog.match(CHANGELOG_PLACEHOLDER_REGEX) || []).length) {
         case 0:
-            fail(safe_1.default.red(`Cannot continue, the changelog placeholder is missing from ${changelogFilename}!\n` +
+            fail(picocolors_1.default.red(`Cannot continue, the changelog placeholder is missing from ${changelogFilename}!\n` +
                 "Please add the following line to your changelog:\n" +
                 CHANGELOG_PLACEHOLDER));
         case 1:
             break; // all good
         default:
-            fail(safe_1.default.red(`Cannot continue, there is more than one changelog placeholder in ${changelogFilename}!`));
+            fail(picocolors_1.default.red(`Cannot continue, there is more than one changelog placeholder in ${changelogFilename}!`));
     }
     // Check if there is a changelog for the current version
     const currentChangelog = tools_1.extractCurrentChangelog(changelog, CHANGELOG_PLACEHOLDER_PREFIX, CHANGELOG_PLACEHOLDER_REGEX);
     if (!currentChangelog) {
-        fail(safe_1.default.red("Cannot continue, the changelog for the next version is empty!"));
+        fail(picocolors_1.default.red("Cannot continue, the changelog for the next version is empty!"));
     }
     // check if there are untracked changes
     const branchStatus = git_1.gitStatus(rootDir, remote);
     if (branchStatus === "diverged") {
         if (!isDryRun) {
-            fail(safe_1.default.red("Cannot continue, both the remote and the local repo have different changes! Please merge the remote changes first."));
+            fail(picocolors_1.default.red("Cannot continue, both the remote and the local repo have different changes! Please merge the remote changes first."));
         }
         else {
-            console.log(safe_1.default.red("This is a dry run. The full run would fail due to a diverged branch\n"));
+            console.log(picocolors_1.default.red("This is a dry run. The full run would fail due to a diverged branch\n"));
         }
     }
     else if (branchStatus === "behind") {
         if (!isDryRun) {
-            fail(safe_1.default.red(`Cannot continue, the local branch is behind the remote changes! Please include them first, e.g. with "git pull".`));
+            fail(picocolors_1.default.red(`Cannot continue, the local branch is behind the remote changes! Please include them first, e.g. with "git pull".`));
         }
         else {
-            console.log(safe_1.default.red("This is a dry run. The full run would fail due to the local branch being behind\n"));
+            console.log(picocolors_1.default.red("This is a dry run. The full run would fail due to the local branch being behind\n"));
         }
     }
     else if (branchStatus === "ahead" || branchStatus === "up-to-date") {
         // all good
         if (!lerna) {
-            console.log(safe_1.default.green("git status is good - I can continue..."));
+            console.log(picocolors_1.default.green("git status is good - I can continue..."));
         }
     }
     else if (branchStatus === "uncommitted" && !lerna) {
         if (!isDryRun && !allChanges) {
-            fail(safe_1.default.red(`Cannot continue, the local branch has uncommitted changes! Add them to a separate commit first or add the "--all" option to include them in the release commit.`));
+            fail(picocolors_1.default.red(`Cannot continue, the local branch has uncommitted changes! Add them to a separate commit first or add the "--all" option to include them in the release commit.`));
         }
         else {
             if (allChanges) {
-                console.warn(safe_1.default.yellow(`Your branch has uncommitted changes that will be included in the release commit!
+                console.warn(picocolors_1.default.yellow(`Your branch has uncommitted changes that will be included in the release commit!
 Consider adding them to a separate commit first.
 `));
             }
             else {
-                console.log(safe_1.default.red(`This is a dry run. The full run would fail due to uncommitted changes.
+                console.log(picocolors_1.default.red(`This is a dry run. The full run would fail due to uncommitted changes.
 Add them to a separate commit first or add the "--all" option to include them in the release commit.
 `));
             }
@@ -270,7 +270,7 @@ Add them to a separate commit first or add the "--all" option to include them in
             else {
                 newVersion = semver.inc(oldVersion, releaseType);
             }
-            console.log(`bumping version ${safe_1.default.blue(oldVersion)} to ${safe_1.default.gray(releaseType)} version ${safe_1.default.green(newVersion)}\n`);
+            console.log(`bumping version ${picocolors_1.default.blue(oldVersion)} to ${picocolors_1.default.gray(releaseType)} version ${picocolors_1.default.green(newVersion)}\n`);
         }
         else {
             // increment to specific version
@@ -292,11 +292,11 @@ Add them to a separate commit first or add the "--all" option to include them in
         }
     }
     if (isDryRun) {
-        console.log(safe_1.default.yellow("dry run:") + " not updating package files");
+        console.log(picocolors_1.default.yellow("dry run:") + " not updating package files");
     }
     else {
         if (!lerna && !yarnWorkspace) {
-            console.log(`updating package.json from ${safe_1.default.blue(pack.version)} to ${safe_1.default.green(newVersion)}`);
+            console.log(`updating package.json from ${picocolors_1.default.blue(pack.version)} to ${picocolors_1.default.green(newVersion)}`);
             pack.version = newVersion;
             fs.writeFileSync(packPath, JSON.stringify(pack, null, 2));
         }
@@ -326,7 +326,7 @@ Add them to a separate commit first or add the "--all" option to include them in
 
 ${newChangelog}`);
         if (hasIoPack) {
-            console.log(`updating io-package.json from ${safe_1.default.blue(ioPack.common.version)} to ${safe_1.default.green(newVersion)}`);
+            console.log(`updating io-package.json from ${picocolors_1.default.blue(ioPack.common.version)} to ${picocolors_1.default.green(newVersion)}`);
             ioPack.common.version = newVersion;
             if (newVersion in ioPack.common.news) {
                 console.log(`current news is already in io-package.json`);
@@ -390,14 +390,14 @@ ${newChangelog}`);
         execQueue.unshift(...userScripts.beforePush);
     }
     if (isDryRun) {
-        console.log(safe_1.default.yellow("dry run:") + " I would execute this:");
+        console.log(picocolors_1.default.yellow("dry run:") + " I would execute this:");
         for (const command of execQueue) {
             console.log("  " + command);
         }
     }
     else {
         for (const command of execQueue) {
-            console.log(`executing "${safe_1.default.blue(command)}" ...`);
+            console.log(`executing "${picocolors_1.default.blue(command)}" ...`);
             child_process_1.execSync(command, { cwd: rootDir });
         }
         // Delete the commit message file again
@@ -409,7 +409,7 @@ ${newChangelog}`);
         }
     }
     console.log("");
-    console.log(safe_1.default.green("done!"));
+    console.log(picocolors_1.default.green("done!"));
     console.log("");
     process.exit(0);
 })().catch((e) => {
