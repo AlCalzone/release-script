@@ -4,7 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "3.4.1",
+  "version": "3.4.3",
   "description": "Plugin for Al Calzone's release script: template",
   "keywords": [],
   "license": "MIT",
@@ -38,10 +38,10 @@
     "node": ">=12.20"
   },
   "dependencies": {
-    "@alcalzone/release-script-core": "3.4.1"
+    "@alcalzone/release-script-core": "3.4.3"
   },
   "devDependencies": {
-    "@alcalzone/release-script-testing": "3.4.1",
+    "@alcalzone/release-script-testing": "3.4.3",
     "jest-extended": "^0.11.5",
     "typescript": "*"
   },

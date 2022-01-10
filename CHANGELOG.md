@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## 3.4.3 (2022-01-10)
+* Replace `colors` dependency with `picocolors`
+
 ## 3.4.2 (2021-12-18)
 * `package` plugin: Set package manager to `development` for updating the lockfile to prevent npm7+ from deleting `devDependencies`.
 

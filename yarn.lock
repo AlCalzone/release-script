@@ -16,7 +16,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@alcalzone/release-script-core@3.4.1, @alcalzone/release-script-core@workspace:packages/core":
+"@alcalzone/release-script-core@3.4.3, @alcalzone/release-script-core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-core@workspace:packages/core"
   dependencies:
@@ -28,36 +28,36 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@alcalzone/release-script-plugin-changelog@3.4.1, @alcalzone/release-script-plugin-changelog@workspace:packages/plugin-changelog":
+"@alcalzone/release-script-plugin-changelog@3.4.3, @alcalzone/release-script-plugin-changelog@workspace:packages/plugin-changelog":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-changelog@workspace:packages/plugin-changelog"
   dependencies:
-    "@alcalzone/release-script-core": 3.4.1
-    "@alcalzone/release-script-testing": 3.4.1
+    "@alcalzone/release-script-core": 3.4.3
+    "@alcalzone/release-script-testing": 3.4.3
     alcalzone-shared: ^4.0.0
     jest-extended: ^0.11.5
     typescript: "*"
   languageName: unknown
   linkType: soft
 
-"@alcalzone/release-script-plugin-exec@3.4.1, @alcalzone/release-script-plugin-exec@workspace:packages/plugin-exec":
+"@alcalzone/release-script-plugin-exec@3.4.3, @alcalzone/release-script-plugin-exec@workspace:packages/plugin-exec":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-exec@workspace:packages/plugin-exec"
   dependencies:
-    "@alcalzone/release-script-core": 3.4.1
-    "@alcalzone/release-script-testing": 3.4.1
+    "@alcalzone/release-script-core": 3.4.3
+    "@alcalzone/release-script-testing": 3.4.3
     alcalzone-shared: ^4.0.0
     jest-extended: ^0.11.5
     typescript: "*"
   languageName: unknown
   linkType: soft
 
-"@alcalzone/release-script-plugin-git@3.4.1, @alcalzone/release-script-plugin-git@workspace:packages/plugin-git":
+"@alcalzone/release-script-plugin-git@3.4.3, @alcalzone/release-script-plugin-git@workspace:packages/plugin-git":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-git@workspace:packages/plugin-git"
   dependencies:
-    "@alcalzone/release-script-core": 3.4.1
-    "@alcalzone/release-script-testing": 3.4.1
+    "@alcalzone/release-script-core": 3.4.3
+    "@alcalzone/release-script-testing": 3.4.3
     fs-extra: ^10.0.0
     jest-extended: ^0.11.5
     typescript: "*"
@@ -68,8 +68,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-iobroker@workspace:packages/plugin-iobroker"
   dependencies:
-    "@alcalzone/release-script-core": 3.4.1
-    "@alcalzone/release-script-testing": 3.4.1
+    "@alcalzone/release-script-core": 3.4.3
+    "@alcalzone/release-script-testing": 3.4.3
     alcalzone-shared: ^4.0.0
     axios: ^0.21.4
     jest-extended: ^0.11.5
@@ -81,8 +81,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-lerna@workspace:packages/plugin-lerna"
   dependencies:
-    "@alcalzone/release-script-core": 3.4.1
-    "@alcalzone/release-script-testing": 3.4.1
+    "@alcalzone/release-script-core": 3.4.3
+    "@alcalzone/release-script-testing": 3.4.3
     jest-extended: ^0.11.5
     typescript: "*"
   languageName: unknown
@@ -92,8 +92,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-license@workspace:packages/plugin-license"
   dependencies:
-    "@alcalzone/release-script-core": 3.4.1
-    "@alcalzone/release-script-testing": 3.4.1
+    "@alcalzone/release-script-core": 3.4.3
+    "@alcalzone/release-script-testing": 3.4.3
     fs-extra: ^10.0.0
     jest-extended: ^0.11.5
     tiny-glob: ^0.2.9
@@ -105,20 +105,20 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-manual-review@workspace:packages/plugin-manual-review"
   dependencies:
-    "@alcalzone/release-script-core": 3.4.1
-    "@alcalzone/release-script-testing": 3.4.1
+    "@alcalzone/release-script-core": 3.4.3
+    "@alcalzone/release-script-testing": 3.4.3
     jest-extended: ^0.11.5
     typescript: "*"
   languageName: unknown
   linkType: soft
 
-"@alcalzone/release-script-plugin-package@3.4.2, @alcalzone/release-script-plugin-package@workspace:packages/plugin-package":
+"@alcalzone/release-script-plugin-package@3.4.3, @alcalzone/release-script-plugin-package@workspace:packages/plugin-package":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-package@workspace:packages/plugin-package"
   dependencies:
     "@alcalzone/pak": ^0.7.0
-    "@alcalzone/release-script-core": 3.4.1
-    "@alcalzone/release-script-testing": 3.4.1
+    "@alcalzone/release-script-core": 3.4.3
+    "@alcalzone/release-script-testing": 3.4.3
     alcalzone-shared: ^4.0.0
     jest-extended: ^0.11.5
     semver: ^7.3.5
@@ -130,19 +130,19 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-template@workspace:packages/plugin-template"
   dependencies:
-    "@alcalzone/release-script-core": 3.4.1
-    "@alcalzone/release-script-testing": 3.4.1
+    "@alcalzone/release-script-core": 3.4.3
+    "@alcalzone/release-script-testing": 3.4.3
     jest-extended: ^0.11.5
     typescript: "*"
   languageName: unknown
   linkType: soft
 
-"@alcalzone/release-script-plugin-version@3.4.1, @alcalzone/release-script-plugin-version@workspace:packages/plugin-version":
+"@alcalzone/release-script-plugin-version@3.4.3, @alcalzone/release-script-plugin-version@workspace:packages/plugin-version":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-version@workspace:packages/plugin-version"
   dependencies:
-    "@alcalzone/release-script-core": 3.4.1
-    "@alcalzone/release-script-testing": 3.4.1
+    "@alcalzone/release-script-core": 3.4.3
+    "@alcalzone/release-script-testing": 3.4.3
     alcalzone-shared: ^4.0.0
     jest-extended: ^0.11.5
     semver: ^7.3.5
@@ -183,11 +183,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@alcalzone/release-script-testing@3.4.1, @alcalzone/release-script-testing@workspace:packages/testing":
+"@alcalzone/release-script-testing@3.4.3, @alcalzone/release-script-testing@workspace:packages/testing":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-testing@workspace:packages/testing"
   dependencies:
-    "@alcalzone/release-script-core": 3.4.1
+    "@alcalzone/release-script-core": 3.4.3
     execa: "*"
     picocolors: 1.0.0
     typescript: "*"
@@ -200,13 +200,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script@workspace:packages/release-script"
   dependencies:
-    "@alcalzone/release-script-core": 3.4.1
-    "@alcalzone/release-script-plugin-changelog": 3.4.1
-    "@alcalzone/release-script-plugin-exec": 3.4.1
-    "@alcalzone/release-script-plugin-git": 3.4.1
-    "@alcalzone/release-script-plugin-package": 3.4.2
-    "@alcalzone/release-script-plugin-version": 3.4.1
-    "@alcalzone/release-script-testing": 3.4.1
+    "@alcalzone/release-script-core": 3.4.3
+    "@alcalzone/release-script-plugin-changelog": 3.4.3
+    "@alcalzone/release-script-plugin-exec": 3.4.3
+    "@alcalzone/release-script-plugin-git": 3.4.3
+    "@alcalzone/release-script-plugin-package": 3.4.3
+    "@alcalzone/release-script-plugin-version": 3.4.3
+    "@alcalzone/release-script-testing": 3.4.3
     "@types/yargs": ^17.0.2
     alcalzone-shared: ^4.0.0
     axios: ^0.21.4
