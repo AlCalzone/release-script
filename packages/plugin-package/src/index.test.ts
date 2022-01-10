@@ -13,7 +13,7 @@ plugins:
   - path: .yarn/plugins/@yarnpkg/plugin-workspace-tools.cjs
     spec: "@yarnpkg/plugin-workspace-tools"
   - path: .yarn/plugins/@yarnpkg/plugin-changed.cjs
-    spec: "https://github.com/Dcard/yarn-plugins/releases/download/v0.7.2/plugin-changed.js"
+    spec: "https://github.com/Dcard/yarn-plugins/releases/latest/download/plugin-changed.js"
 # commented out, but required:
 #  - path: .yarn/plugins/@yarnpkg/plugin-version.cjs
 #    spec: "@yarnpkg/plugin-version"
@@ -23,7 +23,7 @@ plugins:
   - path: .yarn/plugins/@yarnpkg/plugin-workspace-tools.cjs
     spec: "@yarnpkg/plugin-workspace-tools"
   - path: .yarn/plugins/@yarnpkg/plugin-changed.cjs
-    spec: "https://github.com/Dcard/yarn-plugins/releases/download/v0.7.2/plugin-changed.js"
+    spec: "https://github.com/Dcard/yarn-plugins/releases/latest/download/plugin-changed.js"
   - path: .yarn/plugins/@yarnpkg/plugin-version.cjs
     spec: "@yarnpkg/plugin-version"
 `.trim(),

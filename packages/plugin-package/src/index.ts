@@ -67,7 +67,7 @@ class PackagePlugin implements Plugin {
 						"workspace-tools": "workspace-tools",
 						version: "version",
 						changed:
-							"https://github.com/Dcard/yarn-plugins/releases/download/latest/plugin-changed.js",
+							"https://github.com/Dcard/yarn-plugins/releases/latest/download/plugin-changed.js",
 					};
 					const missingPlugins = Object.keys(requiredPlugins).filter(
 						(plugin) => !yarnPlugins.includes(plugin),

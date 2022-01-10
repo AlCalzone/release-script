@@ -123,7 +123,7 @@ jobs:
         run: |
           npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
           npm whoami
-          yarn lerna publish from-package --yes
+          yarn workspaces foreach npm publish --tolerate-republish
 
       - name: Create Github Release
         uses: actions/create-release@v1

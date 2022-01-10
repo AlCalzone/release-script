@@ -224,7 +224,7 @@ Starting with `yarn v3.1.0`, the release script can use Yarn plugins to manage v
 ```bash
 yarn plugin import workspace-tools
 yarn plugin import version
-yarn plugin import https://github.com/Dcard/yarn-plugins/releases/download/latest/plugin-changed.js
+yarn plugin import https://github.com/Dcard/yarn-plugins/releases/latest/download/plugin-changed.js
 ```
 
 You also need to make sure that there is a `"version"` field in the root `package.json` file.
