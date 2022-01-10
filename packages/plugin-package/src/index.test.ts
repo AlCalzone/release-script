@@ -370,6 +370,7 @@ describe("Package plugin", () => {
 					newVersion,
 					"--deferred",
 				],
+				["yarn", "version", newVersion, "--deferred"],
 				["yarn", "version", "apply", "--all"],
 			];
 			for (const [cmd, ...args] of expectedCommands) {
