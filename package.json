@@ -1,6 +1,6 @@
 {
   "name": "@alcalzone/release-script-repo",
-  "version": "3.4.4-0",
+  "version": "3.5.0-beta.2",
   "description": "Release script to automatically increment version numbers and push git tags",
   "keywords": [
     "release",
@@ -70,6 +70,5 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "packageManager": "yarn@3.1.1",
-  "stableVersion": "3.4.3"
+  "packageManager": "yarn@3.1.1"
 }
