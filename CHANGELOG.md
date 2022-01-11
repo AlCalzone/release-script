@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 3.5.0 (2022-01-11)
 * Support managing Yarn monorepos without `lerna`
 * Fix: `version` plugin tries to propose the current prerelease identifier instead of always `alpha`
 * Publish all packages when promoting from prerelease to full release
