@@ -237,9 +237,9 @@ To release changed packages, simply run the following command after bumping the 
 
 ```bash
 # without dist-tags
-yarn workspaces foreach --no-private npm publish --tolerate-republish
+yarn workspaces foreach -vti --no-private npm publish --tolerate-republish
 # with dist-tags
-yarn workspaces foreach --no-private npm publish --tolerate-republish --tag my-tag
+yarn workspaces foreach -vti --no-private npm publish --tolerate-republish --tag my-tag
 ```
 
 ### Using `lerna`
@@ -541,7 +541,7 @@ jobs:
         run: |
           yarn config set npmAuthToken "${{ secrets.NPM_TOKEN }}"
           yarn npm whoami
-          yarn workspaces foreach --topological --no-private npm publish --tolerate-republish
+          yarn workspaces foreach -vti --no-private npm publish --tolerate-republish
 
       - name: Create Github Release
         uses: actions/create-release@v1
