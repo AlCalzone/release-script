@@ -41,12 +41,13 @@ class VersionPlugin implements Plugin {
 		let deleteLines = 2;
 		let askOk = false;
 
+		let preid = context.argv.preid ?? parsedVersion?.prerelease?.[0];
+		if (typeof preid !== "string" || !Number.isNaN(parseInt(preid, 10))) {
+			preid = undefined;
+		}
+
 		if (!context.argv.bump) {
 			context.cli.log(`Version bump not provided`);
-			let preid = context.argv.preid ?? parsedVersion?.prerelease?.[0];
-			if (typeof preid !== "string" || !Number.isNaN(parseInt(preid, 10))) {
-				preid = undefined;
-			}
 			context.argv.bump = await context.cli.select("Please choose a version", [
 				{
 					value: "major",
@@ -99,7 +100,10 @@ class VersionPlugin implements Plugin {
 
 		if (context.argv.bump.startsWith("pre")) {
 			context.argv.preid = (
-				await context.cli.ask("Please enter the desired prerelease identifier", "alpha")
+				await context.cli.ask(
+					"Please enter the desired prerelease identifier",
+					preid ?? "alpha",
+				)
 			).trim();
 			deleteLines++;
 			askOk = true;

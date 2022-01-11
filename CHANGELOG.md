@@ -3,8 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## 3.5.0-beta.5 (2022-01-11)
+## **WORK IN PROGRESS**
 * Support managing Yarn monorepos without `lerna`
+* Fix: `version` plugin tries to propose the current prerelease identifier instead of always `alpha`
 
 ## 3.4.3 (2022-01-10)
 * Replace `colors` dependency with `picocolors`

@@ -156,7 +156,6 @@ export async function main(): Promise<void> {
 				.positional("preid", {
 					describe: "The prerelease identifier. Only for pre* bumps.",
 					required: false,
-					default: "alpha",
 				}),
 		)
 		.wrap(yargs.terminalWidth())
