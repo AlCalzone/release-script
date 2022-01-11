@@ -188,6 +188,11 @@ export async function main(): Promise<void> {
 				description: "Answer all (applicable) yes/no prompts with yes",
 				default: false,
 			},
+			publishAll: {
+				type: "boolean",
+				description: `Bump and publish all non-private packages in monorepos, even if they didn't change`,
+				default: false,
+			},
 		});
 
 	// We do two-pass parsing:

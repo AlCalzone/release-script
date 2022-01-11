@@ -211,6 +211,10 @@ Example:
 npm run release minor -- --yes
 ```
 
+#### Publish all monorepo packages (`--publishAll`)
+
+By default, only changed packages of monorepos are bumped and published. With this flag, all non-private packages are re-published under a new version, even if they had no changes.
+
 ## Monorepo support
 
 You can version monorepos in two different ways.
@@ -372,12 +376,6 @@ You can also define these on the command line (if you really must):
 ```
 npm run release -- -x.commit "echo Hello" -x.after_push "echo 1" "echo 2" "echo 3" -x.before_check "sudo shutdown"
 ```
-
-### `lerna` plugin options
-
-#### Publish all packages (`--publishAll`)
-
-By default, `lerna` only bumps and publishes changed packages. With this flag, all non-private packages are re-published under a new version, even if they had no changes.
 
 ### `ioBroker` plugin options
 

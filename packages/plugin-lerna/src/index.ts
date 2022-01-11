@@ -3,7 +3,6 @@ import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/type
 import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
-import type { Argv } from "yargs";
 
 class LernaPlugin implements Plugin {
 	public readonly id = "lerna";
@@ -15,27 +14,6 @@ class LernaPlugin implements Plugin {
 		// The git plugin amends the commit made by lerna
 		commit: ["git"],
 	};
-
-	public defineCLIOptions(yargs: Argv<any>): Argv<any> {
-		return yargs.options({
-			publishAll: {
-				type: "boolean",
-				description: `Bump and publish all non-private packages, even if they didn't change`,
-				default: false,
-			},
-			noWorkflowCheck: {
-				description: "Disable checking the test-and-release.yml workflow",
-				type: "boolean",
-				default: false,
-			},
-			numNews: {
-				alias: ["nn"],
-				type: "number",
-				description: `How many news entries should be kept in io-package.json`,
-				default: 7,
-			},
-		});
-	}
 
 	private async executeCheckStage(context: Context): Promise<void> {
 		// ensure that lerna.json exists and has a version (unless in lerna mode)

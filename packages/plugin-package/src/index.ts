@@ -169,22 +169,22 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 		const newVersion = context.getData<string>("version_new");
 		const pack = context.getData<any>("package.json");
 
-		// Figure out which packages changed
+		// Figure out which packages changed (or exist if all should be published)
 		const { stdout: output } = await context.sys.exec(
 			"yarn",
-			["changed", "list", "--json", `--git-range=v${pack.version}`],
+			context.argv.publishAll
+				? ["workspaces", "list", "--json"]
+				: ["changed", "list", "--json", `--git-range=v${pack.version}`],
 			{ cwd: context.cwd },
 		);
-		// The returned info contains the monorepo root
-		const changedPackages = output
+		const updatePackages = output
 			.trim()
 			.split("\n")
-			.map((line) => JSON.parse(line))
-			.filter((info) => info.location !== ".");
+			.map((line) => JSON.parse(line));
 
 		// Work around https://github.com/yarnpkg/berry/issues/3868
-		const packageJsonFiles = [".", ...changedPackages.map((info) => info.location)].map((loc) =>
-			path.join(context.cwd, loc, "package.json"),
+		const packageJsonFiles = updatePackages.map((info) =>
+			path.join(context.cwd, info.location, "package.json"),
 		);
 		const deleteStableVersions = async (): Promise<void> => {
 			for (const packPath of packageJsonFiles) {
@@ -205,31 +205,39 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 				)} to ${context.cli.colors.green(
 					newVersion!,
 				)}. The following packages would be updated:${context.cli.colors.blue(
-					changedPackages.map((info) => `\n· ${info.name}`).join(""),
+					updatePackages
+						.filter((info) => info.location !== ".")
+						.map((info) => `\n· ${info.name}`)
+						.join(""),
 				)}`,
 			);
 		} else {
 			context.cli.log(
-				`updating package.json version from ${context.cli.colors.blue(
+				`updating monorepo version from ${context.cli.colors.blue(
 					pack.version,
 				)} to ${context.cli.colors.green(
 					newVersion!,
 				)}. The following packages will be updated:${context.cli.colors.blue(
-					changedPackages.map((info) => `\n· ${info.name}`).join(""),
+					updatePackages
+						.filter((info) => info.location !== ".")
+						.map((info) => `\n· ${info.name}`)
+						.join(""),
 				)}`,
 			);
 
 			await deleteStableVersions();
 			const commands = [
-				[
-					"yarn",
-					"changed",
-					"foreach",
-					`--git-range=v${pack.version}`,
-					"version",
-					newVersion,
-					"--deferred",
-				],
+				context.argv.publishAll
+					? ["yarn", "workspaces", "foreach", "version", newVersion, "--deferred"]
+					: [
+							"yarn",
+							"changed",
+							"foreach",
+							`--git-range=v${pack.version}`,
+							"version",
+							newVersion,
+							"--deferred",
+					  ],
 				["yarn", "version", newVersion, "--deferred"],
 				["yarn", "version", "apply", "--all"],
 			];
