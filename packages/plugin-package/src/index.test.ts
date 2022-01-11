@@ -331,9 +331,12 @@ describe("Package plugin", () => {
 				cwd: testFSRoot,
 			});
 
+			const oldVersion = "1.2.3";
+			const newVersion = "1.2.4";
+
 			const pack = {
 				name: "test-package",
-				version: "1.2.3",
+				version: oldVersion,
 				workspaces: ["packages/*"],
 			};
 			await testFS.create({
@@ -341,8 +344,8 @@ describe("Package plugin", () => {
 				".yarnrc.yml": fixtures.yarnrc_complete,
 			});
 
-			const newVersion = "1.2.4";
 			context.setData("package.json", pack);
+			context.setData("version", oldVersion);
 			context.setData("version_new", newVersion);
 			context.setData("monorepo", "yarn");
 

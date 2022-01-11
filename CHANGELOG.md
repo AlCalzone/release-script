@@ -6,6 +6,7 @@
 ## **WORK IN PROGRESS**
 * Support managing Yarn monorepos without `lerna`
 * Fix: `version` plugin tries to propose the current prerelease identifier instead of always `alpha`
+* Publish all packages when promoting from prerelease to full release
 
 ## 3.4.3 (2022-01-10)
 * Replace `colors` dependency with `picocolors`

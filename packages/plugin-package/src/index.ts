@@ -166,13 +166,25 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 	}
 
 	private async executeEditStageYarnMonorepo(context: Context): Promise<void> {
+		const oldVersion = context.getData<string>("version");
 		const newVersion = context.getData<string>("version_new");
 		const pack = context.getData<any>("package.json");
+
+		// Force a publish of all packages if the version changed from a prerelease to a stable version
+		let publishAll = context.argv.publishAll;
+		if (
+			!publishAll &&
+			semver.gt(newVersion, oldVersion) &&
+			semver.parse(newVersion)?.prerelease.length === 0 &&
+			(semver.parse(oldVersion)?.prerelease.length ?? 0) > 0
+		) {
+			publishAll = true;
+		}
 
 		// Figure out which packages changed (or exist if all should be published)
 		const { stdout: output } = await context.sys.exec(
 			"yarn",
-			context.argv.publishAll
+			publishAll
 				? ["workspaces", "list", "--json"]
 				: ["changed", "list", "--json", `--git-range=v${pack.version}`],
 			{ cwd: context.cwd },
@@ -227,7 +239,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 
 			await deleteStableVersions();
 			const commands = [
-				context.argv.publishAll
+				publishAll
 					? ["yarn", "workspaces", "foreach", "version", newVersion, "--deferred"]
 					: [
 							"yarn",
