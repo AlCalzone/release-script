@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "3.5.0",
+  "version": "3.5.2",
   "description": "Release script to automatically increment version numbers and push git tags of Node.js projects",
   "keywords": [],
   "license": "MIT",
@@ -43,7 +43,7 @@
     "@alcalzone/release-script-plugin-changelog": "3.5.0",
     "@alcalzone/release-script-plugin-exec": "3.5.0",
     "@alcalzone/release-script-plugin-git": "3.5.0",
-    "@alcalzone/release-script-plugin-package": "3.5.0",
+    "@alcalzone/release-script-plugin-package": "3.5.2",
     "@alcalzone/release-script-plugin-version": "3.5.0",
     "alcalzone-shared": "^4.0.0",
     "axios": "^0.21.4",
