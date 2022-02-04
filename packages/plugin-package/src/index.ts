@@ -289,7 +289,9 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 				// npm7+ deletes devDependencies unless we set this flag
 				pak.environment = "development";
 				if (!context.argv.dryRun) {
-					const result = await pak.install();
+					const result = await pak.install(undefined, {
+						ignoreScripts: true,
+					});
 					if (!result.success) {
 						context.cli.error(`Updating lockfile failed: ${result.stderr}`);
 					}
