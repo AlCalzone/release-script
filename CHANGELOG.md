@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* `package` plugin: When synchronizing lockfile, avoid executing `pre/post/install` scripts.
+
 ## 3.5.1 (2022-01-25)
 * `iobroker` plugin: Forward slashes in author listings are now supported.
 
