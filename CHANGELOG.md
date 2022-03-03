@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 3.5.3 (2022-03-03)
 * Upgrade most dependencies
 
 ## 3.5.2 (2022-02-04)
