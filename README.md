@@ -258,7 +258,7 @@ Since version 3, the release script is separated into several plugins, making it
 | `package`   | Check and update `package.json`, synchronize lockfiles |
 | `version`   | Determine the version bump                             |
 
-If you need some of these plugins, you have to install and them separately:
+If you need some of these plugins, you have to install and load them separately:
 
 | Plugin name     | Description                                                                        |
 | --------------- | ---------------------------------------------------------------------------------- |
@@ -275,8 +275,24 @@ To do so, add them as a `devDependency`:
   "devDependencies": {
     "@alcalzone/release-script": "3.0.0",
     "@alcalzone/release-script-plugin-iobroker": "3.0.0",
+    "@alcalzone/release-script-plugin-license": "3.0.0",
     // ... others ...
   }
+```
+
+and add the plugin(s) to your CLI command
+
+```
+npm run release -- -p iobroker license <other options>
+```
+
+or to `.releaseconfig.json` if you're using that:
+
+```jsonc
+{
+	// ... other options
+	"plugins": ["iobroker", "license"]
+}
 ```
 
 If possible, the version for the plugins should be the same as the one for `@alcalzone/release-script`.
