@@ -40,10 +40,10 @@
     "execa": "^5.1.1"
   },
   "devDependencies": {
-    "@types/yargs": "^17.0.2",
+    "@types/yargs": "^17.0.9",
     "picocolors": "1.0.0",
-    "typescript": "*",
-    "yargs": "^17.1.1"
+    "typescript": "~4.6.2",
+    "yargs": "^17.3.1"
   },
   "scripts": {
     "clean": "tsc -b tsconfig.build.json --clean",

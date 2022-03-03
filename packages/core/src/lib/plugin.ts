@@ -13,7 +13,7 @@ export interface Plugin {
 	init?: (context: Context) => Promise<void> | void;
 
 	/** Allows a plugin to define additional CLI options */
-	defineCLIOptions?: <T extends unknown>(yargs: Argv<T>) => Argv<T>;
+	defineCLIOptions?: <T>(yargs: Argv<T>) => Argv<T>;
 
 	/** Allows a plugin to define additional stages in the release process */
 	stages?: ConstOrDynamic<Stage[]>;
