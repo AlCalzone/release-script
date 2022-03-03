@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* Upgrade most dependencies
+
 ## 3.5.2 (2022-02-04)
 * `package` plugin: When synchronizing lockfile, avoid executing `pre/post/install` scripts.
 

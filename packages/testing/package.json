@@ -36,12 +36,12 @@
   },
   "devDependencies": {
     "@alcalzone/release-script-core": "3.5.0",
-    "execa": "*",
+    "execa": "^5.1.1",
     "picocolors": "1.0.0",
-    "typescript": "*"
+    "typescript": "~4.6.2"
   },
   "peerDependencies": {
-    "execa": "*"
+    "execa": "^5.1.1"
   },
   "scripts": {
     "clean": "tsc -b tsconfig.build.json --clean",

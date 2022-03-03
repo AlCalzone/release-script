@@ -34,7 +34,7 @@ module.exports = {
 		"^@alcalzone/release-script-(.*)/package.json": "<rootDir>/packages/$1/package.json",
 		// Add others as necessary
 	},
-	setupFilesAfterEnv: ["jest-extended"],
+	setupFilesAfterEnv: ["jest-extended/all"],
 	setupFiles: ["./test/jest.setup.js"],
 	collectCoverage: false,
 	collectCoverageFrom: ["packages/**/src/**/*.ts", "!packages/**/src/**/*.test.ts"],
