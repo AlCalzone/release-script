@@ -214,6 +214,43 @@ describe("Package plugin", () => {
 			await pkgPlugin.executeStage(context, DefaultStages.check);
 			expect(context.errors).toHaveLength(0);
 		});
+
+		it("raises a fatal error in yarn-monorepo mode when no packages are changed", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+			});
+
+			const oldVersion = "1.2.3";
+			const newVersion = "1.2.4";
+
+			const pack = {
+				name: "test-package",
+				version: oldVersion,
+				workspaces: ["packages/*"],
+			};
+			await testFS.create({
+				"package.json": JSON.stringify(pack, null, 2),
+				".yarnrc.yml": fixtures.yarnrc_complete,
+			});
+
+			context.setData("package.json", pack);
+			context.setData("version", oldVersion);
+			context.setData("version_new", newVersion);
+			context.setData("monorepo", "yarn");
+
+			context.sys.mockExec((cmd) =>
+				cmd.includes("changed list")
+					? "" // no changes!
+					: "",
+			);
+
+			await assertReleaseError(() => pkgPlugin.executeStage(context, DefaultStages.check), {
+				fatal: true,
+				messageMatches: /--publishAll/i,
+			});
+		});
 	});
 
 	describe("edit stage", () => {
