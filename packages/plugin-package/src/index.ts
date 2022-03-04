@@ -66,8 +66,6 @@ class PackagePlugin implements Plugin {
 		commit: ["git"],
 	};
 	public readonly stageAfter = {
-		// Checking whether the --publishAll flag is necessary needs to know the new version
-		check: ["version"],
 		commit: (context: Context): string[] => {
 			// In lerna mode, we need to update the lockfile after bumping, so we do that in non-lerna mode too.
 			const lerna = context.hasData("lerna") && !!context.getData("lerna");
@@ -135,7 +133,8 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 					context.setData("monorepo", "yarn");
 
 					// One last check: make sure there is anything to publish
-					const publishAll = getEffectivePublishAllFlag(context);
+					// We cannot use getEffectivePublishAllFlag here without introducing a circular dependency
+					const publishAll = context.argv.publishAll as boolean;
 					const updatePackages = await getUpdatePackages(
 						context,
 						publishAll,
