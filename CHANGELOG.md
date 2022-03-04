@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## 3.5.4 (2022-03-04)
+* `package` plugin: when a Yarn monorepo has no changed packages, abort publish and enforce use of the `--publishAll` flag
+
 ## 3.5.3 (2022-03-03)
 * Upgrade most dependencies
 
