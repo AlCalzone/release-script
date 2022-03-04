@@ -7,6 +7,45 @@ import path from "path";
 import semver from "semver";
 import type { Argv } from "yargs";
 
+function getEffectivePublishAllFlag(context: Context): boolean {
+	const oldVersion = context.getData<string>("version");
+	const newVersion = context.getData<string>("version_new");
+
+	// Force a publish of all packages if the version changed from a prerelease to a stable version
+	let publishAll = context.argv.publishAll as boolean;
+	if (
+		!publishAll &&
+		semver.gt(newVersion, oldVersion) &&
+		semver.parse(newVersion)?.prerelease.length === 0 &&
+		(semver.parse(oldVersion)?.prerelease.length ?? 0) > 0
+	) {
+		publishAll = true;
+	}
+	return publishAll;
+}
+
+async function getUpdatePackages(
+	context: Context,
+	publishAll: boolean,
+	oldVersion: string,
+): Promise<{ name: string; location: string }[]> {
+	const { stdout: output } = await context.sys.exec(
+		"yarn",
+		publishAll
+			? ["workspaces", "list", "--json"]
+			: ["changed", "list", "--json", `--git-range=v${oldVersion}`],
+		{ cwd: context.cwd },
+	);
+	const updatePackages = output
+		.trim()
+		.split("\n")
+		.map((line) => line.trim())
+		.filter(Boolean)
+		.map((line) => JSON.parse(line));
+
+	return updatePackages;
+}
+
 class PackagePlugin implements Plugin {
 	public readonly id = "package";
 	public readonly stages = [DefaultStages.check, DefaultStages.edit, DefaultStages.commit];
@@ -27,6 +66,8 @@ class PackagePlugin implements Plugin {
 		commit: ["git"],
 	};
 	public readonly stageAfter = {
+		// Checking whether the --publishAll flag is necessary needs to know the new version
+		check: ["version"],
 		commit: (context: Context): string[] => {
 			// In lerna mode, we need to update the lockfile after bumping, so we do that in non-lerna mode too.
 			const lerna = context.hasData("lerna") && !!context.getData("lerna");
@@ -92,6 +133,19 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 
 					// All good, remember that we use yarn to manage the monorepo
 					context.setData("monorepo", "yarn");
+
+					// One last check: make sure there is anything to publish
+					const publishAll = getEffectivePublishAllFlag(context);
+					const updatePackages = await getUpdatePackages(
+						context,
+						publishAll,
+						pack.version,
+					);
+					if (!updatePackages.length) {
+						context.cli.fatal(
+							`The current project is a monorepo, but no packages were changed! To force a release anyways, use the "--publishAll" flag!`,
+						);
+					}
 				} else {
 					context.cli.fatal(
 						`The current project is a monorepo. The release script requires either lerna or the yarn package manager to handle this!`,
@@ -166,33 +220,14 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 	}
 
 	private async executeEditStageYarnMonorepo(context: Context): Promise<void> {
-		const oldVersion = context.getData<string>("version");
 		const newVersion = context.getData<string>("version_new");
 		const pack = context.getData<any>("package.json");
 
 		// Force a publish of all packages if the version changed from a prerelease to a stable version
-		let publishAll = context.argv.publishAll;
-		if (
-			!publishAll &&
-			semver.gt(newVersion, oldVersion) &&
-			semver.parse(newVersion)?.prerelease.length === 0 &&
-			(semver.parse(oldVersion)?.prerelease.length ?? 0) > 0
-		) {
-			publishAll = true;
-		}
+		const publishAll = getEffectivePublishAllFlag(context);
 
-		// Figure out which packages changed (or exist if all should be published)
-		const { stdout: output } = await context.sys.exec(
-			"yarn",
-			publishAll
-				? ["workspaces", "list", "--json"]
-				: ["changed", "list", "--json", `--git-range=v${pack.version}`],
-			{ cwd: context.cwd },
-		);
-		const updatePackages = output
-			.trim()
-			.split("\n")
-			.map((line) => JSON.parse(line));
+		// Figure out which packages changed (or which ones exist if all should be published)
+		const updatePackages = await getUpdatePackages(context, publishAll, pack.version);
 
 		// Work around https://github.com/yarnpkg/berry/issues/3868
 		const packageJsonFiles = updatePackages.map((info) =>
