@@ -37,7 +37,8 @@
     "node": ">=12.20"
   },
   "dependencies": {
-    "@alcalzone/release-script-core": "3.5.3"
+    "@alcalzone/release-script-core": "3.5.3",
+    "fs-extra": "^10.0.1"
   },
   "devDependencies": {
     "@alcalzone/release-script-testing": "3.5.3",

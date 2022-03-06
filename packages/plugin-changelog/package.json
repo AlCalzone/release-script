@@ -38,7 +38,8 @@
   },
   "dependencies": {
     "@alcalzone/release-script-core": "3.5.3",
-    "alcalzone-shared": "^4.0.1"
+    "alcalzone-shared": "^4.0.1",
+    "fs-extra": "^10.0.1"
   },
   "devDependencies": {
     "@alcalzone/release-script-testing": "3.5.3",
