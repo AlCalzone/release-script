@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 3.5.6 (2022-03-06)
 * Add missing `fs-extra` dependency to several plugins
 
 ## 3.5.4 (2022-03-04)
