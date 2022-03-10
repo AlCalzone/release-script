@@ -173,7 +173,7 @@ You can suppress this check with the ${colors.bold("--no-workflow-check")} flag.
 					const translated = await translateText(newChangelog);
 					ioPack.common.news = prependKey(ioPack.common.news, newVersion, translated);
 				} catch (e) {
-					fail(`could not translate the news: ${e}`);
+					context.cli.fatal(`Could not translate the news: ${e}`);
 				}
 				// If someone left this in here, also delete it
 				delete ioPack.common.news.NEXT;

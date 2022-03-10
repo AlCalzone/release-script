@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* `iobroker` plugin: call correct method when translating news entries fails
+
 ## 3.5.6 (2022-03-06)
 * Add missing `fs-extra` dependency to several plugins
 
