@@ -167,6 +167,8 @@ export async function execute(context: Context): Promise<void> {
 	}
 	for (const stage of stages) {
 		context.cli.prefix = `${stage.id}`;
+		context.executedStages.push(stage);
+
 		const plugins = await planStage(context, stage);
 		if (context.argv.verbose) {
 			context.cli.log(
@@ -198,5 +200,16 @@ export async function execute(context: Context): Promise<void> {
 			}
 		}
 		if (!isTest) console.log();
+	}
+}
+
+/** Undo all the changes that have already been made to the file system */
+export async function rollback(context: Context): Promise<void> {
+	for (const plugin of context.plugins) {
+		try {
+			await plugin.rollback?.(context);
+		} catch {
+			// ignore
+		}
 	}
 }

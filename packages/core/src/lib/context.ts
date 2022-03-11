@@ -1,5 +1,6 @@
 import type { CLI } from "./cli";
 import type { Plugin } from "./plugin";
+import type { Stage } from "./stage";
 import type { System } from "./system";
 
 export interface Context {
@@ -43,4 +44,7 @@ export interface Context {
 	getData<T>(key: string): T;
 	hasData(key: string): boolean;
 	setData(key: string, value: any): void;
+
+	/** Keeps track of which stages have been fully or partially executed */
+	executedStages: Stage[];
 }

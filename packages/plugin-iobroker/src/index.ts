@@ -1,4 +1,4 @@
-import { DefaultStages } from "@alcalzone/release-script-core";
+import { cloneDeep, DefaultStages } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
 import { isObject } from "alcalzone-shared/typeguards";
 import fs from "fs-extra";
@@ -127,7 +127,7 @@ You can suppress this check with the ${colors.bold("--no-workflow-check")} flag.
 
 	private async executeEditStage(context: Context): Promise<void> {
 		const newVersion = context.getData<string>("version_new");
-		const ioPack = context.getData<any>("io-package.json");
+		const ioPack = cloneDeep(context.getData<any>("io-package.json"));
 
 		if (context.argv.dryRun) {
 			context.cli.log(
@@ -204,6 +204,21 @@ You can suppress this check with the ${colors.bold("--no-workflow-check")} flag.
 		} else if (stage.id === "edit") {
 			await this.executeEditStage(context);
 		}
+	}
+
+	async rollback(context: Context): Promise<void> {
+		if (!context.executedStages.some((s) => s.id === "edit")) {
+			// Nothing has been changed yet
+			return;
+		}
+
+		const ioPack = context.getData<Readonly<any>>("io-package.json");
+		let ioPackDirectory = context.cwd;
+		if (context.argv.ioPackage) {
+			ioPackDirectory = path.join(ioPackDirectory, context.argv.ioPackage as string);
+		}
+		const ioPackPath = path.join(ioPackDirectory, "io-package.json");
+		await fs.writeJson(ioPackPath, ioPack, { spaces: 2 });
 	}
 }
 

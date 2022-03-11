@@ -75,6 +75,7 @@ export const defaultContextOptions: Omit<
 	},
 	plugins: [],
 	sys: new MockSystem(),
+	executedStages: [],
 };
 
 export function createMockContext(

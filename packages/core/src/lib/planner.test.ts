@@ -347,6 +347,7 @@ describe("execute", () => {
 			},
 			argv: {},
 			errors: [],
+			executedStages: [],
 		} as unknown as Context;
 
 		await execute(context);

@@ -1,5 +1,5 @@
 import { detectPackageManager } from "@alcalzone/pak";
-import { DefaultStages } from "@alcalzone/release-script-core";
+import { cloneDeep, DefaultStages } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
 import { isArray, isObject } from "alcalzone-shared/typeguards";
 import fs from "fs-extra";
@@ -197,7 +197,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 
 	private async executeEditStage(context: Context): Promise<void> {
 		const newVersion = context.getData<string>("version_new");
-		const pack = context.getData<any>("package.json");
+		const pack = cloneDeep(context.getData<any>("package.json"));
 
 		if (context.argv.dryRun) {
 			context.cli.log(
@@ -332,6 +332,17 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 				}
 			}
 		}
+	}
+
+	async rollback(context: Context): Promise<void> {
+		if (!context.executedStages.some((s) => s.id === "edit")) {
+			// Nothing has been changed yet
+			return;
+		}
+
+		const pack = context.getData<Readonly<any>>("package.json");
+		const packPath = path.join(context.cwd, "package.json");
+		await fs.writeJson(packPath, pack, { spaces: 2 });
 	}
 }
 
