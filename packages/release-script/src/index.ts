@@ -8,6 +8,7 @@ import {
 	Plugin,
 	ReleaseError,
 	resolvePlugins,
+	rollback,
 	SelectOption,
 	stripColors,
 } from "@alcalzone/release-script-core";
@@ -268,6 +269,7 @@ export async function main(): Promise<void> {
 		setData: (key: string, value: any) => {
 			data.set(key, value);
 		},
+		executedStages: [],
 	};
 	context.cli = new CLI(context);
 
@@ -295,6 +297,7 @@ export async function main(): Promise<void> {
 			message += "!";
 			console.error();
 			console.error(message);
+			await rollback(context);
 			process.exit(1);
 		}
 	} catch (e: any) {
@@ -318,6 +321,7 @@ export async function main(): Promise<void> {
 				),
 			);
 		}
+		await rollback(context);
 		process.exit((e as any).code ?? 1);
 	}
 }

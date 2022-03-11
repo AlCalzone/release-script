@@ -157,10 +157,12 @@ class ChangelogPlugin implements Plugin {
 		let parsedOld: typeof parsed | undefined;
 		if (changelogOld) {
 			parsedOld = parseChangelogFile(changelogOld, changelogPlaceholderPrefix.substr(1));
+			context.setData("changelog_old_raw", changelogOld);
 		}
 
 		const entries = [...parsed.entries, ...(parsedOld?.entries ?? [])];
 
+		context.setData("changelog_raw", changelog);
 		context.setData("changelog_filename", changelogFilename);
 		context.setData("changelog_before", parsed.before);
 		context.setData("changelog_after", parsed.after);
@@ -312,6 +314,22 @@ ${fileContent.slice(changelogBefore.length)}`; // The part after the new placeho
 			} else {
 				await this.executeCleanupStage(context);
 			}
+		}
+	}
+
+	async rollback(context: Context): Promise<void> {
+		if (!context.executedStages.some((s) => s.id === "edit")) {
+			// Nothing has been changed yet
+			return;
+		}
+
+		const changelog_raw = context.getData<string>("changelog_raw");
+		const changelogFilename = context.getData<string>("changelog_filename");
+		await fs.writeFile(path.join(context.cwd, changelogFilename), changelog_raw);
+
+		if (context.hasData("changelog_old_raw")) {
+			const changelog_old_raw = context.getData<string>("changelog_old_raw");
+			await fs.writeFile(path.join(context.cwd, "CHANGELOG_OLD.md"), changelog_old_raw);
 		}
 	}
 }

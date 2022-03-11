@@ -21,6 +21,7 @@ __metadata:
   resolution: "@alcalzone/release-script-core@workspace:packages/core"
   dependencies:
     "@types/yargs": ^17.0.9
+    alcalzone-shared: ^4.0.1
     execa: ^5.1.1
     picocolors: 1.0.0
     typescript: ~4.6.2

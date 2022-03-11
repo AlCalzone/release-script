@@ -35,4 +35,7 @@ export interface Plugin {
 
 	/** Execute the plugin for the given stage */
 	executeStage(context: Context, stage: Stage): Promise<void>;
+
+	/** Reset the previous state in case of an execution error */
+	rollback?: (context: Context) => Promise<void> | void;
 }
