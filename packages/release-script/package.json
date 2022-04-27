@@ -46,18 +46,18 @@
     "@alcalzone/release-script-plugin-package": "3.5.5",
     "@alcalzone/release-script-plugin-version": "3.5.6",
     "alcalzone-shared": "^4.0.1",
-    "axios": "^0.26.0",
+    "axios": "^0.27.1",
     "enquirer": "^2.3.6",
-    "fs-extra": "^10.0.1",
+    "fs-extra": "^10.1.0",
     "picocolors": "1.0.0",
-    "semver": "^7.3.5",
+    "semver": "^7.3.7",
     "source-map-support": "^0.5.21",
-    "yargs": "^17.3.1"
+    "yargs": "^17.4.1"
   },
   "devDependencies": {
     "@alcalzone/release-script-testing": "3.5.3",
-    "@types/yargs": "^17.0.9",
-    "typescript": "~4.6.2"
+    "@types/yargs": "^17.0.10",
+    "typescript": "~4.6.3"
   },
   "scripts": {
     "clean": "tsc -b tsconfig.build.json --clean",
