@@ -3,6 +3,10 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## 3.5.8 (2022-04-27)
+* Add missing `semver` dependency to several plugins
+* Dependency upgrades
+
 ## 3.5.7 (2022-03-10)
 * `iobroker` plugin: call correct method when translating news entries fails
 
