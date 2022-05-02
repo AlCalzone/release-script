@@ -42,6 +42,9 @@
     "ts-node": "^10.7.0",
     "typescript": "~4.6.3"
   },
+  "resolutions": {
+    "minimist": "^1.2.6"
+  },
   "scripts": {
     "build": "tsc -b tsconfig.build.json",
     "watch": "yarn run build --watch",
