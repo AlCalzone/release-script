@@ -445,7 +445,7 @@ The release script tries to find common errors in the ioBroker Github Actions re
 npm run release patch -- --no-workflow-check
 ```
 
-#### Limit the number of news in `io-package.json` (`--numNews` or `-nn`)
+#### Limit the number of news in `io-package.json` (`--numNews` or `--nn`)
 
 By default the most recent 7 news entries are kept in `io-package.json`. Using this option, you can change the limit.
 
