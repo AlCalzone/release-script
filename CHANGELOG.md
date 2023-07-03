@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 3.6.0 (2023-07-03)
 * `git` plugin: Add the `--tagOnly` flag to only create a tag without pushing the commit to the release branch.
 
 ## 3.5.9 (2022-05-02)

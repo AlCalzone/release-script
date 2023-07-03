@@ -53,7 +53,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@alcalzone/release-script-plugin-git@3.5.9, @alcalzone/release-script-plugin-git@workspace:packages/plugin-git":
+"@alcalzone/release-script-plugin-git@3.6.0, @alcalzone/release-script-plugin-git@workspace:packages/plugin-git":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-git@workspace:packages/plugin-git"
   dependencies:
@@ -117,7 +117,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@alcalzone/release-script-plugin-package@3.5.9, @alcalzone/release-script-plugin-package@workspace:packages/plugin-package":
+"@alcalzone/release-script-plugin-package@3.6.0, @alcalzone/release-script-plugin-package@workspace:packages/plugin-package":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-package@workspace:packages/plugin-package"
   dependencies:
@@ -143,7 +143,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@alcalzone/release-script-plugin-version@3.5.9, @alcalzone/release-script-plugin-version@workspace:packages/plugin-version":
+"@alcalzone/release-script-plugin-version@3.6.0, @alcalzone/release-script-plugin-version@workspace:packages/plugin-version":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-version@workspace:packages/plugin-version"
   dependencies:
@@ -209,9 +209,9 @@ __metadata:
     "@alcalzone/release-script-core": 3.5.9
     "@alcalzone/release-script-plugin-changelog": 3.5.9
     "@alcalzone/release-script-plugin-exec": 3.5.9
-    "@alcalzone/release-script-plugin-git": 3.5.9
-    "@alcalzone/release-script-plugin-package": 3.5.9
-    "@alcalzone/release-script-plugin-version": 3.5.9
+    "@alcalzone/release-script-plugin-git": 3.6.0
+    "@alcalzone/release-script-plugin-package": 3.6.0
+    "@alcalzone/release-script-plugin-version": 3.6.0
     "@alcalzone/release-script-testing": 3.5.9
     "@types/yargs": ^17.0.10
     alcalzone-shared: ^4.0.1
