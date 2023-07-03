@@ -326,6 +326,14 @@ Make sure to use the complete remote branch name:
 npm run release patch -- -r upstream/master
 ```
 
+#### Only push the release tag (`--tagOnly`)
+
+When this option is set, only the annotated release tag will be pushed to the remote. The temporary commit on the release branch will be removed afterwards. This option can be useful if branch protection rules prevent the release branch from being pushed.
+
+```bash
+npm run release patch -- --tagOnly
+```
+
 ### `changelog` plugin options
 
 #### Limit the number of entries in README.md (`--numChangelogEntries` or `-n`)

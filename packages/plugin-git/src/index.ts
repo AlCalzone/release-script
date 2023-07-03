@@ -93,6 +93,11 @@ class GitPlugin implements Plugin {
 				description: "Whether unstaged changes should be allowed",
 				default: false,
 			},
+			tagOnly: {
+				type: "boolean",
+				description: "Only push the annotated tag, not the release commit",
+				default: false,
+			},
 		});
 	}
 
@@ -147,8 +152,10 @@ Note: If the current folder belongs to a different user than ${colors.bold(
 	}
 
 	private async executeCommitStage(context: Context): Promise<void> {
+		const newVersion = context.getData<string>("version_new");
+
 		// Prepare the commit message
-		const commitMessage = `chore: release v${context.getData("version_new")}
+		const commitMessage = `chore: release v${newVersion}
 
 ${context.getData("changelog_new")}`;
 
@@ -161,7 +168,6 @@ ${context.getData("changelog_new")}`;
 		}
 
 		// And commit stuff
-		const newVersion = context.getData<string>("version_new");
 		const commands = [
 			["git", "add", "-A", "--", ":(exclude).commitmessage"],
 			["git", "commit", "-F", ".commitmessage"],
@@ -177,15 +183,48 @@ ${context.getData("changelog_new")}`;
 	}
 
 	private async executePushStage(context: Context): Promise<void> {
-		const remote = context.argv.remote as string | undefined;
-		const remoteStr = remote && remote !== "origin" ? ` ${remote.split("/").join(" ")}` : "";
+		const upstream =
+			(context.argv.remote as string | undefined) || (await getUpstream(context));
+		const [remote, branch] = upstream.split("/", 2);
+		const newVersion = context.getData<string>("version_new");
 
-		const commands = [`git push${remoteStr}`, `git push${remoteStr} --tags`];
+		const commands: string[] = [];
+		// Push the branch unless we're in tag-only mode
+		if (!context.argv.tagOnly) {
+			if (remote !== "origin") {
+				commands.push(`git push ${remote || ""} ${branch || ""}`.trimEnd());
+			} else {
+				commands.push(`git push`);
+			}
+		}
+		// Always push the annotated tag. Use refs/tags/... to disambiguate from branch names
+		commands.push(`git push ${remote || "origin"} refs/tags/v${newVersion}`);
 
 		for (const command of commands) {
 			context.cli.logCommand(command);
 			if (!context.argv.dryRun) {
 				await context.sys.execRaw(command, { cwd: context.cwd });
+			}
+		}
+	}
+
+	private async executeCleanupStage(context: Context): Promise<void> {
+		const commitMessagePath = path.join(context.cwd, ".commitmessage");
+		if (await fs.pathExists(commitMessagePath)) {
+			context.cli.log("Removing .commitmessage file");
+			await fs.unlink(path.join(context.cwd, ".commitmessage"));
+		}
+
+		// In tag-only mode, we don't want to preserve the release commit
+		if (context.argv.tagOnly) {
+			context.cli.log("Removing temporary release commit");
+			const commands = [["git", "reset", "--hard", "HEAD~1"]];
+
+			for (const [cmd, ...args] of commands) {
+				context.cli.logCommand(cmd, args);
+				if (!context.argv.dryRun) {
+					await context.sys.exec(cmd, args, { cwd: context.cwd });
+				}
 			}
 		}
 	}
@@ -198,11 +237,7 @@ ${context.getData("changelog_new")}`;
 		} else if (stage.id === "push") {
 			await this.executePushStage(context);
 		} else if (stage.id === "cleanup") {
-			const commitMessagePath = path.join(context.cwd, ".commitmessage");
-			if (await fs.pathExists(commitMessagePath)) {
-				context.cli.log("Removing .commitmessage file");
-				await fs.unlink(path.join(context.cwd, ".commitmessage"));
-			}
+			await this.executeCleanupStage(context);
 		}
 	}
 }
