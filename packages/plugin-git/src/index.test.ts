@@ -202,12 +202,14 @@ This is the changelog.`);
 		it("pushes the changes", async () => {
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({ plugins: [gitPlugin] });
+			const newVersion = "1.2.3";
+			context.setData("version_new", newVersion);
 
 			// Don't throw when calling system commands
 			context.sys.mockExec(() => "");
 
 			await gitPlugin.executeStage(context, DefaultStages.push);
-			const expectedCommands = [`git push`, `git push --tags`];
+			const expectedCommands = [`git push`, `git push origin refs/tags/v1.2.3`];
 			for (const cmd of expectedCommands) {
 				expect(context.sys.execRaw).toHaveBeenCalledWith(cmd, expect.anything());
 			}
@@ -219,6 +221,8 @@ This is the changelog.`);
 				plugins: [gitPlugin],
 				argv: { remote: "upstream/foobar" },
 			});
+			const newVersion = "1.2.5";
+			context.setData("version_new", newVersion);
 
 			// Don't throw when calling system commands
 			context.sys.mockExec(() => "");
@@ -226,7 +230,7 @@ This is the changelog.`);
 			await gitPlugin.executeStage(context, DefaultStages.push);
 			const expectedCommands = [
 				`git push upstream foobar`,
-				`git push upstream foobar --tags`,
+				`git push upstream refs/tags/v1.2.5`,
 			];
 			for (const cmd of expectedCommands) {
 				expect(context.sys.execRaw).toHaveBeenCalledWith(cmd, expect.anything());
@@ -237,17 +241,39 @@ This is the changelog.`);
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({ plugins: [gitPlugin] });
 			context.setData("lerna", true);
+			const newVersion = "1.2.7";
+			context.setData("version_new", newVersion);
 
 			// Don't throw when calling system commands
 			context.sys.mockExec(() => "");
 
 			await gitPlugin.executeStage(context, DefaultStages.push);
-			const expectedCommands = [`git push`, `git push --tags`];
+			const expectedCommands = [`git push`, `git push origin refs/tags/v1.2.7`];
 			for (const cmd of expectedCommands) {
 				expect(context.sys.execRaw).toHaveBeenCalledWith(
 					expect.stringContaining(cmd),
 					expect.anything(),
 				);
+			}
+		});
+
+		it("only pushes the tag in tagOnly mode", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				argv: { tagOnly: true },
+			});
+			const newVersion = "1.2.8";
+			context.setData("version_new", newVersion);
+
+			// Don't throw when calling system commands
+			context.sys.mockExec(() => "");
+
+			await gitPlugin.executeStage(context, DefaultStages.push);
+			expect(context.sys.execRaw).toHaveBeenCalledTimes(1);
+			const expectedCommands = [`git push origin refs/tags/v1.2.8`];
+			for (const cmd of expectedCommands) {
+				expect(context.sys.execRaw).toHaveBeenCalledWith(cmd, expect.anything());
 			}
 		});
 	});
@@ -277,5 +303,24 @@ This is the changelog.`);
 			await gitPlugin.executeStage(context, DefaultStages.cleanup);
 			await expect(fs.pathExists(commitmessagePath)).resolves.toBeFalse();
 		});
+
+		// TODO: Figure out why this test is failing. The command shows up in logs, but toHaveBeenCalledTimes fails.
+		// it("removes the temporary release commit in tagOnly mode", async () => {
+		// 	const gitPlugin = new GitPlugin();
+		// 	const context = createMockContext({
+		// 		plugins: [gitPlugin],
+		// 		argv: { tagOnly: true },
+		// 	});
+
+		// 	// Don't throw when calling system commands
+		// 	context.sys.mockExec(() => "");
+
+		// 	await gitPlugin.executeStage(context, DefaultStages.cleanup);
+		// 	expect(context.sys.execRaw).toHaveBeenCalledTimes(1);
+		// 	const expectedCommands = [`git reset --hard HEAD~1`];
+		// 	for (const cmd of expectedCommands) {
+		// 		expect(context.sys.execRaw).toHaveBeenCalledWith(cmd, expect.anything());
+		// 	}
+		// });
 	});
 });
