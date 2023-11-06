@@ -58,6 +58,12 @@ class PackagePlugin implements Plugin {
 				type: "boolean",
 				default: true,
 			},
+			updateLockfileWithForce: {
+				alias: ["update-lockfile-force", "lf"],
+				description: "Update the lockfile with force option before committing",
+				type: "boolean",
+				default: true,
+			},
 		});
 	}
 
@@ -309,12 +315,12 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 			}
 		} else if (stage.id === "commit") {
 			if (context.hasData("monorepo") && context.getData("monorepo") === "yarn") {
-				// Not necessary, when using yarn workspaces this was done during the edit stage
+				// Not necessary, when using yarn workspaces, this was done during the edit stage
 				return;
 			}
 
-			if (context.argv.updateLockfile) {
-				context.cli.log(`updating lockfile...`);
+			if (context.argv.updateLockfile || context.argv.updateLockfileWithForce) {
+				context.cli.log(`updating lockfile...${context.argv.updateLockfileWithForce ? " (with force)" : ""}`);
 				const pak = await detectPackageManager({
 					cwd: context.cwd,
 					setCwdToPackageRoot: true,
@@ -325,6 +331,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 				if (!context.argv.dryRun) {
 					const result = await pak.install(undefined, {
 						ignoreScripts: true,
+						force: context.argv.updateLockfileWithForce,
 					});
 					if (!result.success) {
 						context.cli.error(`Updating lockfile failed: ${result.stderr}`);
