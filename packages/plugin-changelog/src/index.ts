@@ -191,7 +191,7 @@ class ChangelogPlugin implements Plugin {
 		if(context.argv.additionalChangelog) {
 			let currentChangelogsIndex = entries.findIndex((e) => getPlaceholderRegex().test(e));
 			if (currentChangelogsIndex == -1) {
-				entries.unshift('## **WORK IN PROGRESS**');
+				entries.unshift(changelogPlaceholder);
 				currentChangelogsIndex = 0
 			}
 			entries[currentChangelogsIndex] += `\n${context.argv.additionalChangelog}`;
