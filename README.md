@@ -344,6 +344,10 @@ Only applies when the changelog is in `README.md` and a `CHANGELOG_OLD.md` exist
 
 If you want the release script to add a new empty placeholder to the changelog after a release, this option is for you. By default, this is disabled.
 
+#### Add additional entries to the release changelog (`--additionalChangelog` or `--additional-changelog`)
+
+If you want the release script to add some more entry/entries to the changelog for the release. To add multiple just separate them using `\n` so f.e. `* Entry 1\n* Entry 2`.By default this does not add anything.
+
 ### `package` plugin options
 
 #### Don't synchronize the lockfile (`--no-update-lockfile`)
