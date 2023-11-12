@@ -113,6 +113,11 @@ class ChangelogPlugin implements Plugin {
 				description: `Add an empty placeholder to the changelog after a release.`,
 				default: false,
 			},
+			additionalChangelog: {
+				alias: ["additional-changelog"],
+				type: "string",
+				description: `Add additional changelog entry/entries to the release.`
+			}
 		});
 	}
 
@@ -183,7 +188,17 @@ class ChangelogPlugin implements Plugin {
 		// But we only output the primary one
 		const changelogPlaceholder = `${changelogPlaceholderPrefix} ${changelogMarkers[0]}`;
 
+		if(context.argv.additionalChangelog) {
+			let currentChangelogsIndex = entries.findIndex((e) => getPlaceholderRegex().test(e));
+			if (currentChangelogsIndex == -1) {
+				entries.unshift('## **WORK IN PROGRESS**');
+				currentChangelogsIndex = 0
+			}
+			entries[currentChangelogsIndex] += `\n${context.argv.additionalChangelog}`;
+		}
+
 		const currentChangelogs = entries.filter((e) => getPlaceholderRegex().test(e));
+
 		switch (currentChangelogs.length) {
 			case 0:
 				context.cli.error(
