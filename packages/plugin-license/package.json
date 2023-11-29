@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "3.5.9",
+  "version": "3.7.0",
   "description": "Plugin for Al Calzone's release script: license",
   "keywords": [],
   "license": "MIT",
@@ -37,12 +37,12 @@
     "node": ">=12.20"
   },
   "dependencies": {
-    "@alcalzone/release-script-core": "3.5.9",
+    "@alcalzone/release-script-core": "3.7.0",
     "fs-extra": "^10.1.0",
     "tiny-glob": "^0.2.9"
   },
   "devDependencies": {
-    "@alcalzone/release-script-testing": "3.5.9",
+    "@alcalzone/release-script-testing": "3.7.0",
     "jest-extended": "^3.1.0",
     "typescript": "~4.8.4"
   },
