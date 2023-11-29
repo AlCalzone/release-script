@@ -350,6 +350,10 @@ If you want the release script to add a new empty placeholder to the changelog a
 
 After bumping the version, the lockfile is normally synchronized with `package.json` to avoid errors on CI. If this is not desirable, you can disable the behavior.
 
+#### Pass the `--force` flag to the package manager when updating the lockfile (`--force-update-lockfile` or `-lf`)
+
+In some cases it is necessary to pass the `--force` flag to the package manager when updating the lockfile. This can be done with this option. Depending on the package manager in use, this option may or may not do anything.
+
 ### `version` plugin options
 
 #### Replace the version in additional files (`--versionFiles`)

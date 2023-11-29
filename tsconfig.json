@@ -17,13 +17,14 @@
 
 		// Avoid runtime imports that are unnecessary
 		"importsNotUsedAsValues": "error",
+		// "ignoreDeprecations": "5.0",
 
 		// Required for TS debugging
 		"sourceMap": true,
 		"inlineSourceMap": false,
 
 		// Make jest-extended work in tests
-		"types": ["jest-extended"],
+		"types": ["node", "jest", "jest-extended"],
 
 		"preserveWatchOutput": true
 	},
