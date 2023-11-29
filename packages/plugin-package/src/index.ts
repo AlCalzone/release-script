@@ -58,11 +58,11 @@ class PackagePlugin implements Plugin {
 				type: "boolean",
 				default: true,
 			},
-			updateLockfileWithForce: {
-				alias: ["update-lockfile-force", "lf"],
-				description: "Update the lockfile with force option before committing",
+			forceUpdateLockfile: {
+				alias: ["force-update-lockfile", "lf"],
+				description: "Update the lockfile before committing, using the --force flag",
 				type: "boolean",
-				default: true,
+				default: false,
 			},
 		});
 	}
@@ -319,8 +319,12 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 				return;
 			}
 
-			if (context.argv.updateLockfile || context.argv.updateLockfileWithForce) {
-				context.cli.log(`updating lockfile...${context.argv.updateLockfileWithForce ? " (with force)" : ""}`);
+			if (context.argv.updateLockfile || context.argv.forceUpdateLockfile) {
+				context.cli.log(
+					`updating lockfile...${
+						context.argv.forceUpdateLockfile ? " (with --force)" : ""
+					}`,
+				);
 				const pak = await detectPackageManager({
 					cwd: context.cwd,
 					setCwdToPackageRoot: true,
@@ -331,7 +335,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 				if (!context.argv.dryRun) {
 					const result = await pak.install(undefined, {
 						ignoreScripts: true,
-						force: context.argv.updateLockfileWithForce,
+						force: !!context.argv.forceUpdateLockfile,
 					});
 					if (!result.success) {
 						context.cli.error(`Updating lockfile failed: ${result.stderr}`);
