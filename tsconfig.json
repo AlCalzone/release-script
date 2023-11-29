@@ -24,7 +24,7 @@
 		"inlineSourceMap": false,
 
 		// Make jest-extended work in tests
-		"types": ["jest-extended"],
+		"types": ["node", "jest", "jest-extended"],
 
 		"preserveWatchOutput": true
 	},
