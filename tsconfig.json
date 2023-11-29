@@ -17,7 +17,7 @@
 
 		// Avoid runtime imports that are unnecessary
 		"importsNotUsedAsValues": "error",
-		"ignoreDeprecations": "5.0",
+		// "ignoreDeprecations": "5.0",
 
 		// Required for TS debugging
 		"sourceMap": true,
