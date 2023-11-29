@@ -1,5 +1,6 @@
 module.exports = {
 	testEnvironment: "node",
+	testRunner: "jest-jasmine2", // https://github.com/jestjs/jest/issues/11698
 	roots: [
 		"<rootDir>/packages/release-script/src",
 		"<rootDir>/packages/core/src",
@@ -40,6 +41,6 @@ module.exports = {
 	collectCoverageFrom: ["packages/**/src/**/*.ts", "!packages/**/src/**/*.test.ts"],
 	coverageReporters: ["lcov", "html", "text-summary"],
 	transform: {
-		"^.+.tsx?$": "babel-jest",
+		"^.+\\.tsx?$": "babel-jest",
 	},
 };
