@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## 3.7.1 (2024-06-11)
+* `iobroker` plugin: Detect more author names and @ mentions in the changelog
+
 ## 3.7.0 (2023-11-29)
 * Added `-lf` option to run the lock file update with the `--force` flag
 * Dependency upgrades
