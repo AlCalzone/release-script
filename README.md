@@ -22,7 +22,7 @@ Together with the corresponding **Github Actions** workflow (more on that below)
 1. Add this module to your `devDependencies`:
 
     ```bash
-    npm i -D @alcalzone/release-script
+    npm i -D @alcalzone/release-script @alcalzone/release-script-plugin-iobroker @alcalzone/release-script-plugin-license @alcalzone/release-script-plugin-manual-review
     ```
 
 2. Add a new `npm` script in `package.json`:
@@ -56,7 +56,25 @@ Together with the corresponding **Github Actions** workflow (more on that below)
     -->
     ```
 
-4. If necessary (e.g. for custom versioning steps) use a [config file](#configuration-with-a-config-file)
+4. Add file `.releaseconfig.json` with the following contents in the root folder of the repository:
+
+    ```json
+    {
+      "plugins": ["iobroker", "license", "manual-review"]
+    }
+    ```
+    If your adapter uses TypeScript or React or something else that needs a build step, you can instruct the release script to execute this before committing the changes:
+
+    ```json
+    {
+      "plugins": ["iobroker", "license", "manual-review"],
+      "exec": {
+        "before_commit": "npm run build"
+      }
+    }
+    ```
+
+5. If necessary (e.g. for custom versioning steps) use a [config file](#configuration-with-a-config-file)
 
 ## Usage
 
