@@ -14,7 +14,7 @@ export function limitKeys<T>(obj: Record<string, T>, count: number): Record<stri
 	return ret;
 }
 
-const changelogAuthorRegex = /^[ \t]*[\*\-][ \t]*\([\p{L}\p{M}0-9@\-_,;&\+\/ ]+\)[ \t]*/gim;
+const changelogAuthorRegex = /^[ \t]*[\*\-][ \t]*\([\p{L}\p{M}0-9@\-_,;&\+\/ ]+\)[ \t]*/gimu;
 const changelogBulletPointTestRegex = /^[ \t]*[\*\-][ \t]*/;
 const changelogBulletPointReplaceRegex = new RegExp(changelogBulletPointTestRegex, "mg");
 
