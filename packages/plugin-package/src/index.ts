@@ -295,13 +295,17 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 			);
 
 			await deleteStableVersions();
+			const yarnGte4 =
+				context.hasData("yarn_version") &&
+				semver.gte(context.getData<string>("yarn_version"), "4.0.0");
+
 			const commands = [
 				publishAll
 					? [
 							"yarn",
 							"workspaces",
 							"foreach",
-							"--all",
+							...(yarnGte4 ? ["--all"] : []),
 							"version",
 							newVersion,
 							"--deferred",
@@ -310,7 +314,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 							"yarn",
 							"changed",
 							"foreach",
-							"--all",
+							...(yarnGte4 ? ["--all"] : []),
 							`--git-range=v${pack.version}`,
 							"version",
 							newVersion,
