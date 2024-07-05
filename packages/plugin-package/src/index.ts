@@ -46,6 +46,15 @@ async function getUpdatePackages(
 	return updatePackages;
 }
 
+async function getYarnVersion(context: Context): Promise<string> {
+	const { stdout: output } = await context.sys.exec("yarn", ["--version"], { cwd: context.cwd });
+	const version = output.trim();
+	if (!semver.valid(version)) {
+		context.cli.fatal(`Invalid yarn version "${version}"`);
+	}
+	return version;
+}
+
 class PackagePlugin implements Plugin {
 	public readonly id = "package";
 	public readonly stages = [DefaultStages.check, DefaultStages.edit, DefaultStages.commit];
@@ -100,6 +109,8 @@ class PackagePlugin implements Plugin {
 				// we need some yarn plugins to be able to handle this
 				const yarnRcPath = path.join(context.cwd, ".yarnrc.yml");
 				if (await fs.pathExists(yarnRcPath)) {
+					const yarnVersion = await getYarnVersion(context);
+
 					const yarnRc = await fs.readFile(yarnRcPath, "utf8");
 					const yarnPlugins = yarnRc
 						.split("\n")
@@ -114,11 +125,16 @@ class PackagePlugin implements Plugin {
 						);
 					// A list of required plugins and how to import them
 					const requiredPlugins: Record<string, string> = {
-						"workspace-tools": "workspace-tools",
-						version: "version",
 						changed:
 							"https://github.com/Dcard/yarn-plugins/releases/latest/download/plugin-changed.js",
 					};
+					if (semver.lt(yarnVersion, "4.0.0")) {
+						// Yarn v4 includes these plugins by default
+						Object.assign(requiredPlugins, {
+							"workspace-tools": "workspace-tools",
+							version: "version",
+						});
+					}
 					const missingPlugins = Object.keys(requiredPlugins).filter(
 						(plugin) => !yarnPlugins.includes(plugin),
 					);
@@ -137,6 +153,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 
 					// All good, remember that we use yarn to manage the monorepo
 					context.setData("monorepo", "yarn");
+					context.setData("yarn_version", yarnVersion);
 
 					// One last check: make sure there is anything to publish
 					// We cannot use getEffectivePublishAllFlag here without introducing a circular dependency
@@ -280,11 +297,20 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 			await deleteStableVersions();
 			const commands = [
 				publishAll
-					? ["yarn", "workspaces", "foreach", "version", newVersion, "--deferred"]
+					? [
+							"yarn",
+							"workspaces",
+							"foreach",
+							"--all",
+							"version",
+							newVersion,
+							"--deferred",
+					  ]
 					: [
 							"yarn",
 							"changed",
 							"foreach",
+							"--all",
 							`--git-range=v${pack.version}`,
 							"version",
 							newVersion,
