@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 3.7.3 (2024-07-05)
 * `package` plugin: Support monorepos managed with Yarn v4
 
 ## 3.7.2 (2024-06-24)

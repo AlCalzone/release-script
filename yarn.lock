@@ -119,7 +119,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@alcalzone/release-script-plugin-package@3.7.0, @alcalzone/release-script-plugin-package@workspace:packages/plugin-package":
+"@alcalzone/release-script-plugin-package@3.7.3, @alcalzone/release-script-plugin-package@workspace:packages/plugin-package":
   version: 0.0.0-use.local
   resolution: "@alcalzone/release-script-plugin-package@workspace:packages/plugin-package"
   dependencies:
@@ -214,7 +214,7 @@ __metadata:
     "@alcalzone/release-script-plugin-changelog": 3.7.0
     "@alcalzone/release-script-plugin-exec": 3.7.0
     "@alcalzone/release-script-plugin-git": 3.7.0
-    "@alcalzone/release-script-plugin-package": 3.7.0
+    "@alcalzone/release-script-plugin-package": 3.7.3
     "@alcalzone/release-script-plugin-version": 3.7.0
     "@alcalzone/release-script-testing": 3.7.0
     "@types/yargs": ^17.0.10
