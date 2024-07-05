@@ -170,6 +170,11 @@ describe("Package plugin", () => {
 				".yarnrc.yml": fixtures.yarnrc_commented_out,
 			});
 
+			context.sys.mockExec((cmd) => {
+				if (cmd === "yarn --version") return "3.4.5";
+				return "";
+			});
+
 			await assertReleaseError(() => pkgPlugin.executeStage(context, DefaultStages.check), {
 				fatal: true,
 				messageMatches: /plugin import version/i,
@@ -240,11 +245,10 @@ describe("Package plugin", () => {
 			context.setData("version_new", newVersion);
 			context.setData("monorepo", "yarn");
 
-			context.sys.mockExec((cmd) =>
-				cmd.includes("changed list")
-					? "" // no changes!
-					: "",
-			);
+			context.sys.mockExec((cmd) => {
+				if (cmd === "yarn --version") return "3.4.5";
+				return "";
+			});
 
 			await assertReleaseError(() => pkgPlugin.executeStage(context, DefaultStages.check), {
 				fatal: true,
@@ -405,6 +409,7 @@ describe("Package plugin", () => {
 					"yarn",
 					"changed",
 					"foreach",
+					"--all",
 					`--git-range=v${pack.version}`,
 					"version",
 					newVersion,

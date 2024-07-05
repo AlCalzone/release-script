@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* `package` plugin: Support monorepos managed with Yarn v4
+
 ## 3.7.2 (2024-06-24)
 * `iobroker` plugin: Fixed issue in changelog cleanup routine introduced in `3.7.1`
 
