@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 3.8.0 (2024-07-23)
 * `git` plugin: allow to skip push stage via `noPush` option
 
 ## 3.7.3 (2024-07-05)
