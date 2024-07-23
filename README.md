@@ -52,7 +52,7 @@ Together with the corresponding **Github Actions** workflow (more on that below)
 
     <!--
       Placeholder for the next version (at the beginning of the line):
-      ## **WORK IN PROGRESS**
+      ### **WORK IN PROGRESS**
     -->
     ```
 
@@ -67,10 +67,10 @@ In order to use this script, you need to maintain the changelog in either `READM
 
 <!--
     Placeholder for the next version (at the beginning of the line):
-    ## **WORK IN PROGRESS**
+    ### **WORK IN PROGRESS**
 -->
 
-## **WORK IN PROGRESS**
+### **WORK IN PROGRESS**
 
 -   Did some changes
 -   Did some more changes
@@ -93,13 +93,13 @@ If you are using `README.md`, the script can automatically move old changelog en
 You can add free text after the placeholder:
 
 ```md
-## **WORK IN PROGRESS** - 2020 Doomsday release
+### **WORK IN PROGRESS** - 2020 Doomsday release
 ```
 
 will be turned into
 
 ```md
-## 1.2.3 (2020-02-02) - 2020 Doomsday release
+### 1.2.3 (2020-02-02) - 2020 Doomsday release
 ```
 
 for example.
