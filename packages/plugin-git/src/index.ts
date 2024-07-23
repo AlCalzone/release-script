@@ -98,6 +98,11 @@ class GitPlugin implements Plugin {
 				description: "Only push the annotated tag, not the release commit",
 				default: false,
 			},
+			noPush: {
+				type: "boolean",
+				description: "Do not push anything to the remote",
+				default: false,
+			},
 		});
 	}
 
@@ -183,6 +188,11 @@ ${context.getData("changelog_new")}`;
 	}
 
 	private async executePushStage(context: Context): Promise<void> {
+		if (context.argv.noPush) {
+			context.cli.log("git push skipped");
+			return;
+		}
+
 		const upstream =
 			(context.argv.remote as string | undefined) || (await getUpstream(context));
 		const [remote, branch] = upstream.split("/", 2);

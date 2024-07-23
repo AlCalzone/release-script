@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* `git` plugin: allow to skip push stage via `noPush` option
+
 ## 3.7.3 (2024-07-05)
 * `package` plugin: Support monorepos managed with Yarn v4
 

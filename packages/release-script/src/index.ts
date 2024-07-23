@@ -89,6 +89,10 @@ class CLI implements ICLI {
 		this.log(`$ ${command}`);
 	}
 	clearLines(lines: number): void {
+		if (!process.stdout.isTTY) {
+			return;
+		}
+
 		process.stdout.moveCursor(0, -lines);
 		process.stdout.clearScreenDown();
 	}
