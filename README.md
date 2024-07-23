@@ -334,6 +334,14 @@ When this option is set, only the annotated release tag will be pushed to the re
 npm run release patch -- --tagOnly
 ```
 
+#### Do not push to the remote at all (`--noPush`)
+
+When this option is set, nothing will be pushed to the remote. This option can be useful if branch protection rules prevent the release branch from being pushed, and release commits are pushed by other means.
+
+```bash
+npm run release patch -- --noPush
+```
+
 ### `changelog` plugin options
 
 #### Limit the number of entries in README.md (`--numChangelogEntries` or `-n`)

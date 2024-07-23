@@ -189,7 +189,7 @@ ${context.getData("changelog_new")}`;
 
 	private async executePushStage(context: Context): Promise<void> {
 		if (context.argv.noPush) {
-			context.cli.log("Do not push to git");
+			context.cli.log("git push skipped");
 			return;
 		}
 
