@@ -100,7 +100,7 @@ class GitPlugin implements Plugin {
 			},
 			noPush: {
 				type: "boolean",
-				description: "Do not push the commit or tag to Git",
+				description: "Do not push anything to the remote",
 				default: false,
 			},
 		});
