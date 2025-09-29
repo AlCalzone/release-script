@@ -469,6 +469,35 @@ npm run release patch -- --no-workflow-check
 
 By default the most recent 7 news entries are kept in `io-package.json`. Using this option, you can change the limit.
 
+#### Use DeepL API for translation (`DEEPL_API_KEY` environment variable)
+
+By default, the ioBroker plugin uses the ioBroker translator service to translate changelog entries into multiple languages. You can configure it to use DeepL API instead by setting the `DEEPL_API_KEY` environment variable.
+
+**Setting up DeepL translation:**
+
+1. Get a DeepL API key from [DeepL API](https://www.deepl.com/api)
+   - Free tier: Keys end with `:fx` and have usage limits
+   - Pro tier: Keys don't have the `:fx` suffix
+
+2. Set the environment variable:
+   ```bash
+   export DEEPL_API_KEY="your-api-key:fx"  # For free tier
+   export DEEPL_API_KEY="your-api-key"     # For pro tier
+   ```
+
+3. Run the release script normally:
+   ```bash
+   npm run release patch
+   ```
+
+**Supported languages:**
+- German (de), Spanish (es), French (fr), Italian (it)
+- Dutch (nl), Polish (pl), Portuguese (pt), Russian (ru)
+- Chinese Simplified (zh-cn)
+
+**Fallback behavior:**
+If DeepL translation fails (invalid key, network issues, etc.), the plugin automatically falls back to the ioBroker translator service to ensure releases continue working.
+
 ### `license` plugin options
 
 #### Change where to look for license files to check (`--license`)
