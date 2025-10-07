@@ -4,6 +4,7 @@
     "access": "public"
   },
   "version": "3.8.0",
+  "type": "module",
   "description": "Release script to automatically increment version numbers and push git tags of Node.js projects",
   "keywords": [],
   "license": "MIT",
@@ -12,23 +13,11 @@
     "email": "d.griesel@gmx.net"
   },
   "bin": "bin/release.js",
-  "main": "build/index.js",
   "exports": {
     ".": "./build/index.js",
     "./package.json": "./package.json",
     "./*.map": "./build/*.js.map",
     "./*": "./build/*.js"
-  },
-  "types": "build/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "build/index.d.ts": [
-        "build/index.d.ts"
-      ],
-      "*": [
-        "build/*"
-      ]
-    }
   },
   "files": [
     "bin/",
@@ -36,7 +25,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=12.20"
+    "node": ">=18"
   },
   "dependencies": {
     "@alcalzone/release-script-core": "3.7.0",

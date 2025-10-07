@@ -14,7 +14,8 @@ import {
 import { distinct } from "alcalzone-shared/arrays";
 import { prompt } from "enquirer";
 import colors from "picocolors";
-import yargs from "yargs";
+import yargs from "yargs/yargs";
+import { hideBin } from "yargs/helpers";
 
 function colorizeTextAndTags(
 	textWithTags: string,
@@ -139,7 +140,8 @@ class CLI implements ICLI {
 }
 
 export async function main(): Promise<void> {
-	let argv = yargs
+	const yargsInstance = yargs(hideBin(process.argv));
+	let argv = yargsInstance
 		.env("RELEASE_SCRIPT")
 		.usage("$0 [<bump> [<preid>]] [options]", "AlCalzone's release script", (yargs) =>
 			yargs
@@ -161,7 +163,7 @@ export async function main(): Promise<void> {
 					required: false,
 				}),
 		)
-		.wrap(yargs.terminalWidth())
+		.wrap(yargsInstance.terminalWidth())
 		// Delay showing help until the second parsing pass
 		.help(false)
 		.alias("v", "version")

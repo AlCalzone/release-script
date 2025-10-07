@@ -1,8 +1,8 @@
-import { ReleaseError } from "..";
-import type { Context } from "./context";
-import { GraphNode, topologicalSort } from "./graph";
-import type { Plugin } from "./plugin";
-import { DefaultStages, type Stage } from "./stage";
+import { ReleaseError } from "../index.js";
+import type { Context } from "./context.js";
+import { GraphNode, topologicalSort } from "./graph.js";
+import type { Plugin } from "./plugin.js";
+import { DefaultStages, type Stage } from "./stage.js";
 
 /** Resolve all plugins that are required by the chosen plugins */
 export function resolvePlugins(allPlugins: Plugin[], chosenPluginIds: string[]): Plugin[] {

@@ -1,3 +1,3 @@
-export * from "./lib/assertReleaseError";
-export * from "./lib/context";
-export * from "./lib/testFS";
+export * from "./lib/assertReleaseError.js";
+export * from "./lib/context.js";
+export * from "./lib/testFS.js";

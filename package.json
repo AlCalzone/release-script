@@ -13,6 +13,7 @@
     "email": "d.griesel@gmx.net"
   },
   "private": true,
+  "type": "module",
   "workspaces": [
     "packages/*"
   ],

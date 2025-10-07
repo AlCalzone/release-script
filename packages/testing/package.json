@@ -2,6 +2,7 @@
   "name": "@alcalzone/release-script-testing",
   "private": true,
   "version": "3.7.0",
+  "type": "module",
   "description": "Al Calzone's release script: testing tools",
   "keywords": [],
   "license": "MIT",
@@ -9,30 +10,18 @@
     "name": "AlCalzone",
     "email": "d.griesel@gmx.net"
   },
-  "main": "build/index.js",
   "exports": {
     ".": "./build/index.js",
     "./package.json": "./package.json",
     "./*.map": "./build/*.js.map",
     "./*": "./build/*.js"
   },
-  "types": "build/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "build/index.d.ts": [
-        "build/index.d.ts"
-      ],
-      "*": [
-        "build/*"
-      ]
-    }
-  },
   "files": [
     "build/",
     "LICENSE"
   ],
   "engines": {
-    "node": ">=12.20"
+    "node": ">=18"
   },
   "devDependencies": {
     "@alcalzone/release-script-core": "3.7.0",

@@ -5,8 +5,8 @@ import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
 import type { Argv } from "yargs";
-import { cleanChangelogForNews, limitKeys, prependKey } from "./tools";
-import { translateText } from "./translate";
+import { cleanChangelogForNews, limitKeys, prependKey } from "./tools.js";
+import { translateText } from "./translate.js";
 
 function getDesiredIoPackVersion(context: Context): string {
 	const version = context.getData<string>("version");
