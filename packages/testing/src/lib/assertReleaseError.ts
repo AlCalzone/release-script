@@ -1,5 +1,6 @@
 import { ReleaseError } from "@alcalzone/release-script-core";
 import { AssertionError } from "assert";
+import { expect } from "vitest";
 
 export interface AssertReleaseErrorOptions {
 	messageMatches?: string | RegExp;

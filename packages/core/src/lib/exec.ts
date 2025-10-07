@@ -1,4 +1,4 @@
-import execa, { ExecaChildProcess } from "execa";
+import execa, { type ExecaChildProcess } from "execa";
 
 export function execRaw(command: string, options?: execa.Options): ExecaChildProcess {
 	return execa.command(command, options);

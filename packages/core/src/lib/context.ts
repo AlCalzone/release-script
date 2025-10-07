@@ -1,6 +1,6 @@
-import type { CLI } from "./cli";
-import type { Plugin } from "./plugin";
-import type { System } from "./system";
+import type { CLI } from "./cli.js";
+import type { Plugin } from "./plugin.js";
+import type { System } from "./system.js";
 
 export interface Context {
 	/** Access to the CLI instance. */

@@ -1,5 +1,6 @@
 import { DefaultStages } from "@alcalzone/release-script-core";
 import { assertReleaseError, createMockContext, TestFS } from "@alcalzone/release-script-testing";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import LernaPlugin from ".";
 
 describe("Lerna plugin", () => {
@@ -140,7 +141,7 @@ describe("Lerna plugin", () => {
 			});
 
 			await lernaPlugin.executeStage(context, DefaultStages.check);
-			expect(context.getData("lerna")).toBeTrue();
+			expect(context.getData("lerna")).toBe(true);
 		});
 	});
 });

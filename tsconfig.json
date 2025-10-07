@@ -2,32 +2,32 @@
 {
 	// To update the compilation target, install a different version of @tsconfig/node... and reference it here
 	// https://github.com/tsconfig/bases#node-12-tsconfigjson
-	"extends": "@tsconfig/node12/tsconfig.json",
+	"extends": "@tsconfig/node18/tsconfig.json",
 	"compilerOptions": {
 		// Required for monorepos
 		"composite": true,
 		"declaration": true,
 		"declarationMap": true,
-
 		// Never emit faulty JS
 		"noEmitOnError": true,
-
 		"outDir": "build/",
 		"removeComments": false,
-
-		// Avoid runtime imports that are unnecessary
-		"importsNotUsedAsValues": "error",
-		// "ignoreDeprecations": "5.0",
-
 		// Required for TS debugging
 		"sourceMap": true,
 		"inlineSourceMap": false,
-
-		// Make jest-extended work in tests
-		"types": ["node", "jest", "jest-extended"],
-
+		// Types for tests
+		"types": [
+			"node",
+		],
 		"preserveWatchOutput": true
 	},
-	"include": ["packages/**/src/**/*.ts", "test/**/*.ts"],
-	"exclude": ["**/build/**", "node_modules/**", "packages/**/node_modules"]
+	"include": [
+		"packages/**/src/**/*.ts",
+		"test/**/*.ts"
+	],
+	"exclude": [
+		"**/build/**",
+		"node_modules/**",
+		"packages/**/node_modules"
+	]
 }

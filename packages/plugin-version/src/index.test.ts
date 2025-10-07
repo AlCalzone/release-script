@@ -2,6 +2,7 @@ import { DefaultStages } from "@alcalzone/release-script-core";
 import { assertReleaseError, createMockContext, TestFS } from "@alcalzone/release-script-testing";
 import fs from "fs-extra";
 import path from "path";
+import { afterEach, beforeEach, describe, expect, it, type Mock } from "vitest";
 import VersionPlugin from ".";
 
 describe("Version plugin", () => {
@@ -12,7 +13,7 @@ describe("Version plugin", () => {
 				plugins: [versionPlugin],
 			});
 			context.setData("version", "1.2.3");
-			(context.cli.select as jest.Mock).mockResolvedValue("patch");
+			(context.cli.select as Mock).mockResolvedValue("patch");
 
 			await versionPlugin.executeStage(context, DefaultStages.check);
 
@@ -45,7 +46,7 @@ describe("Version plugin", () => {
 				},
 			});
 			context.setData("version", "1.2.3");
-			(context.cli.select as jest.Mock).mockResolvedValue("yes");
+			(context.cli.select as Mock).mockResolvedValue("yes");
 
 			await versionPlugin.executeStage(context, DefaultStages.check);
 
@@ -68,7 +69,7 @@ describe("Version plugin", () => {
 				},
 			});
 			context.setData("version", "1.2.3");
-			(context.cli.select as jest.Mock).mockResolvedValue("no");
+			(context.cli.select as Mock).mockResolvedValue("no");
 
 			await assertReleaseError(
 				() => versionPlugin.executeStage(context, DefaultStages.check),
@@ -86,7 +87,7 @@ describe("Version plugin", () => {
 				argv: { bump: "major" },
 			});
 			context.setData("version", "1.2.3");
-			(context.cli.select as jest.Mock).mockResolvedValue("yes");
+			(context.cli.select as Mock).mockResolvedValue("yes");
 
 			// Error: invalid option
 			context.errors = [];
@@ -155,7 +156,7 @@ describe("Version plugin", () => {
 };`,
 			});
 			context.argv.versionFiles = [
-				["widget/*.html", `(?<=\>Version: )(.*?)(?=<)`],
+				["widget/*.html", `(?<=>Version: )(.*?)(?=<)`],
 				["widget/**/*.*", [`(?<="version": ")(.*?)(?=",)`, `(?<=Version: ")(.*?)(?=")`]],
 			] as any;
 
