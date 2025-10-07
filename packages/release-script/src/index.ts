@@ -1,14 +1,14 @@
 import {
-	CLI as ICLI,
-	Context,
+	type CLI as ICLI,
+	type Context,
 	exec,
 	execRaw,
 	execute,
 	isReleaseError,
-	Plugin,
+	type Plugin,
 	ReleaseError,
 	resolvePlugins,
-	SelectOption,
+	type SelectOption,
 	stripColors,
 } from "@alcalzone/release-script-core";
 import { distinct } from "alcalzone-shared/arrays";
@@ -133,7 +133,6 @@ class CLI implements ICLI {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-inferrable-types
 	public prefix: string = "";
 	public readonly colors = colors;
 	public readonly stripColors = stripColors;
@@ -216,9 +215,7 @@ export async function main(): Promise<void> {
 	const allPlugins: Plugin[] = await Promise.all(
 		chosenPlugins.map(
 			async (plugin) =>
-				new (
-					await import(`@alcalzone/release-script-plugin-${plugin}`)
-				).default(),
+				new (await import(`@alcalzone/release-script-plugin-${plugin}`)).default(),
 		),
 	);
 	const plugins = resolvePlugins(allPlugins, chosenPlugins);

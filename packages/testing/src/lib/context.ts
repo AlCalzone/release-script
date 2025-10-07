@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-inferrable-types */
 import {
-	CLI,
-	Context,
+	type CLI,
+	type Context,
 	exec,
 	execRaw,
 	ReleaseError,
 	stripColors,
-	System,
+	type System,
 } from "@alcalzone/release-script-core";
 import type { ExecaReturnValue } from "execa";
 import colors from "picocolors";
@@ -38,7 +37,7 @@ class MockSystem implements System {
 							isCanceled: false,
 							failed: false,
 							exitCode: 0,
-					  } as any)
+						} as any)
 					: ret,
 			);
 		};

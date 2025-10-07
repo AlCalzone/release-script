@@ -16,7 +16,7 @@ async function hasGitIdentity(context: Context): Promise<boolean> {
 			cwd: context.cwd,
 		});
 		return username !== "" && email !== "";
-	} catch (e) {
+	} catch {
 		return false;
 	}
 }

@@ -155,7 +155,7 @@ describe("Version plugin", () => {
 };`,
 			});
 			context.argv.versionFiles = [
-				["widget/*.html", `(?<=\>Version: )(.*?)(?=<)`],
+				["widget/*.html", `(?<=>Version: )(.*?)(?=<)`],
 				["widget/**/*.*", [`(?<="version": ")(.*?)(?=",)`, `(?<=Version: ")(.*?)(?=")`]],
 			] as any;
 

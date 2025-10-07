@@ -110,6 +110,7 @@ class VersionPlugin implements Plugin {
 		} else {
 			context.argv.preid = undefined;
 		}
+		// @ts-expect-error preid is only used for "pre*" bumps
 		const newVersion = semver.inc(version, context.argv.bump as any, context.argv.preid)!;
 		context.cli.log(`Bumping version from ${version} to ${newVersion}`);
 		if (askOk && !context.argv.yes) {
@@ -154,7 +155,7 @@ class VersionPlugin implements Plugin {
 					for (const r of re) {
 						try {
 							new RegExp(r, "g");
-						} catch (e) {
+						} catch {
 							context.cli.error(
 								`Invalid option versionFiles: replacement pattern for glob "${pattern}" contains invalid regular expression "${r}"!`,
 							);

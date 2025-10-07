@@ -2,7 +2,7 @@ import { ReleaseError } from "..";
 import type { Context } from "./context";
 import { GraphNode, topologicalSort } from "./graph";
 import type { Plugin } from "./plugin";
-import { DefaultStages, Stage } from "./stage";
+import { DefaultStages, type Stage } from "./stage";
 
 /** Resolve all plugins that are required by the chosen plugins */
 export function resolvePlugins(allPlugins: Plugin[], chosenPluginIds: string[]): Plugin[] {
