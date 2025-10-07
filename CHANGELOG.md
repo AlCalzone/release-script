@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 4.0.0 (2025-10-07)
 * Dependency upgrades
 * Switch to ESM module format
 * Require Node.js 18+
