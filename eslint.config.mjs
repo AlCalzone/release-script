@@ -7,7 +7,7 @@ import { defineConfig } from "eslint/config";
 export default defineConfig(
 	// Ignore patterns
 	{
-		ignores: ["**/build/**", "**/.prettierrc.js", "**/*.config.js", "**/test/jest.setup.js"],
+		ignores: ["**/build/**", "**/.prettierrc.js", "**/*.config.js"],
 	},
 
 	// Base config for all files

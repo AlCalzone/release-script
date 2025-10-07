@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { GraphNode, topologicalSort } from "./graph";
 
 describe("Graph", () => {

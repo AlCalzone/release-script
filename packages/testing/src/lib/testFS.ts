@@ -1,6 +1,6 @@
+import * as fs from "fs-extra";
 import os from "os";
 import path from "path";
-const fs = jest.requireActual("fs-extra") as typeof import("fs-extra");
 
 /** Class to manage an isolated test "filesystem" for unit tests */
 export class TestFS {

@@ -1,3 +1,4 @@
+import { describe, expect, it, vi } from "vitest";
 import type { Context } from "./context";
 import { execute, planStage, planStages, resolvePlugins } from "./planner";
 import type { Plugin } from "./plugin";
@@ -339,7 +340,7 @@ describe("execute", () => {
 		} as any as Plugin;
 
 		const plugins = resolvePlugins([plugin1, plugin2, plugin3], ["plugin2", "plugin3"]);
-		const logStub = jest.fn();
+		const logStub = vi.fn();
 		const context = {
 			plugins,
 			cli: {

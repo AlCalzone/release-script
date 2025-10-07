@@ -15,11 +15,9 @@
 		// Required for TS debugging
 		"sourceMap": true,
 		"inlineSourceMap": false,
-		// Make jest-extended work in tests
+		// Types for tests
 		"types": [
 			"node",
-			"jest",
-			"jest-extended"
 		],
 		"preserveWatchOutput": true
 	},

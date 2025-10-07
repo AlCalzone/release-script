@@ -3,9 +3,10 @@ import { DefaultStages } from "@alcalzone/release-script-core";
 import { assertReleaseError, createMockContext, TestFS } from "@alcalzone/release-script-testing";
 import fs from "fs-extra";
 import path from "path";
+import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import PackagePlugin from ".";
 
-jest.mock("@alcalzone/pak");
+vi.mock("@alcalzone/pak");
 
 const fixtures = {
 	yarnrc_commented_out: `
@@ -448,8 +449,8 @@ describe("Package plugin", () => {
 			context.sys.mockExec(() => "");
 
 			// Mock pak
-			const pakInstall = jest.fn().mockResolvedValue({ success: true });
-			(detectPackageManager as jest.Mock).mockReturnValue({
+			const pakInstall = vi.fn().mockResolvedValue({ success: true });
+			(detectPackageManager as Mock).mockReturnValue({
 				install: pakInstall,
 			});
 
@@ -476,8 +477,8 @@ describe("Package plugin", () => {
 			context.sys.mockExec(() => "");
 
 			// Mock pak
-			const pakInstall = jest.fn().mockResolvedValue({ success: true });
-			(detectPackageManager as jest.Mock).mockReturnValue({
+			const pakInstall = vi.fn().mockResolvedValue({ success: true });
+			(detectPackageManager as Mock).mockReturnValue({
 				install: pakInstall,
 			});
 
@@ -503,8 +504,8 @@ describe("Package plugin", () => {
 			context.sys.mockExec(() => "");
 
 			// Mock pak
-			const pakInstall = jest.fn().mockResolvedValue({ success: false, stderr: "NOOOO" });
-			(detectPackageManager as jest.Mock).mockReturnValue({
+			const pakInstall = vi.fn().mockResolvedValue({ success: false, stderr: "NOOOO" });
+			(detectPackageManager as Mock).mockReturnValue({
 				install: pakInstall,
 			});
 
