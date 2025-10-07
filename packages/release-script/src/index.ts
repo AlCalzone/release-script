@@ -12,10 +12,12 @@ import {
 	stripColors,
 } from "@alcalzone/release-script-core";
 import { distinct } from "alcalzone-shared/arrays";
-import { prompt } from "enquirer";
+import enquirer from "enquirer";
 import colors from "picocolors";
 import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
+
+const { prompt } = enquirer;
 
 function colorizeTextAndTags(
 	textWithTags: string,
