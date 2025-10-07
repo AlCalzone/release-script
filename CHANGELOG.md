@@ -3,6 +3,11 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* Dependency upgrades
+* Switch to ESM module format
+* Require Node.js 18+
+
 ## 3.8.0 (2024-07-23)
 * `git` plugin: allow to skip push stage via `noPush` option
 
