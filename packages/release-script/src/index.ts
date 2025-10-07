@@ -14,7 +14,7 @@ import {
 import { distinct } from "alcalzone-shared/arrays";
 import enquirer from "enquirer";
 import colors from "picocolors";
-import yargs from "yargs/yargs";
+import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
 const { prompt } = enquirer;
