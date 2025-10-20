@@ -2,18 +2,18 @@
 
 Automate the monotonous tasks when it comes to releasing new versions of your project. The features include:
 
--   Bump the version in `package.json` (and `package-lock.json`)
--   Update the changelog headline with the new version and release date whenever a release is made
--   Move old changelog entries into another file
--   Add the changelog to the release commit and create a tag for it.
--   Support for monorepos managed with `lerna` or `yarn workspaces` (using additional `yarn` plugins)
--   Support for custom scripts during the release lifecycle
--   Check licenses for outdated copyrights
--   Dry runs and checking for errors
--   **ioBroker only**:
-    -   Bump the version in `io-package.json`
-    -   Update the `news` in `io-package.json` and auto-translate the changelog to the other languages
-    -   Remove old `news`
+- Bump the version in `package.json` (and `package-lock.json`)
+- Update the changelog headline with the new version and release date whenever a release is made
+- Move old changelog entries into another file
+- Add the changelog to the release commit and create a tag for it.
+- Support for monorepos managed with `lerna` or `yarn workspaces` (using additional `yarn` plugins)
+- Support for custom scripts during the release lifecycle
+- Check licenses for outdated copyrights
+- Dry runs and checking for errors
+- **ioBroker only**:
+    - Bump the version in `io-package.json`
+    - Update the `news` in `io-package.json` and auto-translate the changelog to the other languages
+    - Remove old `news`
 
 Together with the corresponding **Github Actions** workflow (more on that below) this enables auto-publishing on `npm` and `Github Releases` if the build was successful.
 
@@ -72,8 +72,8 @@ In order to use this script, you need to maintain the changelog in either `READM
 
 ## **WORK IN PROGRESS**
 
--   Did some changes
--   Did some more changes
+- Did some changes
+- Did some more changes
 
 ## v0.0.1 (2020-01-01)
 
@@ -166,8 +166,8 @@ Instead of manually providing all options, you can configure the release process
 	"plugins": ["iobroker", "lerna"],
 	// Objects
 	"exec": {
-		"before_commit": "echo Hello World!"
-	}
+		"before_commit": "echo Hello World!",
+	},
 }
 ```
 
@@ -291,7 +291,7 @@ or to `.releaseconfig.json` if you're using that:
 ```jsonc
 {
 	// ... other options
-	"plugins": ["iobroker", "license"]
+	"plugins": ["iobroker", "license"],
 }
 ```
 
@@ -340,6 +340,14 @@ When this option is set, nothing will be pushed to the remote. This option can b
 
 ```bash
 npm run release patch -- --noPush
+```
+
+#### Configure branches from which releases can be created (`--branchPattern`)
+
+By default, the release script only allows creating releases from the repository's default branch (usually `main` or `master`). If you want to allow releases from other branches, you can use this option. It supports `*` as a wildcard, e.g. `release/*` to allow releases from all branches starting with `release/`. Can be specified multiple times.
+
+```bash
+npm run release patch -- --branchPattern main --branchPattern release/*
 ```
 
 ### `changelog` plugin options
@@ -402,8 +410,8 @@ To run custom scripts, you can use these options. They accept an object defining
 		// Run "echo 1", "echo 2", "echo 3" after the "push" stage
 		"after_push": ["echo 1", "echo 2", "echo 3"],
 		// Run "sudo shutdown" before the "check" stage
-		"before_check": "sudo shutdown"
-	}
+		"before_check": "sudo shutdown",
+	},
 }
 ```
 

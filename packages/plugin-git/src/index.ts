@@ -36,9 +36,8 @@ async function getDefaultBranch(context: Context): Promise<string | undefined> {
 		);
 		// Output is like "origin/main", extract the branch name
 		const match = stdout.match(/^origin\/(.+)$/);
-		return match ? match[1] : undefined;
+		return match?.[1];
 	} catch {
-		// If the command fails (e.g., symbolic ref not set), return undefined
 		return undefined;
 	}
 }
@@ -110,10 +109,9 @@ async function checkBranchPattern(context: Context, currentBranch: string): Prom
 
 	let branchPatterns: string[];
 	if (patterns) {
-		// User provided patterns
 		branchPatterns = Array.isArray(patterns) ? patterns : [patterns];
 	} else {
-		// Try to get the default branch dynamically
+		// If the user did not specify any patterns, default to the repository's default branch
 		const defaultBranch = await getDefaultBranch(context);
 		if (defaultBranch) {
 			branchPatterns = [defaultBranch];
@@ -126,12 +124,11 @@ async function checkBranchPattern(context: Context, currentBranch: string): Prom
 	const matches = branchPatterns.some((pattern) => matchesBranchPattern(currentBranch, pattern));
 
 	if (!matches) {
-		const colors = context.cli.colors;
-		const patternsStr =
-			branchPatterns.length === 1 ? branchPatterns[0] : branchPatterns.join(", ");
-		const message = `Release can only be triggered from branches matching: ${colors.bold(
-			colors.blue(patternsStr),
-		)}. Current branch: ${colors.bold(colors.red(currentBranch))}`;
+		const message = `Release can only be triggered from branches matching:
+${context.cli.colors.blue(branchPatterns.map((p) => `· ${p}`).join("\n"))}
+Current branch: ${context.cli.colors.red(currentBranch)}
+
+Note: Use the --branch-pattern option to customize this behavior.`;
 		context.cli.fatal(message);
 	}
 }
@@ -176,9 +173,7 @@ class GitPlugin implements Plugin {
 				type: "string",
 				array: true,
 				description:
-					"Branch name patterns (supports * wildcard) that releases can be triggered from",
-				defaultDescription:
-					"The repository's default branch (from git symbolic-ref), or 'main'/'master' if that fails",
+					"On which git branches a release may be created. Supports '*' as a wildcard. Defaults to the repository's default branch, or ['main', 'master'] if it cannot be determined.",
 			},
 		});
 	}
