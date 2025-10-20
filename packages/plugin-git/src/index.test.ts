@@ -265,42 +265,6 @@ describe("Git plugin", () => {
 				messageMatches: /Release can only be triggered from/i,
 			});
 		});
-
-		it("succeeds with regex pattern", async () => {
-			const gitPlugin = new GitPlugin();
-			const context = createMockContext({
-				plugins: [gitPlugin],
-				argv: { branchPattern: ["^(main|master|release/.+)$"] },
-			});
-			context.sys.mockExec({
-				"git config --get user.name": "henlo",
-				"git config --get user.email": "this.is@dog",
-				"git rev-parse --abbrev-ref HEAD": "release/v1.2.3",
-				"git rev-list --left-right --count HEAD...origin": "1\t0",
-				"git status --porcelain": "",
-			});
-
-			await gitPlugin.executeStage(context, DefaultStages.check);
-			expect(context.errors).toHaveLength(0);
-		});
-
-		it("fails with regex pattern when branch doesn't match", async () => {
-			const gitPlugin = new GitPlugin();
-			const context = createMockContext({
-				plugins: [gitPlugin],
-				argv: { branchPattern: ["^(main|master)$"] },
-			});
-			context.sys.mockExec({
-				"git config --get user.name": "henlo",
-				"git config --get user.email": "this.is@dog",
-				"git rev-parse --abbrev-ref HEAD": "develop",
-			});
-
-			await assertReleaseError(() => gitPlugin.executeStage(context, DefaultStages.check), {
-				fatal: true,
-				messageMatches: /Release can only be triggered from/i,
-			});
-		});
 	});
 
 	describe("commit stage", () => {

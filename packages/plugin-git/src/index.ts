@@ -90,35 +90,15 @@ async function gitStatus(context: Context): Promise<GitStatus> {
 }
 
 function matchesBranchPattern(branch: string, pattern: string): boolean {
-	// Convert simplified wildcard to regex pattern
-	// * without leading dot expands to .*
-	let regexPattern = pattern;
+	// Support only * as a wildcard that matches 1 or more characters
+	// Escape all regex special characters except *
+	const regexPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".+");
 
-	// Check if it's already a valid regex pattern
-	// If pattern starts with ^ or ends with $ or contains regex special chars (not just *), treat as regex
-	const isRegex =
-		/^\/.*\/[gimuy]*$/.test(pattern) ||
-		/[[\]{}()+?.|\\]/.test(pattern) ||
-		pattern.startsWith("^") ||
-		pattern.endsWith("$");
-
-	if (!isRegex) {
-		// Escape special regex characters except *
-		regexPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
-		// Replace * with .*
-		regexPattern = regexPattern.replace(/\*/g, ".*");
-		// Anchor the pattern
-		regexPattern = `^${regexPattern}$`;
-	} else if (/^\/(.*)\/([gimuy]*)$/.test(pattern)) {
-		// Handle /pattern/flags format
-		const match = pattern.match(/^\/(.*)\/([gimuy]*)$/);
-		if (match) {
-			return new RegExp(match[1], match[2]).test(branch);
-		}
-	}
+	// Anchor the pattern to match the entire branch name
+	const anchored = `^${regexPattern}$`;
 
 	try {
-		return new RegExp(regexPattern).test(branch);
+		return new RegExp(anchored).test(branch);
 	} catch {
 		// If regex is invalid, treat as literal string match
 		return branch === pattern;
@@ -196,7 +176,7 @@ class GitPlugin implements Plugin {
 				type: "string",
 				array: true,
 				description:
-					"Branch name patterns (supports wildcards and regex) that releases can be triggered from",
+					"Branch name patterns (supports * wildcard) that releases can be triggered from",
 				defaultDescription:
 					"The repository's default branch (from git symbolic-ref), or 'main'/'master' if that fails",
 			},
