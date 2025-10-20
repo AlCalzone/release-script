@@ -28,6 +28,21 @@ async function getCurrentBranch(context: Context): Promise<string> {
 	return branch;
 }
 
+async function getDefaultBranch(context: Context): Promise<string | undefined> {
+	try {
+		const { stdout } = await context.sys.execRaw(
+			"git symbolic-ref --short refs/remotes/origin/HEAD",
+			{ cwd: context.cwd },
+		);
+		// Output is like "origin/main", extract the branch name
+		const match = stdout.match(/^origin\/(.+)$/);
+		return match ? match[1] : undefined;
+	} catch {
+		// If the command fails (e.g., symbolic ref not set), return undefined
+		return undefined;
+	}
+}
+
 async function getUpstream(context: Context): Promise<string> {
 	const { stdout: upstream } = await context.sys.execRaw(
 		"git rev-parse --abbrev-ref --symbolic-full-name @{u}",
@@ -110,15 +125,23 @@ function matchesBranchPattern(branch: string, pattern: string): boolean {
 	}
 }
 
-function checkBranchPattern(context: Context, currentBranch: string): void {
+async function checkBranchPattern(context: Context, currentBranch: string): Promise<void> {
 	const patterns = context.argv.branchPattern as string | string[] | undefined;
-	// Default to ["main", "master"] if not provided
-	const defaultPatterns = ["main", "master"];
-	const branchPatterns = patterns
-		? Array.isArray(patterns)
-			? patterns
-			: [patterns]
-		: defaultPatterns;
+
+	let branchPatterns: string[];
+	if (patterns) {
+		// User provided patterns
+		branchPatterns = Array.isArray(patterns) ? patterns : [patterns];
+	} else {
+		// Try to get the default branch dynamically
+		const defaultBranch = await getDefaultBranch(context);
+		if (defaultBranch) {
+			branchPatterns = [defaultBranch];
+		} else {
+			// Fallback to common defaults if we can't determine the default branch
+			branchPatterns = ["main", "master"];
+		}
+	}
 
 	const matches = branchPatterns.some((pattern) => matchesBranchPattern(currentBranch, pattern));
 
@@ -174,7 +197,8 @@ class GitPlugin implements Plugin {
 				array: true,
 				description:
 					"Branch name patterns (supports wildcards and regex) that releases can be triggered from",
-				default: ["main", "master"],
+				defaultDescription:
+					"The repository's default branch (from git symbolic-ref), or 'main'/'master' if that fails",
 			},
 		});
 	}
@@ -203,7 +227,7 @@ Note: If the current folder belongs to a different user than ${colors.bold(
 
 		// Check that we're on the correct branch
 		const currentBranch = await getCurrentBranch(context);
-		checkBranchPattern(context, currentBranch);
+		await checkBranchPattern(context, currentBranch);
 
 		const lerna = context.hasData("lerna") && !!context.getData("lerna");
 

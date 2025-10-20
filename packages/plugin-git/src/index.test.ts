@@ -106,6 +106,7 @@ describe("Git plugin", () => {
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
 				"git rev-parse --abbrev-ref HEAD": "main",
+				"git symbolic-ref --short refs/remotes/origin/HEAD": "origin/main",
 				"git rev-list --left-right --count HEAD...origin": "1\t0",
 				"git status --porcelain": "",
 			});
@@ -123,6 +124,7 @@ describe("Git plugin", () => {
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
 				"git rev-parse --abbrev-ref HEAD": "main",
+				"git symbolic-ref --short refs/remotes/origin/HEAD": "origin/main",
 				"git rev-list --left-right --count HEAD...origin": "1\t0",
 				"git status --porcelain": "",
 			});
@@ -140,6 +142,7 @@ describe("Git plugin", () => {
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
 				"git rev-parse --abbrev-ref HEAD": "master",
+				"git symbolic-ref --short refs/remotes/origin/HEAD": "origin/master",
 				"git rev-list --left-right --count HEAD...origin": "1\t0",
 				"git status --porcelain": "",
 			});
@@ -153,16 +156,60 @@ describe("Git plugin", () => {
 			const context = createMockContext({
 				plugins: [gitPlugin],
 			});
-			context.sys.mockExec({
-				"git config --get user.name": "henlo",
-				"git config --get user.email": "this.is@dog",
-				"git rev-parse --abbrev-ref HEAD": "feature-branch",
+			context.sys.mockExec((cmd) => {
+				if (cmd === "git config --get user.name") return "henlo";
+				if (cmd === "git config --get user.email") return "this.is@dog";
+				if (cmd === "git rev-parse --abbrev-ref HEAD") return "feature-branch";
+				if (cmd === "git symbolic-ref --short refs/remotes/origin/HEAD") {
+					// Simulate failure - fall back to ["main", "master"]
+					throw new Error("not a symbolic ref");
+				}
+				throw new Error(`mock missing for command "${cmd}"!`);
 			});
 
 			await assertReleaseError(() => gitPlugin.executeStage(context, DefaultStages.check), {
 				fatal: true,
 				messageMatches: /Release can only be triggered from/i,
 			});
+		});
+
+		it("uses dynamic default branch from git symbolic-ref", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+			});
+			context.sys.mockExec({
+				"git config --get user.name": "henlo",
+				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "develop",
+				"git symbolic-ref --short refs/remotes/origin/HEAD": "origin/develop",
+				"git rev-list --left-right --count HEAD...origin": "1\t0",
+				"git status --porcelain": "",
+			});
+
+			await gitPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+		});
+
+		it("falls back to main/master when git symbolic-ref fails", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+			});
+			context.sys.mockExec((cmd) => {
+				if (cmd === "git config --get user.name") return "henlo";
+				if (cmd === "git config --get user.email") return "this.is@dog";
+				if (cmd === "git rev-parse --abbrev-ref HEAD") return "main";
+				if (cmd === "git symbolic-ref --short refs/remotes/origin/HEAD") {
+					throw new Error("not a symbolic ref");
+				}
+				if (cmd === "git rev-list --left-right --count HEAD...origin") return "1\t0";
+				if (cmd === "git status --porcelain") return "";
+				throw new Error(`mock missing for command "${cmd}"!`);
+			});
+
+			await gitPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
 		});
 
 		it("succeeds with custom branch pattern (single string)", async () => {
