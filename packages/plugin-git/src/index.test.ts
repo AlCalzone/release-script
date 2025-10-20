@@ -15,6 +15,7 @@ describe("Git plugin", () => {
 			context.sys.mockExec({
 				"git config --get user.name": "",
 				"git config --get user.email": "",
+				"git rev-parse --abbrev-ref HEAD": "main",
 			});
 
 			await assertReleaseError(() => gitPlugin.executeStage(context, DefaultStages.check), {
@@ -31,6 +32,7 @@ describe("Git plugin", () => {
 			context.sys.mockExec({
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "main",
 				"git rev-list --left-right --count HEAD...origin": "0\t2",
 			});
 
@@ -48,6 +50,7 @@ describe("Git plugin", () => {
 			context.sys.mockExec({
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "main",
 				"git rev-list --left-right --count HEAD...origin": "1\t1",
 			});
 
@@ -66,6 +69,7 @@ describe("Git plugin", () => {
 			context.sys.mockExec({
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "main",
 				"git rev-list --left-right --count HEAD...origin": "1\t0",
 				"git status --porcelain": "whatever",
 			});
@@ -84,6 +88,7 @@ describe("Git plugin", () => {
 			context.sys.mockExec({
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "main",
 				"git rev-list --left-right --count HEAD...origin": "1\t0",
 				"git status --porcelain": "whatever",
 			});
@@ -100,12 +105,154 @@ describe("Git plugin", () => {
 			context.sys.mockExec({
 				"git config --get user.name": "henlo",
 				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "main",
 				"git rev-list --left-right --count HEAD...origin": "1\t0",
 				"git status --porcelain": "",
 			});
 
 			await gitPlugin.executeStage(context, DefaultStages.check);
 			expect(context.errors).toHaveLength(0);
+		});
+
+		it("succeeds when on the 'main' branch (default pattern)", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+			});
+			context.sys.mockExec({
+				"git config --get user.name": "henlo",
+				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "main",
+				"git rev-list --left-right --count HEAD...origin": "1\t0",
+				"git status --porcelain": "",
+			});
+
+			await gitPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+		});
+
+		it("succeeds when on the 'master' branch (default pattern)", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+			});
+			context.sys.mockExec({
+				"git config --get user.name": "henlo",
+				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "master",
+				"git rev-list --left-right --count HEAD...origin": "1\t0",
+				"git status --porcelain": "",
+			});
+
+			await gitPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+		});
+
+		it("raises a fatal error when not on an allowed branch", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+			});
+			context.sys.mockExec({
+				"git config --get user.name": "henlo",
+				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "feature-branch",
+			});
+
+			await assertReleaseError(() => gitPlugin.executeStage(context, DefaultStages.check), {
+				fatal: true,
+				messageMatches: /Release can only be triggered from/i,
+			});
+		});
+
+		it("succeeds with custom branch pattern (single string)", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				argv: { branchPattern: ["develop"] },
+			});
+			context.sys.mockExec({
+				"git config --get user.name": "henlo",
+				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "develop",
+				"git rev-list --left-right --count HEAD...origin": "1\t0",
+				"git status --porcelain": "",
+			});
+
+			await gitPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+		});
+
+		it("succeeds with wildcard pattern matching release branches", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				argv: { branchPattern: ["main", "release/*"] },
+			});
+			context.sys.mockExec({
+				"git config --get user.name": "henlo",
+				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "release/1.0.0",
+				"git rev-list --left-right --count HEAD...origin": "1\t0",
+				"git status --porcelain": "",
+			});
+
+			await gitPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+		});
+
+		it("fails with wildcard pattern when branch doesn't match", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				argv: { branchPattern: ["main", "release/*"] },
+			});
+			context.sys.mockExec({
+				"git config --get user.name": "henlo",
+				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "feature/my-feature",
+			});
+
+			await assertReleaseError(() => gitPlugin.executeStage(context, DefaultStages.check), {
+				fatal: true,
+				messageMatches: /Release can only be triggered from/i,
+			});
+		});
+
+		it("succeeds with regex pattern", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				argv: { branchPattern: ["^(main|master|release/.+)$"] },
+			});
+			context.sys.mockExec({
+				"git config --get user.name": "henlo",
+				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "release/v1.2.3",
+				"git rev-list --left-right --count HEAD...origin": "1\t0",
+				"git status --porcelain": "",
+			});
+
+			await gitPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+		});
+
+		it("fails with regex pattern when branch doesn't match", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				argv: { branchPattern: ["^(main|master)$"] },
+			});
+			context.sys.mockExec({
+				"git config --get user.name": "henlo",
+				"git config --get user.email": "this.is@dog",
+				"git rev-parse --abbrev-ref HEAD": "develop",
+			});
+
+			await assertReleaseError(() => gitPlugin.executeStage(context, DefaultStages.check), {
+				fatal: true,
+				messageMatches: /Release can only be triggered from/i,
+			});
 		});
 	});
 

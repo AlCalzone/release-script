@@ -21,6 +21,13 @@ async function hasGitIdentity(context: Context): Promise<boolean> {
 	}
 }
 
+async function getCurrentBranch(context: Context): Promise<string> {
+	const { stdout: branch } = await context.sys.execRaw("git rev-parse --abbrev-ref HEAD", {
+		cwd: context.cwd,
+	});
+	return branch;
+}
+
 async function getUpstream(context: Context): Promise<string> {
 	const { stdout: upstream } = await context.sys.execRaw(
 		"git rev-parse --abbrev-ref --symbolic-full-name @{u}",
@@ -67,6 +74,65 @@ async function gitStatus(context: Context): Promise<GitStatus> {
 	}
 }
 
+function matchesBranchPattern(branch: string, pattern: string): boolean {
+	// Convert simplified wildcard to regex pattern
+	// * without leading dot expands to .*
+	let regexPattern = pattern;
+
+	// Check if it's already a valid regex pattern
+	// If pattern starts with ^ or ends with $ or contains regex special chars (not just *), treat as regex
+	const isRegex =
+		/^\/.*\/[gimuy]*$/.test(pattern) ||
+		/[[\]{}()+?.|\\]/.test(pattern) ||
+		pattern.startsWith("^") ||
+		pattern.endsWith("$");
+
+	if (!isRegex) {
+		// Escape special regex characters except *
+		regexPattern = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+		// Replace * with .*
+		regexPattern = regexPattern.replace(/\*/g, ".*");
+		// Anchor the pattern
+		regexPattern = `^${regexPattern}$`;
+	} else if (/^\/(.*)\/([gimuy]*)$/.test(pattern)) {
+		// Handle /pattern/flags format
+		const match = pattern.match(/^\/(.*)\/([gimuy]*)$/);
+		if (match) {
+			return new RegExp(match[1], match[2]).test(branch);
+		}
+	}
+
+	try {
+		return new RegExp(regexPattern).test(branch);
+	} catch {
+		// If regex is invalid, treat as literal string match
+		return branch === pattern;
+	}
+}
+
+function checkBranchPattern(context: Context, currentBranch: string): void {
+	const patterns = context.argv.branchPattern as string | string[] | undefined;
+	// Default to ["main", "master"] if not provided
+	const defaultPatterns = ["main", "master"];
+	const branchPatterns = patterns
+		? Array.isArray(patterns)
+			? patterns
+			: [patterns]
+		: defaultPatterns;
+
+	const matches = branchPatterns.some((pattern) => matchesBranchPattern(currentBranch, pattern));
+
+	if (!matches) {
+		const colors = context.cli.colors;
+		const patternsStr =
+			branchPatterns.length === 1 ? branchPatterns[0] : branchPatterns.join(", ");
+		const message = `Release can only be triggered from branches matching: ${colors.bold(
+			colors.blue(patternsStr),
+		)}. Current branch: ${colors.bold(colors.red(currentBranch))}`;
+		context.cli.fatal(message);
+	}
+}
+
 class GitPlugin implements Plugin {
 	public readonly id = "git";
 	public readonly stages = [
@@ -103,6 +169,13 @@ class GitPlugin implements Plugin {
 				description: "Do not push anything to the remote",
 				default: false,
 			},
+			branchPattern: {
+				type: "string",
+				array: true,
+				description:
+					"Branch name patterns (supports wildcards and regex) that releases can be triggered from",
+				default: ["main", "master"],
+			},
 		});
 	}
 
@@ -127,6 +200,10 @@ Note: If the current folder belongs to a different user than ${colors.bold(
 `;
 			context.cli.fatal(message);
 		}
+
+		// Check that we're on the correct branch
+		const currentBranch = await getCurrentBranch(context);
+		checkBranchPattern(context, currentBranch);
 
 		const lerna = context.hasData("lerna") && !!context.getData("lerna");
 
