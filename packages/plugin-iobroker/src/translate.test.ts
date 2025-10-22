@@ -1,13 +1,14 @@
 import axios from "axios";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { translateText } from "./translate";
 
 // Mock axios
-jest.mock("axios");
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+vi.mock("axios");
+const mockedAxios = axios as unknown as ReturnType<typeof vi.fn>;
 
 describe("translateText", () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
+		vi.clearAllMocks();
 		delete process.env.DEEPL_API_KEY;
 	});
 
@@ -113,7 +114,7 @@ describe("translateText", () => {
 				});
 			});
 
-			const consoleSpy = jest.spyOn(console, "warn").mockImplementation(() => {
+			const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {
 				// No-op
 			});
 
@@ -140,10 +141,10 @@ describe("translateText", () => {
 				},
 			});
 
-			const consoleSpy = jest.spyOn(console, "warn").mockImplementation(() => {
+			const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {
 				// No-op
 			});
-			const consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => {
+			const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {
 				// No-op
 			});
 
