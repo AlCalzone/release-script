@@ -2,6 +2,7 @@ import { DefaultStages } from "@alcalzone/release-script-core";
 import { assertReleaseError, createMockContext, TestFS } from "@alcalzone/release-script-testing";
 import fs from "fs-extra";
 import path from "path";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import ChangelogPlugin from ".";
 
 const fixtures = {

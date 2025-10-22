@@ -309,7 +309,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 							"version",
 							newVersion,
 							"--deferred",
-					  ]
+						]
 					: [
 							"yarn",
 							"changed",
@@ -319,7 +319,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 							"version",
 							newVersion,
 							"--deferred",
-					  ],
+						],
 				["yarn", "version", newVersion, "--deferred"],
 				["yarn", "version", "apply", "--all"],
 			];

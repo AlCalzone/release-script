@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { cleanChangelogForNews } from "./tools";
 
 describe("cleanChangelogForNews", () => {

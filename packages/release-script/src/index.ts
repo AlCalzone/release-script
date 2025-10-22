@@ -1,20 +1,23 @@
 import {
-	CLI as ICLI,
-	Context,
+	type CLI as ICLI,
+	type Context,
 	exec,
 	execRaw,
 	execute,
 	isReleaseError,
-	Plugin,
+	type Plugin,
 	ReleaseError,
 	resolvePlugins,
-	SelectOption,
+	type SelectOption,
 	stripColors,
 } from "@alcalzone/release-script-core";
 import { distinct } from "alcalzone-shared/arrays";
-import { prompt } from "enquirer";
+import enquirer from "enquirer";
 import colors from "picocolors";
 import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
+
+const { prompt } = enquirer;
 
 function colorizeTextAndTags(
 	textWithTags: string,
@@ -133,14 +136,14 @@ class CLI implements ICLI {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-inferrable-types
 	public prefix: string = "";
 	public readonly colors = colors;
 	public readonly stripColors = stripColors;
 }
 
 export async function main(): Promise<void> {
-	let argv = yargs
+	const yargsInstance = yargs(hideBin(process.argv));
+	let argv = yargsInstance
 		.env("RELEASE_SCRIPT")
 		.usage("$0 [<bump> [<preid>]] [options]", "AlCalzone's release script", (yargs) =>
 			yargs
@@ -162,7 +165,7 @@ export async function main(): Promise<void> {
 					required: false,
 				}),
 		)
-		.wrap(yargs.terminalWidth())
+		.wrap(yargsInstance.terminalWidth())
 		// Delay showing help until the second parsing pass
 		.help(false)
 		.alias("v", "version")
@@ -216,9 +219,7 @@ export async function main(): Promise<void> {
 	const allPlugins: Plugin[] = await Promise.all(
 		chosenPlugins.map(
 			async (plugin) =>
-				new (
-					await import(`@alcalzone/release-script-plugin-${plugin}`)
-				).default(),
+				new (await import(`@alcalzone/release-script-plugin-${plugin}`)).default(),
 		),
 	);
 	const plugins = resolvePlugins(allPlugins, chosenPlugins);

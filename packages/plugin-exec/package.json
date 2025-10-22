@@ -3,7 +3,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "3.7.0",
+  "version": "4.0.0",
+  "type": "module",
   "description": "Plugin for Al Calzone's release script: execute user scripts",
   "keywords": [],
   "license": "MIT",
@@ -11,39 +12,27 @@
     "name": "AlCalzone",
     "email": "d.griesel@gmx.net"
   },
-  "main": "build/index.js",
   "exports": {
     ".": "./build/index.js",
     "./package.json": "./package.json",
     "./*.map": "./build/*.js.map",
     "./*": "./build/*.js"
   },
-  "types": "build/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "build/index.d.ts": [
-        "build/index.d.ts"
-      ],
-      "*": [
-        "build/*"
-      ]
-    }
-  },
   "files": [
     "build/",
     "LICENSE"
   ],
   "engines": {
-    "node": ">=12.20"
+    "node": ">=18"
   },
   "dependencies": {
-    "@alcalzone/release-script-core": "3.7.0",
-    "alcalzone-shared": "^4.0.1"
+    "@alcalzone/release-script-core": "4.0.0",
+    "alcalzone-shared": "^5.0.0"
   },
   "devDependencies": {
-    "@alcalzone/release-script-testing": "3.7.0",
+    "@alcalzone/release-script-testing": "4.0.0",
     "jest-extended": "^3.1.0",
-    "typescript": "~4.8.4"
+    "typescript": "~5.9.3"
   },
   "scripts": {
     "clean": "tsc -b tsconfig.build.json --clean",

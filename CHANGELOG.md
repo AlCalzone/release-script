@@ -3,6 +3,14 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## 5.0.0 (2025-10-20)
+* Breaking: Releases can only be created from the default branch (usually `main` or `master`) now. To configure this behavior, use the `branchPattern` option, e.g. `--branchPattern release/*` to allow releases from branches starting with `release/`.
+
+## 4.0.0 (2025-10-07)
+* Dependency upgrades
+* Switch to ESM module format
+* Require Node.js 18+
+
 ## 3.8.0 (2024-07-23)
 * `git` plugin: allow to skip push stage via `noPush` option
 

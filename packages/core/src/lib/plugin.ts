@@ -1,7 +1,7 @@
 import type { Argv } from "yargs";
-import type { Context } from "./context";
-import type { ConstOrDynamic } from "./shared";
-import type { Stage } from "./stage";
+import type { Context } from "./context.js";
+import type { ConstOrDynamic } from "./shared.js";
+import type { Stage } from "./stage.js";
 export interface Plugin {
 	/** A unique identifier for this plugin */
 	readonly id: string;

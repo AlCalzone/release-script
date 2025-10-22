@@ -1,19 +1,19 @@
-/* eslint-disable @typescript-eslint/no-inferrable-types */
 import {
-	CLI,
-	Context,
+	type Context,
 	exec,
 	execRaw,
 	ReleaseError,
 	stripColors,
-	System,
+	type System,
 } from "@alcalzone/release-script-core";
 import type { ExecaReturnValue } from "execa";
 import colors from "picocolors";
+import type { Mock } from "vitest";
+import { vi } from "vitest";
 
 class MockSystem implements System {
-	public exec: jest.MockedFunction<System["exec"]> = jest.fn();
-	public execRaw: jest.MockedFunction<System["execRaw"]> = jest.fn();
+	public exec: Mock = vi.fn();
+	public execRaw: Mock = vi.fn();
 
 	public mockExec(
 		commands:
@@ -38,7 +38,7 @@ class MockSystem implements System {
 							isCanceled: false,
 							failed: false,
 							exitCode: 0,
-					  } as any)
+						} as any)
 					: ret,
 			);
 		};
@@ -87,20 +87,20 @@ export function createMockContext(
 	const data = new Map();
 	const ret: Context & { sys: MockSystem } = {
 		cli: {
-			log: jest.fn(),
-			warn: jest.fn().mockImplementation((msg) => {
+			log: vi.fn(),
+			warn: vi.fn().mockImplementation((msg) => {
 				ret.warnings.push(msg);
 			}),
-			error: jest.fn().mockImplementation((msg) => {
+			error: vi.fn().mockImplementation((msg) => {
 				ret.errors.push(msg);
 			}),
-			fatal: jest.fn<never, Parameters<CLI["fatal"]>>().mockImplementation((msg, code) => {
+			fatal: vi.fn().mockImplementation((msg: string, code?: number): never => {
 				throw new ReleaseError(msg, true, code);
-			}),
-			logCommand: jest.fn(),
-			select: jest.fn(),
-			ask: jest.fn(),
-			clearLines: jest.fn(),
+			}) as any,
+			logCommand: vi.fn(),
+			select: vi.fn(),
+			ask: vi.fn(),
+			clearLines: vi.fn(),
 			colors,
 			stripColors,
 			prefix: "",
