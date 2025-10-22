@@ -133,12 +133,21 @@ describe("translateText", () => {
 		it("should fall back to ioBroker translator if DeepL completely fails", async () => {
 			process.env.DEEPL_API_KEY = "invalid-key";
 
-			// Mock the first DeepL call to fail (which will trigger fallback), then ioBroker to succeed
-			mockedAxios.mockRejectedValueOnce(new Error("DeepL API error")).mockResolvedValueOnce({
-				data: {
-					en: "Test message",
-					de: "Testnachricht (ioBroker)",
-				},
+			// Mock axios to inspect URL and return appropriate response
+			mockedAxios.mockImplementation((config: any) => {
+				if (config.url.includes("deepl.com")) {
+					// DeepL API calls should fail
+					return Promise.reject(new Error("DeepL API error"));
+				} else if (config.url.includes("translator.iobroker.in")) {
+					// ioBroker API should succeed
+					return Promise.resolve({
+						data: {
+							en: "Test message",
+							de: "Testnachricht (ioBroker)",
+						},
+					});
+				}
+				return Promise.reject(new Error("Unexpected URL"));
 			});
 
 			const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {
@@ -152,6 +161,14 @@ describe("translateText", () => {
 
 			// Should have attempted DeepL first (1 call that failed), then called ioBroker (1 call)
 			expect(mockedAxios).toHaveBeenCalledTimes(2);
+
+			// Verify ioBroker API was called
+			expect(mockedAxios).toHaveBeenCalledWith(
+				expect.objectContaining({
+					url: "https://translator.iobroker.in/translator",
+				}),
+			);
+
 			expect(result).toEqual({
 				en: "Test message",
 				de: "Testnachricht (ioBroker)",
