@@ -42,6 +42,10 @@ function parseCommand(command: string): [string, string[]] {
 		parts.push(current);
 	}
 
+	if (parts.length === 0) {
+		throw new Error("Cannot parse empty command string");
+	}
+
 	const [file, ...args] = parts;
 	return [file, args];
 }

@@ -118,8 +118,16 @@ class ExecPlugin implements Plugin {
 						for await (const line of subprocess) {
 							context.cli.log(colors.gray(context.cli.stripColors(line)));
 						}
-					} catch {
-						// Errors will be thrown by the main promise below
+					} catch (error) {
+						// Errors will be thrown by the main promise below, but log unexpected ones
+						if (error && typeof error === "object" && "exitCode" in error) {
+							// Expected subprocess error - will be handled by the main promise
+						} else {
+							// Unexpected error during iteration
+							context.cli.error(
+								`Unexpected error during output processing: ${error}`,
+							);
+						}
 					}
 				})();
 				// Wait for both the subprocess and output processing to complete
