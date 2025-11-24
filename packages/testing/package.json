@@ -25,12 +25,12 @@
   },
   "devDependencies": {
     "@alcalzone/release-script-core": "4.0.0",
-    "execa": "^5.1.1",
+    "nano-spawn": "^2.0.0",
     "picocolors": "1.0.0",
     "typescript": "~5.9.3"
   },
   "peerDependencies": {
-    "execa": "^5.1.1"
+    "nano-spawn": "^2.0.0"
   },
   "scripts": {
     "clean": "tsc -b tsconfig.build.json --clean",

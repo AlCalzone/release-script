@@ -1,9 +1,8 @@
-import type execa from "execa";
-import type { ExecaChildProcess } from "execa";
+import type { Options, Subprocess } from "nano-spawn";
 
 export interface System {
 	/** Functions to execute commands */
-	execRaw(command: string, options: execa.Options): ExecaChildProcess;
-	exec(file: string, args: readonly string[], options: execa.Options<string>): ExecaChildProcess;
-	exec(file: string, options: execa.Options<string>): ExecaChildProcess;
+	execRaw(command: string, options: Options): Subprocess;
+	exec(file: string, args: readonly string[], options: Options): Subprocess;
+	exec(file: string, options: Options): Subprocess;
 }

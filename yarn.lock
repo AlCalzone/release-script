@@ -23,7 +23,7 @@ __metadata:
   resolution: "@alcalzone/release-script-core@workspace:packages/core"
   dependencies:
     "@types/yargs": ^17.0.33
-    execa: ^5.1.1
+    nano-spawn: ^2.0.0
     picocolors: 1.0.0
     typescript: ~5.9.3
     yargs: ^17.4.1
@@ -191,11 +191,11 @@ __metadata:
   resolution: "@alcalzone/release-script-testing@workspace:packages/testing"
   dependencies:
     "@alcalzone/release-script-core": 4.0.0
-    execa: ^5.1.1
+    nano-spawn: ^2.0.0
     picocolors: 1.0.0
     typescript: ~5.9.3
   peerDependencies:
-    execa: ^5.1.1
+    nano-spawn: ^2.0.0
   languageName: unknown
   linkType: soft
 
@@ -2811,23 +2811,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"execa@npm:^5.1.1":
-  version: 5.1.1
-  resolution: "execa@npm:5.1.1"
-  dependencies:
-    cross-spawn: ^7.0.3
-    get-stream: ^6.0.0
-    human-signals: ^2.1.0
-    is-stream: ^2.0.0
-    merge-stream: ^2.0.0
-    npm-run-path: ^4.0.1
-    onetime: ^5.1.2
-    signal-exit: ^3.0.3
-    strip-final-newline: ^2.0.0
-  checksum: fba9022c8c8c15ed862847e94c252b3d946036d7547af310e344a527e59021fd8b6bb0723883ea87044dc4f0201f949046993124a42ccb0855cae5bf8c786343
-  languageName: node
-  linkType: hard
-
 "execa@npm:~5.0.1":
   version: 5.0.1
   resolution: "execa@npm:5.0.1"
@@ -4378,6 +4361,13 @@ __metadata:
   version: 0.0.8
   resolution: "mute-stream@npm:0.0.8"
   checksum: ff48d251fc3f827e5b1206cda0ffdaec885e56057ee86a3155e1951bc940fd5f33531774b1cc8414d7668c10a8907f863f6561875ee6e8768931a62121a531a1
+  languageName: node
+  linkType: hard
+
+"nano-spawn@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "nano-spawn@npm:2.0.0"
+  checksum: 48223f6f5b2ab3f7562d0e6e85abb9b9c4ee52f5c096bd50012c0776664ddc63cd2602c9e4dc3d6cd47ae5189e9c71b51afb2d44b2746d8ca80cb52fc8013904
   languageName: node
   linkType: hard
 

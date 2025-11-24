@@ -6,7 +6,7 @@ import {
 	stripColors,
 	type System,
 } from "@alcalzone/release-script-core";
-import type { ExecaReturnValue } from "execa";
+import type { Result } from "nano-spawn";
 import colors from "picocolors";
 import type { Mock } from "vitest";
 import { vi } from "vitest";
@@ -16,12 +16,10 @@ class MockSystem implements System {
 	public execRaw: Mock = vi.fn();
 
 	public mockExec(
-		commands:
-			| Record<string, string | ExecaReturnValue>
-			| ((cmd: string) => string | ExecaReturnValue),
+		commands: Record<string, string | Result> | ((cmd: string) => string | Result),
 	): void {
-		const execRaw = (command: string): Promise<ExecaReturnValue> => {
-			let ret: string | ExecaReturnValue;
+		const execRaw = (command: string): Promise<Result> => {
+			let ret: string | Result;
 			if (typeof commands === "function") {
 				ret = commands(command);
 			} else if (command in commands) {
@@ -35,9 +33,9 @@ class MockSystem implements System {
 					? ({
 							stdout: ret,
 							stderr: "",
-							isCanceled: false,
-							failed: false,
-							exitCode: 0,
+							output: ret,
+							command: command,
+							durationMs: 0,
 						} as any)
 					: ret,
 			);

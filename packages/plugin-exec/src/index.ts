@@ -111,13 +111,18 @@ class ExecPlugin implements Plugin {
 		for (const command of commands) {
 			context.cli.logCommand(command);
 			if (!context.argv.dryRun) {
-				const promise = context.sys.execRaw(command, { cwd: context.cwd });
-				promise.stdout?.on("data", (data) => {
-					context.cli.log(
-						colors.gray(context.cli.stripColors(data.toString().replace(/\r?\n$/, ""))),
-					);
-				});
-				await promise;
+				const subprocess = context.sys.execRaw(command, { cwd: context.cwd });
+				// Iterate over output lines and log them
+				(async () => {
+					try {
+						for await (const line of subprocess) {
+							context.cli.log(colors.gray(context.cli.stripColors(line)));
+						}
+					} catch {
+						// Errors will be thrown by the main promise below
+					}
+				})();
+				await subprocess;
 			}
 		}
 	}
