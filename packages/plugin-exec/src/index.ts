@@ -120,7 +120,14 @@ class ExecPlugin implements Plugin {
 						}
 					} catch (error) {
 						// Errors will be thrown by the main promise below, but log unexpected ones
-						if (error && typeof error === "object" && "exitCode" in error) {
+						// Check if this is a subprocess execution error (has stdout/stderr/exitCode properties)
+						if (
+							error &&
+							typeof error === "object" &&
+							("exitCode" in error || "signalName" in error) &&
+							"stdout" in error &&
+							"stderr" in error
+						) {
 							// Expected subprocess error - will be handled by the main promise
 						} else {
 							// Unexpected error during iteration
