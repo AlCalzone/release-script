@@ -3,18 +3,26 @@ import spawn, { type Subprocess, type Options } from "nano-spawn";
 /**
  * Parse a command string into file and arguments.
  * This is a simple implementation that handles basic command parsing.
- * It splits on spaces but respects quoted strings.
+ * It splits on spaces but respects quoted strings and escape sequences.
  */
 function parseCommand(command: string): [string, string[]] {
 	const parts: string[] = [];
 	let current = "";
 	let inQuotes = false;
 	let quoteChar = "";
+	let escaped = false;
 
 	for (let i = 0; i < command.length; i++) {
 		const char = command[i];
 
-		if ((char === '"' || char === "'") && !inQuotes) {
+		if (escaped) {
+			// Add the escaped character literally
+			current += char;
+			escaped = false;
+		} else if (char === "\\") {
+			// Next character is escaped
+			escaped = true;
+		} else if ((char === '"' || char === "'") && !inQuotes) {
 			inQuotes = true;
 			quoteChar = char;
 		} else if (char === quoteChar && inQuotes) {

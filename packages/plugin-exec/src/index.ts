@@ -112,8 +112,8 @@ class ExecPlugin implements Plugin {
 			context.cli.logCommand(command);
 			if (!context.argv.dryRun) {
 				const subprocess = context.sys.execRaw(command, { cwd: context.cwd });
-				// Iterate over output lines and log them
-				(async () => {
+				// Iterate over output lines and log them as they arrive
+				const outputPromise = (async () => {
 					try {
 						for await (const line of subprocess) {
 							context.cli.log(colors.gray(context.cli.stripColors(line)));
@@ -122,7 +122,8 @@ class ExecPlugin implements Plugin {
 						// Errors will be thrown by the main promise below
 					}
 				})();
-				await subprocess;
+				// Wait for both the subprocess and output processing to complete
+				await Promise.all([subprocess, outputPromise]);
 			}
 		}
 	}
