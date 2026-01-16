@@ -484,8 +484,6 @@ By default, the ioBroker plugin uses the ioBroker translator service to translat
 **Setting up DeepL translation:**
 
 1. Get a DeepL API key from [DeepL API](https://www.deepl.com/api)
-   - Free tier: Keys end with `:fx` and have usage limits
-   - Pro tier: Keys don't have the `:fx` suffix
 
 2. Set the environment variable:
    ```bash
