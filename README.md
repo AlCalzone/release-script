@@ -497,14 +497,6 @@ By default, the ioBroker plugin uses the ioBroker translator service to translat
    npm run release patch
    ```
 
-**Supported languages:**
-- German (de), Spanish (es), French (fr), Italian (it)
-- Dutch (nl), Polish (pl), Portuguese (pt), Russian (ru)
-- Chinese Simplified (zh-cn)
-
-**Fallback behavior:**
-If DeepL translation fails (invalid key, network issues, etc.), the plugin automatically falls back to the ioBroker translator service to ensure releases continue working.
-
 ### `license` plugin options
 
 #### Change where to look for license files to check (`--license`)
