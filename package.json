@@ -1,6 +1,6 @@
 {
   "name": "@alcalzone/release-script-repo",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Release script to automatically increment version numbers and push git tags",
   "keywords": [
     "release",
