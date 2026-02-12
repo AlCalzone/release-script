@@ -1,6 +1,6 @@
-import { DefaultStages } from "@alcalzone/release-script-core";
+import { DefaultStages, pathExists } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import type { Argv } from "yargs";
 
@@ -133,11 +133,11 @@ class ChangelogPlugin implements Plugin {
 		let changelogOld: string | undefined;
 		let changelogPlaceholderPrefix = "##";
 
-		if (await fs.pathExists(changelogPath)) {
+		if (await pathExists(changelogPath)) {
 			changelog = await fs.readFile(changelogPath, "utf8");
 			changelogFilename = path.basename(changelogPath);
 			changelogLocation = "changelog";
-		} else if (await fs.pathExists(readmePath)) {
+		} else if (await pathExists(readmePath)) {
 			changelog = await fs.readFile(readmePath, "utf8");
 			changelogFilename = path.basename(readmePath);
 			changelogLocation = "readme";
@@ -147,7 +147,7 @@ class ChangelogPlugin implements Plugin {
 			context.cli.fatal("No CHANGELOG.md or README.md found in the current directory!");
 		}
 
-		if (changelogLocation === "readme" && (await fs.pathExists(changelogOldPath))) {
+		if (changelogLocation === "readme" && (await pathExists(changelogOldPath))) {
 			changelogOld = await fs.readFile(changelogOldPath, "utf8");
 		}
 

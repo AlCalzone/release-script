@@ -1,7 +1,7 @@
 import { DefaultStages } from "@alcalzone/release-script-core";
 import { createMockContext, TestFS } from "@alcalzone/release-script-testing";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import LicensePlugin from ".";
+import LicensePlugin from "./index.js";
 
 describe("License plugin", () => {
 	describe("check stage", () => {

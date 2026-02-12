@@ -37,7 +37,6 @@ __metadata:
     "@alcalzone/release-script-core": "npm:4.0.0"
     "@alcalzone/release-script-testing": "npm:4.0.0"
     alcalzone-shared: "npm:^5.0.0"
-    fs-extra: "npm:^10.1.0"
     jest-extended: "npm:^3.1.0"
     typescript: "npm:~5.9.3"
   languageName: unknown
@@ -61,7 +60,6 @@ __metadata:
   dependencies:
     "@alcalzone/release-script-core": "npm:4.0.0"
     "@alcalzone/release-script-testing": "npm:4.0.0"
-    fs-extra: "npm:^10.1.0"
     jest-extended: "npm:^3.1.0"
     typescript: "npm:~5.9.3"
   languageName: unknown
@@ -74,7 +72,6 @@ __metadata:
     "@alcalzone/release-script-core": "npm:4.0.0"
     "@alcalzone/release-script-testing": "npm:4.0.0"
     alcalzone-shared: "npm:^5.0.0"
-    fs-extra: "npm:^10.1.0"
     jest-extended: "npm:^3.1.0"
     ky: "npm:^1.7.5"
     semver: "npm:^7.7.2"
@@ -88,7 +85,6 @@ __metadata:
   dependencies:
     "@alcalzone/release-script-core": "npm:4.0.0"
     "@alcalzone/release-script-testing": "npm:4.0.0"
-    fs-extra: "npm:^10.1.0"
     jest-extended: "npm:^3.1.0"
     semver: "npm:^7.7.2"
     typescript: "npm:~5.9.3"
@@ -101,7 +97,6 @@ __metadata:
   dependencies:
     "@alcalzone/release-script-core": "npm:4.0.0"
     "@alcalzone/release-script-testing": "npm:4.0.0"
-    fs-extra: "npm:^10.1.0"
     jest-extended: "npm:^3.1.0"
     tiny-glob: "npm:^0.2.9"
     typescript: "npm:~5.9.3"
@@ -127,7 +122,6 @@ __metadata:
     "@alcalzone/release-script-core": "npm:4.0.0"
     "@alcalzone/release-script-testing": "npm:4.0.0"
     alcalzone-shared: "npm:^5.0.0"
-    fs-extra: "npm:^10.1.0"
     jest-extended: "npm:^3.1.0"
     semver: "npm:^7.7.2"
     typescript: "npm:~5.9.3"
@@ -152,7 +146,6 @@ __metadata:
     "@alcalzone/release-script-core": "npm:4.0.0"
     "@alcalzone/release-script-testing": "npm:4.0.0"
     alcalzone-shared: "npm:^5.0.0"
-    fs-extra: "npm:^10.1.0"
     jest-extended: "npm:^3.1.0"
     semver: "npm:^7.7.2"
     tiny-glob: "npm:^0.2.9"
@@ -167,7 +160,6 @@ __metadata:
     "@commitlint/cli": "npm:^20.1.0"
     "@commitlint/config-conventional": "npm:^20.0.0"
     "@tsconfig/node18": "npm:^18.2.4"
-    "@types/fs-extra": "npm:^9.0.13"
     "@types/node": "npm:^18.19.129"
     "@types/semver": "npm:^7.7.1"
     "@types/yargs": "npm:^17.0.33"
@@ -213,7 +205,6 @@ __metadata:
     "@types/yargs": "npm:^17.0.33"
     alcalzone-shared: "npm:^5.0.0"
     enquirer: "npm:^2.3.6"
-    fs-extra: "npm:^10.1.0"
     picocolors: "npm:1.0.0"
     semver: "npm:^7.7.2"
     source-map-support: "npm:^0.5.21"
@@ -1139,15 +1130,6 @@ __metadata:
   version: 1.0.8
   resolution: "@types/estree@npm:1.0.8"
   checksum: 10/25a4c16a6752538ffde2826c2cc0c6491d90e69cd6187bef4a006dd2c3c45469f049e643d7e516c515f21484dc3d48fd5c870be158a5beb72f5baf3dc43e4099
-  languageName: node
-  linkType: hard
-
-"@types/fs-extra@npm:^9.0.13":
-  version: 9.0.13
-  resolution: "@types/fs-extra@npm:9.0.13"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 10/ac545e377248039c596ef27d9f277b813507ebdd95d05f32fe7e9c67eb1ed567dafb4ba59f5fdcb6601dd7fd396ff9ba24f8c122e89cef096cdc17987c50a7fa
   languageName: node
   linkType: hard
 

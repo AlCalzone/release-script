@@ -29,7 +29,6 @@
     "@alcalzone/pak": "^0.11.0",
     "@alcalzone/release-script-core": "4.0.0",
     "alcalzone-shared": "^5.0.0",
-    "fs-extra": "^10.1.0",
     "semver": "^7.7.2"
   },
   "devDependencies": {

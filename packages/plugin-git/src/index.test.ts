@@ -1,9 +1,9 @@
-import { DefaultStages } from "@alcalzone/release-script-core";
+import { DefaultStages, pathExists } from "@alcalzone/release-script-core";
 import { assertReleaseError, createMockContext, TestFS } from "@alcalzone/release-script-testing";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import GitPlugin from ".";
+import GitPlugin from "./index.js";
 
 describe("Git plugin", () => {
 	describe("check stage", () => {
@@ -290,7 +290,7 @@ describe("Git plugin", () => {
 
 			const commitmessagePath = path.join(testFSRoot, ".commitmessage");
 
-			await expect(fs.pathExists(commitmessagePath)).resolves.toBe(true);
+			await expect(pathExists(commitmessagePath)).resolves.toBe(true);
 			const fileContent = await fs.readFile(commitmessagePath, "utf8");
 			expect(fileContent).toBe(`chore: release v1.2.3
 
@@ -458,9 +458,9 @@ This is the changelog.`);
 
 			const commitmessagePath = path.join(testFSRoot, ".commitmessage");
 
-			await expect(fs.pathExists(commitmessagePath)).resolves.toBe(true);
+			await expect(pathExists(commitmessagePath)).resolves.toBe(true);
 			await gitPlugin.executeStage(context, DefaultStages.cleanup);
-			await expect(fs.pathExists(commitmessagePath)).resolves.toBe(false);
+			await expect(pathExists(commitmessagePath)).resolves.toBe(false);
 		});
 
 		// TODO: Figure out why this test is failing. The command shows up in logs, but toHaveBeenCalledTimes fails.

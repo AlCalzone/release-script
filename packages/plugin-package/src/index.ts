@@ -1,8 +1,8 @@
 import { detectPackageManager } from "@alcalzone/pak";
-import { DefaultStages } from "@alcalzone/release-script-core";
+import { DefaultStages, pathExists, readJson, writeJson } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
 import { isArray, isObject } from "alcalzone-shared/typeguards";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import semver from "semver";
 import type { Argv } from "yargs";
@@ -92,11 +92,11 @@ class PackagePlugin implements Plugin {
 	private async executeCheckStage(context: Context): Promise<void> {
 		// ensure that package.json exists and has a version (unless in lerna mode)
 		const packPath = path.join(context.cwd, "package.json");
-		if (!(await fs.pathExists(packPath))) {
+		if (!(await pathExists(packPath))) {
 			context.cli.fatal("No package.json found in the current directory!");
 		}
 
-		const pack = await fs.readJson(packPath);
+		const pack = await readJson(packPath);
 
 		// Check if the current project is a monorepo
 		const isMonorepo =
@@ -108,7 +108,7 @@ class PackagePlugin implements Plugin {
 			} else {
 				// we need some yarn plugins to be able to handle this
 				const yarnRcPath = path.join(context.cwd, ".yarnrc.yml");
-				if (await fs.pathExists(yarnRcPath)) {
+				if (await pathExists(yarnRcPath)) {
 					const yarnVersion = await getYarnVersion(context);
 
 					const yarnRc = await fs.readFile(yarnRcPath, "utf8");
@@ -237,7 +237,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 
 			pack.version = newVersion;
 			const packPath = path.join(context.cwd, "package.json");
-			await fs.writeJson(packPath, pack, { spaces: 2 });
+			await writeJson(packPath, pack);
 		}
 	}
 
@@ -258,9 +258,9 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 		const deleteStableVersions = async (): Promise<void> => {
 			for (const packPath of packageJsonFiles) {
 				try {
-					const pack = await fs.readJSON(packPath);
+					const pack = await readJson(packPath);
 					delete pack.stableVersion;
-					await fs.writeJSON(packPath, pack, { spaces: 2 });
+					await writeJson(packPath, pack);
 				} catch {
 					// ignore
 				}
