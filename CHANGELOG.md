@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 5.1.1 (2026-02-12)
 * Update dependencies
 * Use trusted publishing
 
