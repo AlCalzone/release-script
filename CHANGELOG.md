@@ -3,6 +3,10 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* Update dependencies
+* Use trusted publishing
+
 ## 5.1.0 (2026-01-16)
 * `iobroker` plugin: Support translation using DeepL API
 
