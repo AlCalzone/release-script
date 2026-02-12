@@ -28,8 +28,8 @@
   "dependencies": {
     "@alcalzone/release-script-core": "4.0.0",
     "alcalzone-shared": "^5.0.0",
-    "axios": "^1.6.2",
     "fs-extra": "^10.1.0",
+    "ky": "^1.7.5",
     "semver": "^7.7.2"
   },
   "devDependencies": {

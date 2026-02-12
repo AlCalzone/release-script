@@ -74,9 +74,9 @@ __metadata:
     "@alcalzone/release-script-core": 4.0.0
     "@alcalzone/release-script-testing": 4.0.0
     alcalzone-shared: ^5.0.0
-    axios: ^1.6.2
     fs-extra: ^10.1.0
     jest-extended: ^3.1.0
+    ky: ^1.7.5
     semver: ^7.7.2
     typescript: ~5.9.3
   languageName: unknown
@@ -212,7 +212,6 @@ __metadata:
     "@alcalzone/release-script-testing": 4.0.0
     "@types/yargs": ^17.0.33
     alcalzone-shared: ^5.0.0
-    axios: ^1.6.2
     enquirer: ^2.3.6
     fs-extra: ^10.1.0
     picocolors: 1.0.0
@@ -3544,6 +3543,13 @@ __metadata:
   dependencies:
     json-buffer: 3.0.1
   checksum: 74a24395b1c34bd44ad5cb2b49140d087553e170625240b86755a6604cd65aa16efdbdeae5cdb17ba1284a0fbb25ad06263755dbc71b8d8b06f74232ce3cdd72
+  languageName: node
+  linkType: hard
+
+"ky@npm:^1.7.5":
+  version: 1.14.3
+  resolution: "ky@npm:1.14.3"
+  checksum: 3a3ea5aa126c0badfc6f9f7c9b8ac8e95baaee0750f3e9dfa5920ba65ad02d2dd0660f66dc500be6d577bb3626a812abf10d3acbcf70a397e2be121d5aea5a52
   languageName: node
   linkType: hard
 

@@ -35,7 +35,6 @@
     "@alcalzone/release-script-plugin-package": "4.0.0",
     "@alcalzone/release-script-plugin-version": "4.0.0",
     "alcalzone-shared": "^5.0.0",
-    "axios": "^1.6.2",
     "enquirer": "^2.3.6",
     "fs-extra": "^10.1.0",
     "picocolors": "1.0.0",

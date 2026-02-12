@@ -1,5 +1,4 @@
-import axios from "axios";
-import * as qs from "querystring";
+import ky from "ky";
 
 const ioBrokerUrl = "https://translator.iobroker.in/translator";
 
@@ -36,44 +35,38 @@ async function translateWithDeepL(textEN: string, apiKey: string): Promise<Recor
 	const [firstDeeplLang, firstIoBrokerLang] = firstLanguage;
 
 	// First, test with one language to validate API key
-	const response = await axios({
-		method: "post",
-		url: baseUrl,
-		data: qs.stringify({
-			text: textEN,
-			source_lang: "EN",
-			target_lang: firstDeeplLang.toUpperCase(),
-			auth_key: apiKey,
-		}),
-		headers: {
-			"Content-Type": "application/x-www-form-urlencoded",
-		},
-	});
+	const response = await ky
+		.post(baseUrl, {
+			body: new URLSearchParams({
+				text: textEN,
+				source_lang: "EN",
+				target_lang: firstDeeplLang.toUpperCase(),
+				auth_key: apiKey,
+			}),
+		})
+		.json<{ translations: Array<{ text: string }> }>();
 
-	if (response.data.translations && response.data.translations.length > 0) {
-		translations[firstIoBrokerLang] = response.data.translations[0].text;
+	if (response.translations && response.translations.length > 0) {
+		translations[firstIoBrokerLang] = response.translations[0].text;
 	}
 
 	// Now translate to remaining languages in parallel
 	const remainingLanguages = Object.entries(deeplLanguageMap).slice(1);
 	const translatePromises = remainingLanguages.map(async ([deeplLang, ioBrokerLang]) => {
 		try {
-			const resp = await axios({
-				method: "post",
-				url: baseUrl,
-				data: qs.stringify({
-					text: textEN,
-					source_lang: "EN",
-					target_lang: deeplLang.toUpperCase(),
-					auth_key: apiKey,
-				}),
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
-				},
-			});
+			const resp = await ky
+				.post(baseUrl, {
+					body: new URLSearchParams({
+						text: textEN,
+						source_lang: "EN",
+						target_lang: deeplLang.toUpperCase(),
+						auth_key: apiKey,
+					}),
+				})
+				.json<{ translations: Array<{ text: string }> }>();
 
-			if (resp.data.translations && resp.data.translations.length > 0) {
-				translations[ioBrokerLang] = resp.data.translations[0].text;
+			if (resp.translations && resp.translations.length > 0) {
+				translations[ioBrokerLang] = resp.translations[0].text;
 			}
 		} catch (error) {
 			// If translation fails for one language, continue with others
@@ -90,21 +83,14 @@ async function translateWithDeepL(textEN: string, apiKey: string): Promise<Recor
 
 /** Uses ioBroker translator service to translate text into multiple languages */
 async function translateWithIoBroker(textEN: string): Promise<Record<string, string>> {
-	const data = qs.stringify({
-		text: textEN,
-		together: true,
-	});
-
-	const response = await axios({
-		method: "post",
-		url: ioBrokerUrl,
-		data,
-		headers: {
-			"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-		},
-	});
-
-	return response.data;
+	return ky
+		.post(ioBrokerUrl, {
+			body: new URLSearchParams({
+				text: textEN,
+				together: "true",
+			}),
+		})
+		.json();
 }
 
 /** Takes an english text and translates it into multiple languages */

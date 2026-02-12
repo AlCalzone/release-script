@@ -1,10 +1,23 @@
-import axios from "axios";
+import ky from "ky";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { translateText } from "./translate";
+import { translateText } from "./translate.js";
 
-// Mock axios
-vi.mock("axios");
-const mockedAxios = axios as unknown as ReturnType<typeof vi.fn>;
+// Mock ky
+vi.mock("ky", () => {
+	const post = vi.fn();
+	return { default: { post } };
+});
+const mockedPost = vi.mocked(ky.post);
+
+/** Helper to create a mock return value for ky.post().json() */
+function mockJsonResponse(data: unknown) {
+	return { json: () => Promise.resolve(data) } as ReturnType<typeof ky.post>;
+}
+
+/** Helper to create a mock rejected response for ky.post().json() */
+function mockJsonRejection(error: Error) {
+	return { json: () => Promise.reject(error) } as unknown as ReturnType<typeof ky.post>;
+}
 
 describe("translateText", () => {
 	beforeEach(() => {
@@ -14,27 +27,29 @@ describe("translateText", () => {
 
 	describe("with ioBroker translator (default behavior)", () => {
 		it("should use ioBroker translator when no DeepL API key is provided", async () => {
-			const mockResponse = {
-				data: {
-					en: "Test message",
-					de: "Testnachricht",
-					fr: "Message de test",
-				},
+			const mockData = {
+				en: "Test message",
+				de: "Testnachricht",
+				fr: "Message de test",
 			};
-			mockedAxios.mockResolvedValueOnce(mockResponse);
+			mockedPost.mockReturnValueOnce(mockJsonResponse(mockData));
 
 			const result = await translateText("Test message");
 
-			expect(mockedAxios).toHaveBeenCalledTimes(1);
-			expect(mockedAxios).toHaveBeenCalledWith({
-				method: "post",
-				url: "https://translator.iobroker.in/translator",
-				data: "text=Test%20message&together=true",
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-				},
-			});
-			expect(result).toEqual(mockResponse.data);
+			expect(mockedPost).toHaveBeenCalledTimes(1);
+			expect(mockedPost).toHaveBeenCalledWith(
+				"https://translator.iobroker.in/translator",
+				expect.objectContaining({
+					body: expect.any(URLSearchParams),
+				}),
+			);
+
+			// Verify the body params
+			const body = mockedPost.mock.calls[0][1]!.body as URLSearchParams;
+			expect(body.get("text")).toBe("Test message");
+			expect(body.get("together")).toBe("true");
+
+			expect(result).toEqual(mockData);
 		});
 	});
 
@@ -44,30 +59,28 @@ describe("translateText", () => {
 
 			// Mock DeepL responses for different languages
 			const mockResponses = [
-				{ data: { translations: [{ text: "Testnachricht" }] } }, // German
-				{ data: { translations: [{ text: "Mensaje de prueba" }] } }, // Spanish
-				{ data: { translations: [{ text: "Message de test" }] } }, // French
-				{ data: { translations: [{ text: "Messaggio di prova" }] } }, // Italian
-				{ data: { translations: [{ text: "Testbericht" }] } }, // Dutch
-				{ data: { translations: [{ text: "Wiadomość testowa" }] } }, // Polish
-				{ data: { translations: [{ text: "Mensagem de teste" }] } }, // Portuguese
-				{ data: { translations: [{ text: "Тестовое сообщение" }] } }, // Russian
-				{ data: { translations: [{ text: "测试消息" }] } }, // Chinese
+				{ translations: [{ text: "Testnachricht" }] }, // German
+				{ translations: [{ text: "Mensaje de prueba" }] }, // Spanish
+				{ translations: [{ text: "Message de test" }] }, // French
+				{ translations: [{ text: "Messaggio di prova" }] }, // Italian
+				{ translations: [{ text: "Testbericht" }] }, // Dutch
+				{ translations: [{ text: "Wiadomość testowa" }] }, // Polish
+				{ translations: [{ text: "Mensagem de teste" }] }, // Portuguese
+				{ translations: [{ text: "Тестовое сообщение" }] }, // Russian
+				{ translations: [{ text: "测试消息" }] }, // Chinese
 			];
 
-			mockedAxios.mockImplementation(() => Promise.resolve(mockResponses.shift()!));
+			mockedPost.mockImplementation(() => mockJsonResponse(mockResponses.shift()!));
 
 			const result = await translateText("Test message");
 
-			expect(mockedAxios).toHaveBeenCalledTimes(9); // 9 target languages
-			expect(mockedAxios).toHaveBeenCalledWith({
-				method: "post",
-				url: "https://api-free.deepl.com/v2/translate",
-				data: "text=Test%20message&source_lang=EN&target_lang=DE&auth_key=test-key%3Afx",
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
-				},
-			});
+			expect(mockedPost).toHaveBeenCalledTimes(9); // 9 target languages
+			expect(mockedPost).toHaveBeenCalledWith(
+				"https://api-free.deepl.com/v2/translate",
+				expect.objectContaining({
+					body: expect.any(URLSearchParams),
+				}),
+			);
 
 			expect(result).toEqual({
 				en: "Test message",
@@ -86,15 +99,15 @@ describe("translateText", () => {
 		it("should use pro API URL for non-free API keys", async () => {
 			process.env.DEEPL_API_KEY = "test-key-pro";
 
-			const mockResponse = { data: { translations: [{ text: "Testnachricht" }] } };
-			mockedAxios.mockResolvedValue(mockResponse);
+			mockedPost.mockImplementation(() =>
+				mockJsonResponse({ translations: [{ text: "Testnachricht" }] }),
+			);
 
 			await translateText("Test message");
 
-			expect(mockedAxios).toHaveBeenCalledWith(
-				expect.objectContaining({
-					url: "https://api.deepl.com/v2/translate",
-				}),
+			expect(mockedPost).toHaveBeenCalledWith(
+				"https://api.deepl.com/v2/translate",
+				expect.anything(),
 			);
 		});
 
@@ -103,14 +116,14 @@ describe("translateText", () => {
 
 			// Mock some successful and some failed responses
 			let callCount = 0;
-			mockedAxios.mockImplementation(() => {
+			mockedPost.mockImplementation(() => {
 				callCount++;
 				if (callCount === 2) {
 					// Fail Spanish translation
-					return Promise.reject(new Error("API error"));
+					return mockJsonRejection(new Error("API error"));
 				}
-				return Promise.resolve({
-					data: { translations: [{ text: `Translation ${callCount}` }] },
+				return mockJsonResponse({
+					translations: [{ text: `Translation ${callCount}` }],
 				});
 			});
 
@@ -133,21 +146,20 @@ describe("translateText", () => {
 		it("should fall back to ioBroker translator if DeepL completely fails", async () => {
 			process.env.DEEPL_API_KEY = "invalid-key";
 
-			// Mock axios to inspect URL and return appropriate response
-			mockedAxios.mockImplementation((config: any) => {
-				if (config.url.includes("deepl.com")) {
+			// Mock ky.post to inspect URL and return appropriate response
+			mockedPost.mockImplementation((url) => {
+				const urlStr = String(url);
+				if (urlStr.includes("deepl.com")) {
 					// DeepL API calls should fail
-					return Promise.reject(new Error("DeepL API error"));
-				} else if (config.url.includes("translator.iobroker.in")) {
+					return mockJsonRejection(new Error("DeepL API error"));
+				} else if (urlStr.includes("translator.iobroker.in")) {
 					// ioBroker API should succeed
-					return Promise.resolve({
-						data: {
-							en: "Test message",
-							de: "Testnachricht (ioBroker)",
-						},
+					return mockJsonResponse({
+						en: "Test message",
+						de: "Testnachricht (ioBroker)",
 					});
 				}
-				return Promise.reject(new Error("Unexpected URL"));
+				return mockJsonRejection(new Error("Unexpected URL"));
 			});
 
 			const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {
@@ -160,13 +172,12 @@ describe("translateText", () => {
 			const result = await translateText("Test message");
 
 			// Should have attempted DeepL first (1 call that failed), then called ioBroker (1 call)
-			expect(mockedAxios).toHaveBeenCalledTimes(2);
+			expect(mockedPost).toHaveBeenCalledTimes(2);
 
 			// Verify ioBroker API was called
-			expect(mockedAxios).toHaveBeenCalledWith(
-				expect.objectContaining({
-					url: "https://translator.iobroker.in/translator",
-				}),
+			expect(mockedPost).toHaveBeenCalledWith(
+				"https://translator.iobroker.in/translator",
+				expect.anything(),
 			);
 
 			expect(result).toEqual({
