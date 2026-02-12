@@ -1,6 +1,5 @@
-import { DefaultStages } from "@alcalzone/release-script-core";
+import { DefaultStages, pathExists, readJson } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
-import fs from "fs-extra";
 import path from "path";
 import semver from "semver";
 
@@ -18,11 +17,11 @@ class LernaPlugin implements Plugin {
 	private async executeCheckStage(context: Context): Promise<void> {
 		// ensure that lerna.json exists and has a version (unless in lerna mode)
 		const jsonPath = path.join(context.cwd, "lerna.json");
-		if (!(await fs.pathExists(jsonPath))) {
+		if (!(await pathExists(jsonPath))) {
 			context.cli.fatal("No lerna.json found in the current directory!");
 		}
 
-		const json = await fs.readJson(jsonPath);
+		const json = await readJson(jsonPath);
 		if (!json?.version) {
 			context.cli.fatal("Missing property version from lerna.json!");
 		} else if (json.version === "independent") {

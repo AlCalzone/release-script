@@ -1,7 +1,7 @@
-import { DefaultStages } from "@alcalzone/release-script-core";
+import { DefaultStages, pathExists, readJson, writeJson } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
 import { isObject } from "alcalzone-shared/typeguards";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import semver from "semver";
 import type { Argv } from "yargs";
@@ -67,11 +67,11 @@ class IoBrokerPlugin implements Plugin {
 			ioPackDirectory = path.join(ioPackDirectory, context.argv.ioPackage as string);
 		}
 		const ioPackPath = path.join(ioPackDirectory, "io-package.json");
-		if (!(await fs.pathExists(ioPackPath))) {
+		if (!(await pathExists(ioPackPath))) {
 			context.cli.fatal(`io-package.json not found in ${ioPackDirectory}!`);
 		}
 
-		const ioPack = await fs.readJson(ioPackPath);
+		const ioPack = await readJson(ioPackPath);
 		const ioPackVersion = ioPack?.common?.version;
 		if (!ioPackVersion) {
 			context.cli.error("Version missing from io-package.json!");
@@ -98,8 +98,8 @@ class IoBrokerPlugin implements Plugin {
 		// This is pretty specific to ioBroker's release workflow, but better than silently failing
 		const workflowPath = path.join(context.cwd, ".github/workflows/test-and-release.yml");
 		const colors = context.cli.colors;
-		if (await fs.pathExists(workflowPath)) {
-			let content = fs.readFileSync(workflowPath, "utf8");
+		if (await pathExists(workflowPath)) {
+			let content = await fs.readFile(workflowPath, "utf8");
 			// Find deploy step, crudely by string manipulation. TODO: This should be done with a yaml parser
 			let match = /^[ \t]+deploy:/gm.exec(content);
 			if (!match) return;
@@ -191,7 +191,7 @@ You can suppress this check with the ${colors.bold("--no-workflow-check")} flag.
 				ioPackDirectory = path.join(ioPackDirectory, context.argv.ioPackage as string);
 			}
 			const ioPackPath = path.join(ioPackDirectory, "io-package.json");
-			await fs.writeJson(ioPackPath, ioPack, { spaces: 2 });
+			await writeJson(ioPackPath, ioPack);
 		}
 	}
 

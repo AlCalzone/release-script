@@ -1,10 +1,10 @@
 import { detectPackageManager } from "@alcalzone/pak";
 import { DefaultStages } from "@alcalzone/release-script-core";
 import { assertReleaseError, createMockContext, TestFS } from "@alcalzone/release-script-testing";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
-import PackagePlugin from ".";
+import PackagePlugin from "./index.js";
 
 vi.mock("@alcalzone/pak");
 
@@ -335,7 +335,7 @@ describe("Package plugin", () => {
 
 			await pkgPlugin.executeStage(context, DefaultStages.edit);
 
-			const fileContent = await fs.readJson(packPath);
+			const fileContent = JSON.parse(await fs.readFile(packPath, "utf8"));
 			expect(fileContent).toEqual(pack);
 		});
 
@@ -362,7 +362,7 @@ describe("Package plugin", () => {
 
 			await pkgPlugin.executeStage(context, DefaultStages.edit);
 
-			const fileContent = await fs.readJson(packPath);
+			const fileContent = JSON.parse(await fs.readFile(packPath, "utf8"));
 			expect(fileContent).toEqual(pack);
 		});
 
@@ -548,7 +548,7 @@ describe("Package plugin", () => {
 			await pkgPlugin.executeStage(context, DefaultStages.commit);
 			expect(context.errors).toHaveLength(0);
 
-			const fileContent = await fs.readJson(packPath);
+			const fileContent = JSON.parse(await fs.readFile(packPath, "utf8"));
 			expect(fileContent).toEqual(pack);
 
 			expect(context.sys.execRaw).not.toHaveBeenCalled();
