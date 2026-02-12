@@ -1,7 +1,7 @@
-import { DefaultStages } from "@alcalzone/release-script-core";
+import { DefaultStages, pathExists } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
 import { isArray } from "alcalzone-shared/typeguards";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import semver from "semver";
 import glob from "tiny-glob";
@@ -184,7 +184,7 @@ class VersionPlugin implements Plugin {
 
 				for (const file of files) {
 					const filePath = path.join(context.cwd, file);
-					if (!(await fs.pathExists(filePath))) continue;
+					if (!(await pathExists(filePath))) continue;
 
 					if (context.argv.verbose) {
 						context.cli.log(`Updating version in ${file}`);

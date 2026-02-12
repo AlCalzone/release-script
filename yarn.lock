@@ -37,7 +37,6 @@ __metadata:
     "@alcalzone/release-script-core": 4.0.0
     "@alcalzone/release-script-testing": 4.0.0
     alcalzone-shared: ^5.0.0
-    fs-extra: ^10.1.0
     jest-extended: ^3.1.0
     typescript: ~5.9.3
   languageName: unknown
@@ -61,7 +60,6 @@ __metadata:
   dependencies:
     "@alcalzone/release-script-core": 4.0.0
     "@alcalzone/release-script-testing": 4.0.0
-    fs-extra: ^10.1.0
     jest-extended: ^3.1.0
     typescript: ~5.9.3
   languageName: unknown
@@ -74,7 +72,6 @@ __metadata:
     "@alcalzone/release-script-core": 4.0.0
     "@alcalzone/release-script-testing": 4.0.0
     alcalzone-shared: ^5.0.0
-    fs-extra: ^10.1.0
     jest-extended: ^3.1.0
     ky: ^1.7.5
     semver: ^7.7.2
@@ -88,7 +85,6 @@ __metadata:
   dependencies:
     "@alcalzone/release-script-core": 4.0.0
     "@alcalzone/release-script-testing": 4.0.0
-    fs-extra: ^10.1.0
     jest-extended: ^3.1.0
     semver: ^7.7.2
     typescript: ~5.9.3
@@ -101,7 +97,6 @@ __metadata:
   dependencies:
     "@alcalzone/release-script-core": 4.0.0
     "@alcalzone/release-script-testing": 4.0.0
-    fs-extra: ^10.1.0
     jest-extended: ^3.1.0
     tiny-glob: ^0.2.9
     typescript: ~5.9.3
@@ -127,7 +122,6 @@ __metadata:
     "@alcalzone/release-script-core": 4.0.0
     "@alcalzone/release-script-testing": 4.0.0
     alcalzone-shared: ^5.0.0
-    fs-extra: ^10.1.0
     jest-extended: ^3.1.0
     semver: ^7.7.2
     typescript: ~5.9.3
@@ -152,7 +146,6 @@ __metadata:
     "@alcalzone/release-script-core": 4.0.0
     "@alcalzone/release-script-testing": 4.0.0
     alcalzone-shared: ^5.0.0
-    fs-extra: ^10.1.0
     jest-extended: ^3.1.0
     semver: ^7.7.2
     tiny-glob: ^0.2.9
@@ -167,7 +160,6 @@ __metadata:
     "@commitlint/cli": ^20.1.0
     "@commitlint/config-conventional": ^20.0.0
     "@tsconfig/node18": ^18.2.4
-    "@types/fs-extra": ^9.0.13
     "@types/node": ^18.19.129
     "@types/semver": ^7.7.1
     "@types/yargs": ^17.0.33
@@ -213,7 +205,6 @@ __metadata:
     "@types/yargs": ^17.0.33
     alcalzone-shared: ^5.0.0
     enquirer: ^2.3.6
-    fs-extra: ^10.1.0
     picocolors: 1.0.0
     semver: ^7.7.2
     source-map-support: ^0.5.21
@@ -1139,15 +1130,6 @@ __metadata:
   version: 1.0.8
   resolution: "@types/estree@npm:1.0.8"
   checksum: bd93e2e415b6f182ec4da1074e1f36c480f1d26add3e696d54fb30c09bc470897e41361c8fd957bf0985024f8fbf1e6e2aff977d79352ef7eb93a5c6dcff6c11
-  languageName: node
-  linkType: hard
-
-"@types/fs-extra@npm:^9.0.13":
-  version: 9.0.13
-  resolution: "@types/fs-extra@npm:9.0.13"
-  dependencies:
-    "@types/node": "*"
-  checksum: add79e212acd5ac76b97b9045834e03a7996aef60a814185e0459088fd290519a3c1620865d588fa36c4498bf614210d2a703af5cf80aa1dbc125db78f6edac3
   languageName: node
   linkType: hard
 

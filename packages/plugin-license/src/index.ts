@@ -1,6 +1,6 @@
-import { DefaultStages } from "@alcalzone/release-script-core";
+import { DefaultStages, pathExists } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import glob from "tiny-glob";
 import type { Argv } from "yargs";
@@ -35,7 +35,7 @@ class LicensePlugin implements Plugin {
 
 			for (const file of files) {
 				const filePath = path.join(context.cwd, file);
-				if (!(await fs.pathExists(filePath))) continue;
+				if (!(await pathExists(filePath))) continue;
 
 				const fileContent = await fs.readFile(filePath, "utf8");
 				const regex =

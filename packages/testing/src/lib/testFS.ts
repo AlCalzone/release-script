@@ -1,4 +1,4 @@
-import * as fs from "fs-extra";
+import fs from "node:fs/promises";
 import os from "os";
 import path from "path";
 
@@ -20,15 +20,16 @@ export class TestFS {
 	/** Creates a test directory and file structure with the given contents */
 	async create(structure: Record<string, string | null> = {}): Promise<void> {
 		const root = await this.getRoot();
-		await fs.emptyDir(root);
+		await fs.rm(root, { recursive: true, force: true });
+		await fs.mkdir(root, { recursive: true });
 		for (const [filename, content] of Object.entries(structure)) {
 			const normalizedFilename = this.normalizePath(root, filename);
 			if (content === null) {
 				// this is a directory
-				await fs.ensureDir(normalizedFilename);
+				await fs.mkdir(normalizedFilename, { recursive: true });
 			} else {
 				// this is a file
-				await fs.ensureDir(path.dirname(normalizedFilename));
+				await fs.mkdir(path.dirname(normalizedFilename), { recursive: true });
 				await fs.writeFile(normalizedFilename, content, "utf8");
 			}
 		}
@@ -37,6 +38,6 @@ export class TestFS {
 	/** Removes the test directory structure */
 	async remove(): Promise<void> {
 		if (!this.testFsRoot) return;
-		await fs.remove(this.testFsRoot);
+		await fs.rm(this.testFsRoot, { recursive: true, force: true });
 	}
 }

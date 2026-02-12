@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleanChangelogForNews } from "./tools";
+import { cleanChangelogForNews } from "./tools.js";
 
 describe("cleanChangelogForNews", () => {
 	it("removes author names with umlauts", () => {

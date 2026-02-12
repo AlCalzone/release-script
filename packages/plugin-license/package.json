@@ -27,7 +27,6 @@
   },
   "dependencies": {
     "@alcalzone/release-script-core": "4.0.0",
-    "fs-extra": "^10.1.0",
     "tiny-glob": "^0.2.9"
   },
   "devDependencies": {

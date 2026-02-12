@@ -1,6 +1,6 @@
 import { createMockContext } from "@alcalzone/release-script-testing";
 import { describe, expect, it } from "vitest";
-import ExecPlugin from ".";
+import ExecPlugin from "./index.js";
 
 describe("Exec plugin", () => {
 	it("runs the correct script in the correct stage", async () => {

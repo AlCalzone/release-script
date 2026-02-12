@@ -1,9 +1,9 @@
 import { DefaultStages } from "@alcalzone/release-script-core";
 import { assertReleaseError, createMockContext, TestFS } from "@alcalzone/release-script-testing";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it, type Mock } from "vitest";
-import VersionPlugin from ".";
+import VersionPlugin from "./index.js";
 
 describe("Version plugin", () => {
 	describe("check stage", () => {

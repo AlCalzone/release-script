@@ -1,6 +1,6 @@
-import { DefaultStages } from "@alcalzone/release-script-core";
+import { DefaultStages, pathExists } from "@alcalzone/release-script-core";
 import type { Context, Plugin, Stage } from "@alcalzone/release-script-core/types";
-import fs from "fs-extra";
+import fs from "node:fs/promises";
 import os from "os";
 import path from "path";
 import type { Argv } from "yargs";
@@ -296,7 +296,7 @@ ${context.getData("changelog_new")}`;
 
 	private async executeCleanupStage(context: Context): Promise<void> {
 		const commitMessagePath = path.join(context.cwd, ".commitmessage");
-		if (await fs.pathExists(commitMessagePath)) {
+		if (await pathExists(commitMessagePath)) {
 			context.cli.log("Removing .commitmessage file");
 			await fs.unlink(path.join(context.cwd, ".commitmessage"));
 		}
