@@ -61,6 +61,14 @@ stuff
 ### Subsection 2
 * New entry 4
 * New entry 5`,
+	changelog_testParseAdditionalChangelog1Without: `## **WORK IN PROGRESS** · Doomsday release
+* New entry 1
+* New entry 2`,
+	changelog_testParseAdditionalChangelog1With: `## **WORK IN PROGRESS** · Doomsday release
+* New entry 1
+* New entry 2
+* first Changelog entry added via cli-option
+* another CLI-Option Changelog entry`,
 };
 
 describe("Changelog plugin", () => {
@@ -265,6 +273,88 @@ ${fixtures.changelog_subsectionsParse2}`,
 			expect(currentChangelog).toBe(`### Subsection 1
 * New entry 1
 * New entry 2`);
+		});
+
+		it("parses all changelog entries correctly if additionalChangelog is set", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+				argv: {
+					additionalChangelog: '* first Changelog entry added via cli-option\n* another CLI-Option Changelog entry',
+				}
+			});
+
+			await testFS.create({
+				"CHANGELOG.md": `${fixtures.changelog_testParseHeader}
+${fixtures.changelog_testParseAdditionalChangelog1Without}
+
+${fixtures.changelog_testParse2}
+
+${fixtures.changelog_testParse3}`,
+			});
+
+			await changelogPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+
+			const headline = context.getData<string[]>("changelog_before");
+			expect(headline).toBe(fixtures.changelog_testParseHeader + "\n");
+
+			const entries = context.getData<string[]>("changelog_entries");
+			expect(entries).toEqual([
+				fixtures.changelog_testParseAdditionalChangelog1With,
+				fixtures.changelog_testParse2,
+				fixtures.changelog_testParse3,
+			]);
+
+			const footer = context.getData<string[]>("changelog_after");
+			expect(footer).toBe("");
+
+			const currentChangelog = context.getData<string[]>("changelog_new");
+			expect(currentChangelog).toBe(`* New entry 1
+* New entry 2
+* first Changelog entry added via cli-option
+* another CLI-Option Changelog entry`);
+		});
+
+		it("even if no WIP section exists before", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+				argv: {
+					additionalChangelog: '* first Changelog entry added via cli-option\n* another CLI-Option Changelog entry',
+				}
+			});
+
+			await testFS.create({
+				"CHANGELOG.md": `${fixtures.changelog_testParseHeader}
+${fixtures.changelog_testParse2}
+
+${fixtures.changelog_testParse3}`,
+			});
+
+			await changelogPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+
+			const headline = context.getData<string[]>("changelog_before");
+			expect(headline).toBe(fixtures.changelog_testParseHeader + "\n");
+
+			const entries = context.getData<string[]>("changelog_entries");
+			expect(entries).toEqual([
+				`## **WORK IN PROGRESS**
+* first Changelog entry added via cli-option
+* another CLI-Option Changelog entry`,
+				fixtures.changelog_testParse2,
+				fixtures.changelog_testParse3,
+			]);
+
+			const footer = context.getData<string[]>("changelog_after");
+			expect(footer).toBe("");
+
+			const currentChangelog = context.getData<string[]>("changelog_new");
+			expect(currentChangelog).toBe(`* first Changelog entry added via cli-option
+* another CLI-Option Changelog entry`);
 		});
 
 		it("Detects final newlines correctly", async () => {
