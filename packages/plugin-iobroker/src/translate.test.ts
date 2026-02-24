@@ -5,7 +5,11 @@ import { translateText } from "./translate.js";
 // Mock ky
 vi.mock("ky", () => {
 	const post = vi.fn();
-	return { default: { post } };
+	const extend = vi.fn((defaults: Record<string, unknown>) => ({
+		post: (url: string | URL, options: Record<string, unknown>) =>
+			post(url, { ...defaults, ...options }),
+	}));
+	return { default: { post, extend } };
 });
 const mockedPost = vi.mocked(ky.post);
 
@@ -41,6 +45,7 @@ describe("translateText", () => {
 				"https://translator.iobroker.in/translator",
 				expect.objectContaining({
 					body: expect.any(URLSearchParams),
+					timeout: 120000,
 				}),
 			);
 
@@ -79,6 +84,7 @@ describe("translateText", () => {
 				"https://api-free.deepl.com/v2/translate",
 				expect.objectContaining({
 					body: expect.any(URLSearchParams),
+					timeout: 30000,
 				}),
 			);
 
