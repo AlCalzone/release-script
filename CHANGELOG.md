@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## 5.1.2 (2026-02-24)
+* `iobroker` plugin: Increase HTTP timeouts
+
 ## 5.1.1 (2026-02-12)
 * Update dependencies
 * Use trusted publishing
