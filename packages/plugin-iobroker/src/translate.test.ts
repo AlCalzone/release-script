@@ -41,6 +41,7 @@ describe("translateText", () => {
 				"https://translator.iobroker.in/translator",
 				expect.objectContaining({
 					body: expect.any(URLSearchParams),
+					timeout: 120000,
 				}),
 			);
 
@@ -79,6 +80,7 @@ describe("translateText", () => {
 				"https://api-free.deepl.com/v2/translate",
 				expect.objectContaining({
 					body: expect.any(URLSearchParams),
+					timeout: 30000,
 				}),
 			);
 
