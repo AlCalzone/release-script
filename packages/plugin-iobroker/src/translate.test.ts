@@ -5,11 +5,7 @@ import { translateText } from "./translate.js";
 // Mock ky
 vi.mock("ky", () => {
 	const post = vi.fn();
-	const extend = vi.fn((defaults: Record<string, unknown>) => ({
-		post: (url: string | URL, options: Record<string, unknown>) =>
-			post(url, { ...defaults, ...options }),
-	}));
-	return { default: { post, extend } };
+	return { default: { post } };
 });
 const mockedPost = vi.mocked(ky.post);
 

@@ -3,7 +3,6 @@ import ky from "ky";
 const ioBrokerUrl = "https://translator.iobroker.in/translator";
 const defaultTimeout = 30_000;
 const ioBrokerTimeout = 120_000;
-const apiClient = ky.extend({ timeout: defaultTimeout });
 
 // DeepL language mappings - from DeepL API codes to ioBroker expected codes
 const deeplLanguageMap: Record<string, string> = {
@@ -38,8 +37,9 @@ async function translateWithDeepL(textEN: string, apiKey: string): Promise<Recor
 	const [firstDeeplLang, firstIoBrokerLang] = firstLanguage;
 
 	// First, test with one language to validate API key
-	const response = await apiClient
+	const response = await ky
 		.post(baseUrl, {
+			timeout: defaultTimeout,
 			body: new URLSearchParams({
 				text: textEN,
 				source_lang: "EN",
@@ -57,8 +57,9 @@ async function translateWithDeepL(textEN: string, apiKey: string): Promise<Recor
 	const remainingLanguages = Object.entries(deeplLanguageMap).slice(1);
 	const translatePromises = remainingLanguages.map(async ([deeplLang, ioBrokerLang]) => {
 		try {
-			const resp = await apiClient
+			const resp = await ky
 				.post(baseUrl, {
+					timeout: defaultTimeout,
 					body: new URLSearchParams({
 						text: textEN,
 						source_lang: "EN",
@@ -86,7 +87,7 @@ async function translateWithDeepL(textEN: string, apiKey: string): Promise<Recor
 
 /** Uses ioBroker translator service to translate text into multiple languages */
 async function translateWithIoBroker(textEN: string): Promise<Record<string, string>> {
-	return apiClient
+	return ky
 		.post(ioBrokerUrl, {
 			body: new URLSearchParams({
 				text: textEN,
