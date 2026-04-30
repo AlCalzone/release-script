@@ -159,6 +159,22 @@ class ChangelogPlugin implements Plugin {
 			parsedOld = parseChangelogFile(changelogOld, changelogPlaceholderPrefix.substr(1));
 		}
 
+		// When CHANGELOG_OLD.md is present, the "Older entries" footer link at the end of
+		// the last README entry must stay in the README and not be rotated to CHANGELOG_OLD.md.
+		// Detect this footer and move it from the last entry into the "after" section.
+		if (changelogOld && parsed.entries.length > 0) {
+			const lastIndex = parsed.entries.length - 1;
+			const olderEntriesFooterRegex =
+				/\n+Older entries are in \[CHANGELOG_OLD\.md\]\(CHANGELOG_OLD\.md\)\.\s*$/;
+			const footerMatch = olderEntriesFooterRegex.exec(parsed.entries[lastIndex]);
+			if (footerMatch) {
+				parsed.entries[lastIndex] = parsed.entries[lastIndex].slice(0, footerMatch.index);
+				parsed.after =
+					"\n\nOlder entries are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md)." +
+					parsed.after;
+			}
+		}
+
 		const entries = [...parsed.entries, ...(parsedOld?.entries ?? [])];
 
 		context.setData("changelog_filename", changelogFilename);
