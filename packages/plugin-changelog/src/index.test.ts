@@ -63,6 +63,8 @@ stuff
 * New entry 5`,
 
 	readme_olderEntriesFooter: `Older entries are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).`,
+	readme_olderEntriesFooterVariant: `Older entries have been moved to [CHANGELOG_OLD.md](CHANGELOG_OLD.md).`,
+	readme_olderEntriesFooterCustomLabel: `See [the older changelog](CHANGELOG_OLD.md) for previous releases.`,
 };
 
 describe("Changelog plugin", () => {
@@ -265,9 +267,103 @@ ${fixtures.changelog_old_testParse2}`,
 
 			// The footer should have been moved to changelog_after
 			const changelogAfter = context.getData<string>("changelog_after");
-			expect(changelogAfter).toBe(
-				`\n\n${fixtures.readme_olderEntriesFooter}`,
-			);
+			expect(changelogAfter).toBe(`\n\n${fixtures.readme_olderEntriesFooter}`);
+		});
+
+		it('preserves a custom-phrased "Older entries" footer verbatim', async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+			});
+
+			await testFS.create({
+				"README.md": `${fixtures.readme_testParseHeader}
+${fixtures.readme_testParse1}
+
+${fixtures.readme_testParse2}
+
+${fixtures.readme_testParse3}
+
+${fixtures.readme_olderEntriesFooterVariant}`,
+				"CHANGELOG_OLD.md": `${fixtures.changelog_old_testParseHeader}
+${fixtures.changelog_old_testParse1}
+
+${fixtures.changelog_old_testParse2}`,
+			});
+
+			await changelogPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+
+			const entries = context.getData<string[]>("changelog_entries");
+			expect(entries[2]).toBe(fixtures.readme_testParse3);
+
+			// Custom phrasing must be preserved exactly as the user wrote it
+			const changelogAfter = context.getData<string>("changelog_after");
+			expect(changelogAfter).toBe(`\n\n${fixtures.readme_olderEntriesFooterVariant}`);
+		});
+
+		it("detects a footer even without a blank line separator", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+			});
+
+			await testFS.create({
+				"README.md": `${fixtures.readme_testParseHeader}
+${fixtures.readme_testParse1}
+
+${fixtures.readme_testParse2}
+
+${fixtures.readme_testParse3}
+${fixtures.readme_olderEntriesFooter}`,
+				"CHANGELOG_OLD.md": `${fixtures.changelog_old_testParseHeader}
+${fixtures.changelog_old_testParse1}
+
+${fixtures.changelog_old_testParse2}`,
+			});
+
+			await changelogPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+
+			const entries = context.getData<string[]>("changelog_entries");
+			expect(entries[2]).toBe(fixtures.readme_testParse3);
+
+			const changelogAfter = context.getData<string>("changelog_after");
+			expect(changelogAfter).toBe(`\n\n${fixtures.readme_olderEntriesFooter}`);
+		});
+
+		it("preserves a footer with custom link label verbatim", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+			});
+
+			await testFS.create({
+				"README.md": `${fixtures.readme_testParseHeader}
+${fixtures.readme_testParse1}
+
+${fixtures.readme_testParse2}
+
+${fixtures.readme_testParse3}
+
+${fixtures.readme_olderEntriesFooterCustomLabel}`,
+				"CHANGELOG_OLD.md": `${fixtures.changelog_old_testParseHeader}
+${fixtures.changelog_old_testParse1}
+
+${fixtures.changelog_old_testParse2}`,
+			});
+
+			await changelogPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+
+			const entries = context.getData<string[]>("changelog_entries");
+			expect(entries[2]).toBe(fixtures.readme_testParse3);
+
+			const changelogAfter = context.getData<string>("changelog_after");
+			expect(changelogAfter).toBe(`\n\n${fixtures.readme_olderEntriesFooterCustomLabel}`);
 		});
 
 		it("correctly handles changelogs with sub-sections", async () => {
@@ -481,10 +577,7 @@ ${fixtures.changelog_old_testParse2}`);
 				fixtures.changelog_old_testParse1,
 				fixtures.changelog_old_testParse2,
 			]);
-			context.setData(
-				"changelog_after",
-				`\n\n${fixtures.readme_olderEntriesFooter}`,
-			);
+			context.setData("changelog_after", `\n\n${fixtures.readme_olderEntriesFooter}`);
 			context.setData("changelog_final_newline", false);
 			context.setData("changelog_old_before", fixtures.changelog_old_testParseHeader);
 			context.setData("changelog_old_after", "");
