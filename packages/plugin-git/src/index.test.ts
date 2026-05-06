@@ -443,7 +443,6 @@ This is the changelog.`);
 			context.rollback = {
 				originalHead: "deadbeef",
 				pushAttempted: false,
-				cleanAllowedDuringRollback: true,
 			};
 			context.sys.mockExec(() => "");
 
@@ -466,7 +465,6 @@ This is the changelog.`);
 			context.rollback = {
 				originalHead: "deadbeef",
 				pushAttempted: false,
-				cleanAllowedDuringRollback: true,
 			};
 			context.sys.mockExec((cmd) => {
 				if (cmd.includes("rev-parse --abbrev-ref --symbolic-full-name")) {
@@ -490,7 +488,6 @@ This is the changelog.`);
 			context.rollback = {
 				originalHead: "deadbeef",
 				pushAttempted: false,
-				cleanAllowedDuringRollback: true,
 			};
 			context.sys.mockExec(() => "");
 
@@ -509,7 +506,6 @@ This is the changelog.`);
 			context.rollback = {
 				originalHead: "deadbeef",
 				pushAttempted: false,
-				cleanAllowedDuringRollback: true,
 			};
 
 			await gitPlugin.executeStage(context, DefaultStages.push);
