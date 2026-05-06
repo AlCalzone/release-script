@@ -166,13 +166,12 @@ describe("finalizeRollback (failure path)", () => {
 
 		await finalizeRollback(context, { failed: true });
 
-		// Reset still runs
 		expect(context.sys.exec).toHaveBeenCalledWith(
 			"git",
 			["reset", "--hard", HEAD_SHA],
 			expect.anything(),
 		);
-		// But clean does not — pre-existing untracked files might be unrecoverable
+		// Clean would destroy pre-existing untracked files we couldn't snapshot
 		expect(context.sys.exec).not.toHaveBeenCalledWith(
 			"git",
 			["clean", "-fd"],

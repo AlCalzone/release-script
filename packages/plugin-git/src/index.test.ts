@@ -453,10 +453,9 @@ This is the changelog.`);
 		});
 
 		it("leaves rollback.pushAttempted=false when pre-push setup fails", async () => {
-			// Regression: the flag must not be set on stage entry, otherwise a
-			// failure in `getUpstream()` (or any other pre-push step) would
-			// disable rollback for a release that never actually contacted the
-			// remote.
+			// If a pre-push step (e.g. `getUpstream()`) throws before any push is
+			// dispatched, the release never contacted the remote — rollback must
+			// still be allowed.
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({
 				plugins: [gitPlugin],

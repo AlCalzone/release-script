@@ -173,7 +173,7 @@ export async function execute(context: Context): Promise<void> {
 		// the working tree. The `check` stage is read-only by convention; any
 		// later stage (including exec hooks like `after_check` / `before_edit`)
 		// might write files, so we capture before any of those run.
-		if (!snapshotTaken && stage.id !== "check") {
+		if (!snapshotTaken && stage.id !== DefaultStages.check.id) {
 			await captureRollbackSnapshot(context);
 			snapshotTaken = true;
 		}

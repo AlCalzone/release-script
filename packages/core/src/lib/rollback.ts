@@ -1,4 +1,4 @@
-import type { Context } from "./context.js";
+import type { Context, RollbackState } from "./context.js";
 
 const ROLLBACK_STASH_MESSAGE_PREFIX = "release-script-rollback-";
 
@@ -30,7 +30,7 @@ async function findStashIndexByMessage(
 	return undefined;
 }
 
-async function dropRollbackStash(context: Context, state: RollbackStateInternal): Promise<void> {
+async function dropRollbackStash(context: Context, state: RollbackState): Promise<void> {
 	if (!state.stashMessage) return;
 	const index = await findStashIndexByMessage(context, state.stashMessage);
 	if (!index) {
@@ -43,9 +43,6 @@ async function dropRollbackStash(context: Context, state: RollbackStateInternal)
 		context.cli.warn(`Failed to drop rollback stash ${index}: ${e?.message ?? e}`);
 	}
 }
-
-// Local alias to avoid an import cycle and keep call sites readable.
-type RollbackStateInternal = NonNullable<Context["rollback"]>;
 
 /**
  * Captures the state required to roll back any release-induced changes.
@@ -86,17 +83,12 @@ export async function captureRollbackSnapshot(context: Context): Promise<void> {
 
 	let stashSha: string | undefined;
 	let stashMessage: string | undefined;
-	let cleanAllowedDuringRollback: boolean;
+	// A clean working tree is automatically safe: anything untracked at rollback
+	// time must have been created by the release. A dirty working tree only
+	// becomes safe once we've stashed the user's changes as a recovery anchor.
+	let cleanAllowedDuringRollback = !isDirty;
 
-	if (!isDirty) {
-		// No pre-existing untracked files at snapshot — anything untracked at
-		// rollback time was created by the release process and is safe to clean.
-		cleanAllowedDuringRollback = true;
-	} else {
-		// Working tree is dirty. We need a recoverable backup before the release
-		// touches it; until that backup exists, rollback must not call
-		// `git clean -fd` or it will permanently destroy the user's untracked files.
-		cleanAllowedDuringRollback = false;
+	if (isDirty) {
 		const message = `${ROLLBACK_STASH_MESSAGE_PREFIX}${Date.now()}`;
 		try {
 			await execGit(context, ["stash", "push", "--include-untracked", "-m", message]);
@@ -136,7 +128,7 @@ export async function captureRollbackSnapshot(context: Context): Promise<void> {
 		stashSha,
 		stashMessage,
 		pushAttempted: false,
-		cleanAllowedDuringRollback: cleanAllowedDuringRollback,
+		cleanAllowedDuringRollback,
 	};
 }
 

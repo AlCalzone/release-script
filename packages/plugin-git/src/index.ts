@@ -249,20 +249,23 @@ ${context.getData("changelog_new")}`;
 		}
 
 		// And commit stuff
+		const tagName = `v${newVersion}`;
+		const tagCommand = ["git", "tag", "-a", tagName, "-m", tagName];
 		const commands = [
 			["git", "add", "-A", "--", ":(exclude).commitmessage"],
 			["git", "commit", "-F", ".commitmessage"],
-			["git", "tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`],
+			tagCommand,
 		];
 
-		for (const [cmd, ...args] of commands) {
+		for (const command of commands) {
+			const [cmd, ...args] = command;
 			context.cli.logCommand(cmd, args);
 			if (!context.argv.dryRun) {
 				await context.sys.exec(cmd, args, { cwd: context.cwd });
-				// Record successful tag creation so rollback can safely delete it
-				// without ever touching a pre-existing tag of the same name.
-				if (cmd === "git" && args[0] === "tag" && context.rollback) {
-					context.rollback.createdTag = `v${newVersion}`;
+				// Record the tag name only after `git tag` succeeds, so rollback
+				// never deletes a pre-existing tag of the same name.
+				if (command === tagCommand && context.rollback) {
+					context.rollback.createdTag = tagName;
 				}
 			}
 		}
