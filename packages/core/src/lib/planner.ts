@@ -2,6 +2,7 @@ import { ReleaseError } from "../index.js";
 import type { Context } from "./context.js";
 import { GraphNode, topologicalSort } from "./graph.js";
 import type { Plugin } from "./plugin.js";
+import { captureRollbackSnapshot } from "./rollback.js";
 import { DefaultStages, type Stage } from "./stage.js";
 
 /** Resolve all plugins that are required by the chosen plugins */
@@ -165,8 +166,17 @@ export async function execute(context: Context): Promise<void> {
 			),
 		);
 	}
+	let snapshotTaken = false;
 	for (const stage of stages) {
 		context.cli.prefix = `${stage.id}`;
+		// Snapshot the pre-release state before the first stage that may mutate
+		// the working tree. The `check` stage is read-only by convention; any
+		// later stage (including exec hooks like `after_check` / `before_edit`)
+		// might write files, so we capture before any of those run.
+		if (!snapshotTaken && stage.id !== DefaultStages.check.id) {
+			await captureRollbackSnapshot(context);
+			snapshotTaken = true;
+		}
 		const plugins = await planStage(context, stage);
 		if (context.argv.verbose) {
 			context.cli.log(

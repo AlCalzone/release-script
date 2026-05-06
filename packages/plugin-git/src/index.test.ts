@@ -435,6 +435,83 @@ This is the changelog.`);
 				expect(context.sys.execRaw).toHaveBeenCalledWith(cmd, expect.anything());
 			}
 		});
+
+		it("marks rollback.pushAttempted=true once a real push is dispatched", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({ plugins: [gitPlugin] });
+			context.setData("version_new", "1.2.9");
+			context.rollback = {
+				originalHead: "deadbeef",
+				pushAttempted: false,
+			};
+			context.sys.mockExec(() => "");
+
+			await gitPlugin.executeStage(context, DefaultStages.push);
+
+			expect(context.rollback.pushAttempted).toBe(true);
+		});
+
+		it("leaves rollback.pushAttempted=false when pre-push setup fails", async () => {
+			// If a pre-push step (e.g. `getUpstream()`) throws before any push is
+			// dispatched, the release never contacted the remote — rollback must
+			// still be allowed.
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				// Force getUpstream() to be called by clearing the configured remote.
+				argv: { remote: "" },
+			});
+			context.setData("version_new", "1.2.9b");
+			context.rollback = {
+				originalHead: "deadbeef",
+				pushAttempted: false,
+			};
+			context.sys.mockExec((cmd) => {
+				if (cmd.includes("rev-parse --abbrev-ref --symbolic-full-name")) {
+					throw new Error("no upstream configured");
+				}
+				return "";
+			});
+
+			await expect(gitPlugin.executeStage(context, DefaultStages.push)).rejects.toThrow();
+
+			expect(context.rollback.pushAttempted).toBe(false);
+		});
+
+		it("does not mark rollback.pushAttempted in dry run", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				argv: { dryRun: true },
+			});
+			context.setData("version_new", "1.3.0");
+			context.rollback = {
+				originalHead: "deadbeef",
+				pushAttempted: false,
+			};
+			context.sys.mockExec(() => "");
+
+			await gitPlugin.executeStage(context, DefaultStages.push);
+
+			expect(context.rollback.pushAttempted).toBe(false);
+		});
+
+		it("does not mark rollback.pushAttempted when --noPush is set", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				argv: { noPush: true },
+			});
+			context.setData("version_new", "1.3.1");
+			context.rollback = {
+				originalHead: "deadbeef",
+				pushAttempted: false,
+			};
+
+			await gitPlugin.executeStage(context, DefaultStages.push);
+
+			expect(context.rollback.pushAttempted).toBe(false);
+		});
 	});
 
 	describe("cleanup stage", () => {

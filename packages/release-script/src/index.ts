@@ -1,9 +1,10 @@
 import {
-	type CLI as ICLI,
 	type Context,
 	exec,
 	execRaw,
 	execute,
+	finalizeRollback,
+	type CLI as ICLI,
 	isReleaseError,
 	type Plugin,
 	ReleaseError,
@@ -199,6 +200,12 @@ export async function main(): Promise<void> {
 				description: `Bump and publish all non-private packages in monorepos, even if they didn't change`,
 				default: false,
 			},
+			noRollback: {
+				type: "boolean",
+				description:
+					"Do not roll back local changes (file edits, commits, tags) if the release fails before pushing",
+				default: false,
+			},
 		});
 
 	// We do two-pass parsing:
@@ -276,6 +283,9 @@ export async function main(): Promise<void> {
 	};
 	context.cli = new CLI(context);
 
+	let failed = false;
+	let exitCode: number | undefined;
+
 	try {
 		// Initialize plugins
 		for (const plugin of plugins) {
@@ -300,7 +310,8 @@ export async function main(): Promise<void> {
 			message += "!";
 			console.error();
 			console.error(message);
-			process.exit(1);
+			failed = true;
+			exitCode = 1;
 		}
 	} catch (e: any) {
 		if (isReleaseError(e)) {
@@ -323,7 +334,32 @@ export async function main(): Promise<void> {
 				),
 			);
 		}
-		process.exit((e as any).code ?? 1);
+		failed = true;
+		exitCode = (e as any).code ?? 1;
+	}
+
+	try {
+		await finalizeRollback(context, { failed });
+	} catch (rollbackError: any) {
+		const msg = rollbackError?.stack ?? rollbackError?.message ?? String(rollbackError);
+		console.error(
+			prependPrefix(
+				context.cli.prefix,
+				colorizeTextAndTags(
+					`[FATAL] Rollback itself failed: ${msg}`,
+					colors.red,
+					colors.bgRed,
+				),
+			),
+		);
+		// A rollback that throws leaves the working tree in an unknown state —
+		// always surface a non-zero exit so automation can detect it, even if
+		// the release itself was successful up to that point.
+		exitCode ??= 1;
+	}
+
+	if (exitCode !== undefined) {
+		process.exit(exitCode);
 	}
 }
 

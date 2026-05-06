@@ -249,16 +249,24 @@ ${context.getData("changelog_new")}`;
 		}
 
 		// And commit stuff
+		const tagName = `v${newVersion}`;
+		const tagCommand = ["git", "tag", "-a", tagName, "-m", tagName];
 		const commands = [
 			["git", "add", "-A", "--", ":(exclude).commitmessage"],
 			["git", "commit", "-F", ".commitmessage"],
-			["git", "tag", "-a", `v${newVersion}`, "-m", `v${newVersion}`],
+			tagCommand,
 		];
 
-		for (const [cmd, ...args] of commands) {
+		for (const command of commands) {
+			const [cmd, ...args] = command;
 			context.cli.logCommand(cmd, args);
 			if (!context.argv.dryRun) {
 				await context.sys.exec(cmd, args, { cwd: context.cwd });
+				// Record the tag name only after `git tag` succeeds, so rollback
+				// never deletes a pre-existing tag of the same name.
+				if (command === tagCommand && context.rollback) {
+					context.rollback.createdTag = tagName;
+				}
 			}
 		}
 	}
@@ -289,6 +297,11 @@ ${context.getData("changelog_new")}`;
 		for (const command of commands) {
 			context.cli.logCommand(command);
 			if (!context.argv.dryRun) {
+				// Remember that we attempted to push immediately before the first
+				// actual push command, not during information gathering.
+				if (context.rollback) {
+					context.rollback.pushAttempted = true;
+				}
 				await context.sys.execRaw(command, { cwd: context.cwd });
 			}
 		}
