@@ -93,9 +93,7 @@ export async function captureRollbackSnapshot(context: Context): Promise<void> {
 		try {
 			await execGit(context, ["stash", "push", "--include-untracked", "-m", message]);
 			// From this line on, the stash entry exists in `git stash list` and
-			// is identifiable by its message. Anything below may fail without
-			// invalidating that recovery anchor — keep `stashMessage` set even on
-			// later errors.
+			// is identifiable by its message.
 			stashMessage = message;
 			cleanAllowedDuringRollback = true;
 		} catch (e: any) {
@@ -107,18 +105,29 @@ export async function captureRollbackSnapshot(context: Context): Promise<void> {
 		}
 
 		if (stashMessage) {
+			// Re-apply immediately so the release operates on the same working
+			// tree the user had. If apply fails the working tree is now clean
+			// while the user's changes only live in the stash — proceeding would
+			// silently change what the release contains, so abort instead.
 			try {
-				const { stdout: stashRef } = await execGit(context, ["rev-parse", "stash@{0}"]);
-				stashSha = stashRef.trim();
-				// Re-apply the stash so the working tree is restored for the
-				// release to operate on. The stash entry itself stays in the
-				// stash list as a recovery snapshot.
-				await execGit(context, ["stash", "apply", stashSha]);
+				await execGit(context, ["stash", "apply", "stash@{0}"]);
 			} catch (e: any) {
-				context.cli.warn(
-					`Snapshot stash was created but could not be re-applied: ${e?.message ?? e}. ` +
-						`Recover manually with: git stash list (look for "${stashMessage}")`,
+				throw new Error(
+					`Could not re-apply your uncommitted changes after snapshotting them ` +
+						`for rollback: ${e?.message ?? e}. ` +
+						`Your changes are preserved in the stash list (look for "${stashMessage}"); ` +
+						`recover them with: git stash apply stash^{/${stashMessage}}`,
 				);
+			}
+
+			// Capture the SHA as a stable handle for the later restore in
+			// finalizeRollback. Best-effort: if this fails we can fall back to
+			// looking the entry up by its unique message.
+			try {
+				const { stdout } = await execGit(context, ["rev-parse", "stash@{0}"]);
+				stashSha = stdout.trim();
+			} catch {
+				/* fall back to message-based lookup */
 			}
 		}
 	}
@@ -155,9 +164,9 @@ export async function finalizeRollback(
 	if (!state) return;
 
 	if (!options.failed) {
-		// Success path: the snapshot stash (if any) holds changes that are now
-		// part of the release commit, so just drop it to keep `git stash list`
-		// clean.
+		// Success path: any snapshot stash was re-applied to the working tree
+		// during capture (captureRollbackSnapshot aborts otherwise), so its
+		// contents are part of the release commit and the entry can be dropped.
 		await dropRollbackStash(context, state);
 		return;
 	}
@@ -215,28 +224,36 @@ export async function finalizeRollback(
 		);
 	}
 
-	// Restore the user's pre-release uncommitted changes from the stash snapshot
+	// Restore the user's pre-release uncommitted changes from the stash
+	// snapshot. Prefer the SHA (stable across other stash operations); if it
+	// wasn't captured, look the entry up by its unique message.
 	let stashApplied = false;
-	if (state.stashSha) {
-		try {
-			await execGit(context, ["stash", "apply", state.stashSha]);
-			stashApplied = true;
-			context.cli.log("Restored your pre-release uncommitted changes");
-		} catch (e: any) {
-			const recoveryHint = state.stashMessage
-				? `Recover them manually with: git stash list (look for "${state.stashMessage}")`
-				: `Recover them manually via the stash list.`;
-			context.cli.warn(
-				`Failed to restore pre-release uncommitted changes: ${e?.message ?? e}. ` +
-					recoveryHint,
-			);
+	if (state.stashMessage || state.stashSha) {
+		const ref =
+			state.stashSha ??
+			(state.stashMessage
+				? await findStashIndexByMessage(context, state.stashMessage)
+				: undefined);
+		if (ref) {
+			try {
+				await execGit(context, ["stash", "apply", ref]);
+				stashApplied = true;
+				context.cli.log("Restored your pre-release uncommitted changes");
+			} catch (e: any) {
+				const recoveryHint = state.stashMessage
+					? `Recover them manually with: git stash list (look for "${state.stashMessage}")`
+					: `Recover them manually via the stash list.`;
+				context.cli.warn(
+					`Failed to restore pre-release uncommitted changes: ${e?.message ?? e}. ` +
+						recoveryHint,
+				);
+			}
 		}
 	}
 
-	// Only drop the stash entry if we successfully restored its contents (or if
-	// there was nothing to restore). Keep it around if apply failed so the user
-	// can recover manually.
-	if (!state.stashSha || stashApplied) {
+	// Drop the snapshot stash only when there was nothing to restore, or the
+	// restore succeeded. Otherwise keep it as the user's recovery anchor.
+	if (!state.stashMessage || stashApplied) {
 		await dropRollbackStash(context, state);
 	}
 }

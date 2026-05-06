@@ -39,8 +39,8 @@ describe("captureRollbackSnapshot", () => {
 			if (cmd === "git rev-parse HEAD") return HEAD_SHA;
 			if (cmd === "git status --porcelain") return " M package.json\n";
 			if (cmd.startsWith("git stash push")) return "";
+			if (cmd === "git stash apply stash@{0}") return "";
 			if (cmd === "git rev-parse stash@{0}") return STASH_SHA;
-			if (cmd === `git stash apply ${STASH_SHA}`) return "";
 			throw new Error(`unexpected command: ${cmd}`);
 		});
 
@@ -52,7 +52,7 @@ describe("captureRollbackSnapshot", () => {
 		// Stash apply must be called so plugin edits + user edits coexist before commit
 		expect(context.sys.exec).toHaveBeenCalledWith(
 			"git",
-			["stash", "apply", STASH_SHA],
+			["stash", "apply", "stash@{0}"],
 			expect.anything(),
 		);
 	});
@@ -86,23 +86,42 @@ describe("captureRollbackSnapshot", () => {
 		expect(context.rollback?.stashSha).toBeUndefined();
 	});
 
-	it("preserves stashMessage when stash push succeeded but a later step failed", async () => {
+	it("preserves stashMessage when SHA capture fails after a successful apply", async () => {
 		const context = freshContext({});
 		context.sys.mockExec((cmd) => {
 			if (cmd === "git rev-parse HEAD") return HEAD_SHA;
 			if (cmd === "git status --porcelain") return " M package.json\n";
 			if (cmd.startsWith("git stash push")) return "";
+			if (cmd === "git stash apply stash@{0}") return "";
 			if (cmd === "git rev-parse stash@{0}") throw new Error("rev-parse failed");
 			throw new Error(`unexpected command: ${cmd}`);
 		});
 
 		await captureRollbackSnapshot(context);
 
-		// Stash exists, so we must remember its message for recovery
+		// Apply succeeded, so the working tree matches the user's pre-release state.
+		// The stash entry remains as a recovery anchor identified by message.
 		expect(context.rollback?.stashMessage).toMatch(/^release-script-rollback-/);
 		expect(context.rollback?.stashSha).toBeUndefined();
-		// And cleanAllowedDuringRollback must be true (we have a recoverable backup)
 		expect(context.rollback?.cleanAllowedDuringRollback).toBe(true);
+	});
+
+	it("throws if apply fails after the snapshot stash was created", async () => {
+		// A failed apply leaves the working tree clean while the user's changes
+		// only live in the stash — proceeding would silently change the release
+		// contents, so capture must abort and let the caller surface the error.
+		const context = freshContext({});
+		context.sys.mockExec((cmd) => {
+			if (cmd === "git rev-parse HEAD") return HEAD_SHA;
+			if (cmd === "git status --porcelain") return " M package.json\n";
+			if (cmd.startsWith("git stash push")) return "";
+			if (cmd === "git stash apply stash@{0}") throw new Error("conflict");
+			throw new Error(`unexpected command: ${cmd}`);
+		});
+
+		await expect(captureRollbackSnapshot(context)).rejects.toThrow(
+			/Could not re-apply your uncommitted changes/,
+		);
 	});
 
 	it("does nothing when --dryRun is set", async () => {
@@ -270,6 +289,66 @@ describe("finalizeRollback (failure path)", () => {
 			}
 			if (cmd === "git stash list --pretty=format:%gd %gs") {
 				return `stash@{0} On main: ${STASH_MSG}`;
+			}
+			return "";
+		});
+
+		await finalizeRollback(context, { failed: true });
+
+		expect(context.sys.exec).not.toHaveBeenCalledWith(
+			"git",
+			["stash", "drop", "stash@{0}"],
+			expect.anything(),
+		);
+		expect(context.warnings.some((w) => /uncommitted changes/i.test(w))).toBe(true);
+	});
+
+	it("restores the stash via message-based lookup when stashSha is missing", async () => {
+		// Captures the case where the SHA couldn't be resolved at snapshot time
+		// (e.g. transient `git rev-parse` failure) but the stash entry exists
+		// and is identifiable by its message.
+		const context = freshContext({});
+		context.rollback = {
+			originalHead: HEAD_SHA,
+			stashMessage: STASH_MSG,
+			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
+		};
+		context.sys.mockExec((cmd) => {
+			if (cmd === "git stash list --pretty=format:%gd %gs") {
+				return `stash@{0} On main: ${STASH_MSG}`;
+			}
+			return "";
+		});
+
+		await finalizeRollback(context, { failed: true });
+
+		expect(context.sys.exec).toHaveBeenCalledWith(
+			"git",
+			["stash", "apply", "stash@{0}"],
+			expect.anything(),
+		);
+		expect(context.sys.exec).toHaveBeenCalledWith(
+			"git",
+			["stash", "drop", "stash@{0}"],
+			expect.anything(),
+		);
+	});
+
+	it("does NOT drop the stash when message-based restore fails", async () => {
+		const context = freshContext({});
+		context.rollback = {
+			originalHead: HEAD_SHA,
+			stashMessage: STASH_MSG,
+			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
+		};
+		context.sys.mockExec((cmd) => {
+			if (cmd === "git stash list --pretty=format:%gd %gs") {
+				return `stash@{0} On main: ${STASH_MSG}`;
+			}
+			if (cmd === "git stash apply stash@{0}") {
+				throw new Error("conflict");
 			}
 			return "";
 		});

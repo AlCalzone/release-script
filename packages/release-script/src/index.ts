@@ -203,7 +203,7 @@ export async function main(): Promise<void> {
 			noRollback: {
 				type: "boolean",
 				description:
-					"Do not roll back local changes (file edits, commits, tags) if making the release commit fails",
+					"Do not roll back local changes (file edits, commits, tags) if the release fails before pushing",
 				default: false,
 			},
 		});
