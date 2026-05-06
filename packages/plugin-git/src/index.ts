@@ -259,6 +259,11 @@ ${context.getData("changelog_new")}`;
 			context.cli.logCommand(cmd, args);
 			if (!context.argv.dryRun) {
 				await context.sys.exec(cmd, args, { cwd: context.cwd });
+				// Record successful tag creation so rollback can safely delete it
+				// without ever touching a pre-existing tag of the same name.
+				if (cmd === "git" && args[0] === "tag" && context.rollback) {
+					context.rollback.createdTag = `v${newVersion}`;
+				}
 			}
 		}
 	}
@@ -267,6 +272,12 @@ ${context.getData("changelog_new")}`;
 		if (context.argv.noPush) {
 			context.cli.log("git push skipped");
 			return;
+		}
+
+		// Once we start pushing to the remote, we can no longer safely roll back
+		// locally without risking divergence with what the remote has accepted.
+		if (context.rollback && !context.argv.dryRun) {
+			context.rollback.pushAttempted = true;
 		}
 
 		const upstream =

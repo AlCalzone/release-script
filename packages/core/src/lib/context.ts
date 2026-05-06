@@ -43,4 +43,32 @@ export interface Context {
 	getData<T>(key: string): T;
 	hasData(key: string): boolean;
 	setData(key: string, value: any): void;
+
+	/**
+	 * State used to roll back local changes if the release fails.
+	 * Populated by `captureRollbackSnapshot` once the edit stage is about to run.
+	 */
+	rollback?: RollbackState;
+}
+
+export interface RollbackState {
+	/** SHA of HEAD before any release-related modifications were made */
+	originalHead: string;
+	/**
+	 * SHA of the stash commit that holds the user's pre-release uncommitted
+	 * changes (only set when the working tree was dirty, i.e. with --all).
+	 */
+	stashSha?: string;
+	/**
+	 * Unique message used to identify the snapshot stash in `git stash list`,
+	 * since `git stash drop` requires a `stash@{N}` ref rather than a SHA.
+	 */
+	stashMessage?: string;
+	/** Set to true once the push stage starts. Disables rollback afterwards. */
+	pushAttempted: boolean;
+	/**
+	 * Name of the release tag created during this run (e.g. "v1.2.3"). Only set
+	 * after `git tag` succeeds, so rollback never deletes a pre-existing tag.
+	 */
+	createdTag?: string;
 }

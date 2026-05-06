@@ -435,6 +435,56 @@ This is the changelog.`);
 				expect(context.sys.execRaw).toHaveBeenCalledWith(cmd, expect.anything());
 			}
 		});
+
+		it("marks rollback.pushAttempted=true when entering the push stage", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({ plugins: [gitPlugin] });
+			context.setData("version_new", "1.2.9");
+			context.rollback = {
+				originalHead: "deadbeef",
+				pushAttempted: false,
+			};
+			context.sys.mockExec(() => "");
+
+			await gitPlugin.executeStage(context, DefaultStages.push);
+
+			expect(context.rollback.pushAttempted).toBe(true);
+		});
+
+		it("does not mark rollback.pushAttempted in dry run", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				argv: { dryRun: true },
+			});
+			context.setData("version_new", "1.3.0");
+			context.rollback = {
+				originalHead: "deadbeef",
+				pushAttempted: false,
+			};
+			context.sys.mockExec(() => "");
+
+			await gitPlugin.executeStage(context, DefaultStages.push);
+
+			expect(context.rollback.pushAttempted).toBe(false);
+		});
+
+		it("does not mark rollback.pushAttempted when --noPush is set", async () => {
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				argv: { noPush: true },
+			});
+			context.setData("version_new", "1.3.1");
+			context.rollback = {
+				originalHead: "deadbeef",
+				pushAttempted: false,
+			};
+
+			await gitPlugin.executeStage(context, DefaultStages.push);
+
+			expect(context.rollback.pushAttempted).toBe(false);
+		});
 	});
 
 	describe("cleanup stage", () => {
