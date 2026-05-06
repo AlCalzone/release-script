@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.1.1",
+  "version": "5.2.0",
   "type": "module",
   "description": "Plugin for Al Calzone's release script: changelog",
   "keywords": [],
@@ -26,11 +26,11 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@alcalzone/release-script-core": "5.1.1",
+    "@alcalzone/release-script-core": "5.2.0",
     "alcalzone-shared": "^5.0.0"
   },
   "devDependencies": {
-    "@alcalzone/release-script-testing": "5.1.1",
+    "@alcalzone/release-script-testing": "5.2.0",
     "jest-extended": "^3.1.0",
     "typescript": "~5.9.3"
   },
