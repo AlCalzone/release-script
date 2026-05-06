@@ -3,6 +3,10 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## **WORK IN PROGRESS**
+* Local changes are now snapshotted and restored if the release fails locally (#205)
+* Fix: make `CHANGELOG_OLD.md` rotation more resilient (#202)
+
 ## 5.1.2 (2026-02-24)
 * `iobroker` plugin: Increase HTTP timeouts
 
