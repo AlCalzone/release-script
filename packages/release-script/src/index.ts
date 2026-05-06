@@ -352,6 +352,10 @@ export async function main(): Promise<void> {
 				),
 			),
 		);
+		// A rollback that throws leaves the working tree in an unknown state —
+		// always surface a non-zero exit so automation can detect it, even if
+		// the release itself was successful up to that point.
+		exitCode ??= 1;
 	}
 
 	if (exitCode !== undefined) {

@@ -39,7 +39,7 @@ describe("captureRollbackSnapshot", () => {
 			if (cmd === "git rev-parse HEAD") return HEAD_SHA;
 			if (cmd === "git status --porcelain") return " M package.json\n";
 			if (cmd.startsWith("git stash push")) return "";
-			if (cmd === "git stash apply stash@{0}") return "";
+			if (cmd === "git stash apply --index stash@{0}") return "";
 			if (cmd === "git rev-parse stash@{0}") return STASH_SHA;
 			throw new Error(`unexpected command: ${cmd}`);
 		});
@@ -52,7 +52,7 @@ describe("captureRollbackSnapshot", () => {
 		// Stash apply must be called so plugin edits + user edits coexist before commit
 		expect(context.sys.exec).toHaveBeenCalledWith(
 			"git",
-			["stash", "apply", "stash@{0}"],
+			["stash", "apply", "--index", "stash@{0}"],
 			expect.anything(),
 		);
 	});
@@ -69,7 +69,7 @@ describe("captureRollbackSnapshot", () => {
 		expect(context.rollback?.cleanAllowedDuringRollback).toBe(true);
 	});
 
-	it("marks cleanAllowedDuringRollback=false and skips stash when push fails on dirty tree", async () => {
+	it("marks cleanAllowedDuringRollback=false when stash creation fails on dirty tree", async () => {
 		const context = freshContext({});
 		context.sys.mockExec((cmd) => {
 			if (cmd === "git rev-parse HEAD") return HEAD_SHA;
@@ -92,7 +92,7 @@ describe("captureRollbackSnapshot", () => {
 			if (cmd === "git rev-parse HEAD") return HEAD_SHA;
 			if (cmd === "git status --porcelain") return " M package.json\n";
 			if (cmd.startsWith("git stash push")) return "";
-			if (cmd === "git stash apply stash@{0}") return "";
+			if (cmd === "git stash apply --index stash@{0}") return "";
 			if (cmd === "git rev-parse stash@{0}") throw new Error("rev-parse failed");
 			throw new Error(`unexpected command: ${cmd}`);
 		});
@@ -115,7 +115,7 @@ describe("captureRollbackSnapshot", () => {
 			if (cmd === "git rev-parse HEAD") return HEAD_SHA;
 			if (cmd === "git status --porcelain") return " M package.json\n";
 			if (cmd.startsWith("git stash push")) return "";
-			if (cmd === "git stash apply stash@{0}") throw new Error("conflict");
+			if (cmd === "git stash apply --index stash@{0}") throw new Error("conflict");
 			throw new Error(`unexpected command: ${cmd}`);
 		});
 
@@ -131,7 +131,7 @@ describe("captureRollbackSnapshot", () => {
 		expect(context.sys.exec).not.toHaveBeenCalled();
 	});
 
-	it("does nothing when --no-rollback is set", async () => {
+	it("does nothing when --noRollback is set", async () => {
 		const context = freshContext({ argv: { noRollback: true } });
 		await captureRollbackSnapshot(context);
 		expect(context.rollback).toBeUndefined();
@@ -258,7 +258,7 @@ describe("finalizeRollback (failure path)", () => {
 
 		expect(context.sys.exec).toHaveBeenCalledWith(
 			"git",
-			["stash", "apply", STASH_SHA],
+			["stash", "apply", "--index", STASH_SHA],
 			expect.anything(),
 		);
 		// Drop must use the stash@{N} index, not the SHA
@@ -284,7 +284,7 @@ describe("finalizeRollback (failure path)", () => {
 			cleanAllowedDuringRollback: true,
 		};
 		context.sys.mockExec((cmd) => {
-			if (cmd === `git stash apply ${STASH_SHA}`) {
+			if (cmd === `git stash apply --index ${STASH_SHA}`) {
 				throw new Error("conflict");
 			}
 			if (cmd === "git stash list --pretty=format:%gd %gs") {
@@ -325,7 +325,7 @@ describe("finalizeRollback (failure path)", () => {
 
 		expect(context.sys.exec).toHaveBeenCalledWith(
 			"git",
-			["stash", "apply", "stash@{0}"],
+			["stash", "apply", "--index", "stash@{0}"],
 			expect.anything(),
 		);
 		expect(context.sys.exec).toHaveBeenCalledWith(
@@ -347,7 +347,7 @@ describe("finalizeRollback (failure path)", () => {
 			if (cmd === "git stash list --pretty=format:%gd %gs") {
 				return `stash@{0} On main: ${STASH_MSG}`;
 			}
-			if (cmd === "git stash apply stash@{0}") {
+			if (cmd === "git stash apply --index stash@{0}") {
 				throw new Error("conflict");
 			}
 			return "";
@@ -407,7 +407,7 @@ describe("finalizeRollback (failure path)", () => {
 		expect(context.sys.exec).not.toHaveBeenCalled();
 	});
 
-	it("does nothing when --no-rollback is set", async () => {
+	it("does nothing when --noRollback is set", async () => {
 		const context = freshContext({ argv: { noRollback: true } });
 		context.rollback = {
 			originalHead: HEAD_SHA,
@@ -468,7 +468,7 @@ describe("finalizeRollback (success path)", () => {
 		expect(context.sys.exec).not.toHaveBeenCalled();
 	});
 
-	it("is a no-op when --dryRun or --no-rollback is set", async () => {
+	it("is a no-op when --dryRun or --noRollback is set", async () => {
 		const dry = freshContext({ argv: { dryRun: true } });
 		dry.rollback = {
 			originalHead: HEAD_SHA,

@@ -106,11 +106,12 @@ export async function captureRollbackSnapshot(context: Context): Promise<void> {
 
 		if (stashMessage) {
 			// Re-apply immediately so the release operates on the same working
-			// tree the user had. If apply fails the working tree is now clean
-			// while the user's changes only live in the stash — proceeding would
-			// silently change what the release contains, so abort instead.
+			// tree the user had. `--index` preserves the staged/unstaged split.
+			// If apply fails the working tree is now clean while the user's
+			// changes only live in the stash — proceeding would silently change
+			// what the release contains, so abort instead.
 			try {
-				await execGit(context, ["stash", "apply", "stash@{0}"]);
+				await execGit(context, ["stash", "apply", "--index", "stash@{0}"]);
 			} catch (e: any) {
 				throw new Error(
 					`Could not re-apply your uncommitted changes after snapshotting them ` +
@@ -236,7 +237,8 @@ export async function finalizeRollback(
 				: undefined);
 		if (ref) {
 			try {
-				await execGit(context, ["stash", "apply", ref]);
+				// `--index` preserves the staged/unstaged split the user had.
+				await execGit(context, ["stash", "apply", "--index", ref]);
 				stashApplied = true;
 				context.cli.log("Restored your pre-release uncommitted changes");
 			} catch (e: any) {
