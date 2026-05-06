@@ -65,28 +65,70 @@ export async function captureRollbackSnapshot(context: Context): Promise<void> {
 		return;
 	}
 
-	let stashSha: string | undefined;
-	let stashMessage: string | undefined;
+	let isDirty: boolean;
 	try {
 		const { stdout } = await execGit(context, ["status", "--porcelain"]);
-		const isDirty = stdout.trim() !== "";
-		if (isDirty) {
-			stashMessage = `${ROLLBACK_STASH_MESSAGE_PREFIX}${Date.now()}`;
-			await execGit(context, ["stash", "push", "--include-untracked", "-m", stashMessage]);
-			const { stdout: stashRef } = await execGit(context, ["rev-parse", "stash@{0}"]);
-			stashSha = stashRef.trim();
-			// Re-apply the stash so the working tree is restored. The stash entry
-			// itself stays in the stash list as a recovery snapshot.
-			await execGit(context, ["stash", "apply", stashSha]);
-		}
+		isDirty = stdout.trim() !== "";
 	} catch (e: any) {
+		// Conservatively treat the tree as dirty so rollback won't run a
+		// destructive `git clean` against state we couldn't observe.
 		context.cli.warn(
-			`Failed to snapshot uncommitted changes for rollback: ${e?.message ?? e}. ` +
-				`Rollback will still undo committed and edited files.`,
+			`Could not determine working tree status for rollback: ${e?.message ?? e}. ` +
+				`Rollback will skip cleanup of untracked files to avoid data loss.`,
 		);
-		// Don't carry a half-baked stash forward.
-		stashSha = undefined;
-		stashMessage = undefined;
+		context.rollback = {
+			originalHead,
+			pushAttempted: false,
+			cleanAllowedDuringRollback: false,
+		};
+		return;
+	}
+
+	let stashSha: string | undefined;
+	let stashMessage: string | undefined;
+	let cleanAllowedDuringRollback: boolean;
+
+	if (!isDirty) {
+		// No pre-existing untracked files at snapshot — anything untracked at
+		// rollback time was created by the release process and is safe to clean.
+		cleanAllowedDuringRollback = true;
+	} else {
+		// Working tree is dirty. We need a recoverable backup before the release
+		// touches it; until that backup exists, rollback must not call
+		// `git clean -fd` or it will permanently destroy the user's untracked files.
+		cleanAllowedDuringRollback = false;
+		const message = `${ROLLBACK_STASH_MESSAGE_PREFIX}${Date.now()}`;
+		try {
+			await execGit(context, ["stash", "push", "--include-untracked", "-m", message]);
+			// From this line on, the stash entry exists in `git stash list` and
+			// is identifiable by its message. Anything below may fail without
+			// invalidating that recovery anchor — keep `stashMessage` set even on
+			// later errors.
+			stashMessage = message;
+			cleanAllowedDuringRollback = true;
+		} catch (e: any) {
+			context.cli.warn(
+				`Failed to snapshot uncommitted changes for rollback: ${e?.message ?? e}. ` +
+					`Rollback will undo committed and edited files but cannot restore ` +
+					`untracked files; cleanup of untracked files will be skipped.`,
+			);
+		}
+
+		if (stashMessage) {
+			try {
+				const { stdout: stashRef } = await execGit(context, ["rev-parse", "stash@{0}"]);
+				stashSha = stashRef.trim();
+				// Re-apply the stash so the working tree is restored for the
+				// release to operate on. The stash entry itself stays in the
+				// stash list as a recovery snapshot.
+				await execGit(context, ["stash", "apply", stashSha]);
+			} catch (e: any) {
+				context.cli.warn(
+					`Snapshot stash was created but could not be re-applied: ${e?.message ?? e}. ` +
+						`Recover manually with: git stash list (look for "${stashMessage}")`,
+				);
+			}
+		}
 	}
 
 	context.rollback = {
@@ -94,6 +136,7 @@ export async function captureRollbackSnapshot(context: Context): Promise<void> {
 		stashSha,
 		stashMessage,
 		pushAttempted: false,
+		cleanAllowedDuringRollback: cleanAllowedDuringRollback,
 	};
 }
 
@@ -163,12 +206,21 @@ export async function finalizeRollback(
 		return;
 	}
 
-	// Drop untracked files left behind by plugins (e.g. .commitmessage). Do not
-	// pass -x so files ignored by .gitignore (node_modules etc.) are preserved.
-	try {
-		await execGit(context, ["clean", "-fd"]);
-	} catch (e: any) {
-		context.cli.warn(`Failed to clean untracked files: ${e?.message ?? e}`);
+	// Drop untracked files left behind by plugins (e.g. .commitmessage). Skip
+	// when we don't have a recoverable backup of pre-existing untracked files,
+	// since `git clean -fd` would otherwise destroy them. Do not pass -x — that
+	// would also remove .gitignore'd files like node_modules.
+	if (state.cleanAllowedDuringRollback) {
+		try {
+			await execGit(context, ["clean", "-fd"]);
+		} catch (e: any) {
+			context.cli.warn(`Failed to clean untracked files: ${e?.message ?? e}`);
+		}
+	} else {
+		context.cli.warn(
+			`Skipping cleanup of untracked files because no recovery snapshot is available. ` +
+				`You may need to remove leftover release artifacts manually.`,
+		);
 	}
 
 	// Restore the user's pre-release uncommitted changes from the stash snapshot

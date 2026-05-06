@@ -71,4 +71,11 @@ export interface RollbackState {
 	 * after `git tag` succeeds, so rollback never deletes a pre-existing tag.
 	 */
 	createdTag?: string;
+	/**
+	 * Whether `git clean -fd` is safe to run during rollback. False when the
+	 * working tree was dirty at snapshot time but the snapshot stash could not
+	 * be created — running clean in that case would permanently lose the user's
+	 * pre-existing untracked files.
+	 */
+	cleanAllowedDuringRollback: boolean;
 }

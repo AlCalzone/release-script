@@ -436,19 +436,49 @@ This is the changelog.`);
 			}
 		});
 
-		it("marks rollback.pushAttempted=true when entering the push stage", async () => {
+		it("marks rollback.pushAttempted=true once a real push is dispatched", async () => {
 			const gitPlugin = new GitPlugin();
 			const context = createMockContext({ plugins: [gitPlugin] });
 			context.setData("version_new", "1.2.9");
 			context.rollback = {
 				originalHead: "deadbeef",
 				pushAttempted: false,
+				cleanAllowedDuringRollback: true,
 			};
 			context.sys.mockExec(() => "");
 
 			await gitPlugin.executeStage(context, DefaultStages.push);
 
 			expect(context.rollback.pushAttempted).toBe(true);
+		});
+
+		it("leaves rollback.pushAttempted=false when pre-push setup fails", async () => {
+			// Regression: the flag must not be set on stage entry, otherwise a
+			// failure in `getUpstream()` (or any other pre-push step) would
+			// disable rollback for a release that never actually contacted the
+			// remote.
+			const gitPlugin = new GitPlugin();
+			const context = createMockContext({
+				plugins: [gitPlugin],
+				// Force getUpstream() to be called by clearing the configured remote.
+				argv: { remote: "" },
+			});
+			context.setData("version_new", "1.2.9b");
+			context.rollback = {
+				originalHead: "deadbeef",
+				pushAttempted: false,
+				cleanAllowedDuringRollback: true,
+			};
+			context.sys.mockExec((cmd) => {
+				if (cmd.includes("rev-parse --abbrev-ref --symbolic-full-name")) {
+					throw new Error("no upstream configured");
+				}
+				return "";
+			});
+
+			await expect(gitPlugin.executeStage(context, DefaultStages.push)).rejects.toThrow();
+
+			expect(context.rollback.pushAttempted).toBe(false);
 		});
 
 		it("does not mark rollback.pushAttempted in dry run", async () => {
@@ -461,6 +491,7 @@ This is the changelog.`);
 			context.rollback = {
 				originalHead: "deadbeef",
 				pushAttempted: false,
+				cleanAllowedDuringRollback: true,
 			};
 			context.sys.mockExec(() => "");
 
@@ -479,6 +510,7 @@ This is the changelog.`);
 			context.rollback = {
 				originalHead: "deadbeef",
 				pushAttempted: false,
+				cleanAllowedDuringRollback: true,
 			};
 
 			await gitPlugin.executeStage(context, DefaultStages.push);

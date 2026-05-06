@@ -48,12 +48,61 @@ describe("captureRollbackSnapshot", () => {
 
 		expect(context.rollback?.stashSha).toBe(STASH_SHA);
 		expect(context.rollback?.stashMessage).toMatch(/^release-script-rollback-/);
+		expect(context.rollback?.cleanAllowedDuringRollback).toBe(true);
 		// Stash apply must be called so plugin edits + user edits coexist before commit
 		expect(context.sys.exec).toHaveBeenCalledWith(
 			"git",
 			["stash", "apply", STASH_SHA],
 			expect.anything(),
 		);
+	});
+
+	it("marks cleanAllowedDuringRollback=true when the working tree is clean", async () => {
+		const context = freshContext({});
+		context.sys.mockExec({
+			"git rev-parse HEAD": HEAD_SHA,
+			"git status --porcelain": "",
+		});
+
+		await captureRollbackSnapshot(context);
+
+		expect(context.rollback?.cleanAllowedDuringRollback).toBe(true);
+	});
+
+	it("marks cleanAllowedDuringRollback=false and skips stash when push fails on dirty tree", async () => {
+		const context = freshContext({});
+		context.sys.mockExec((cmd) => {
+			if (cmd === "git rev-parse HEAD") return HEAD_SHA;
+			if (cmd === "git status --porcelain") return " M package.json\n";
+			if (cmd.startsWith("git stash push")) throw new Error("stash push failed");
+			throw new Error(`unexpected command: ${cmd}`);
+		});
+
+		await captureRollbackSnapshot(context);
+
+		expect(context.rollback).toBeDefined();
+		expect(context.rollback?.cleanAllowedDuringRollback).toBe(false);
+		expect(context.rollback?.stashMessage).toBeUndefined();
+		expect(context.rollback?.stashSha).toBeUndefined();
+	});
+
+	it("preserves stashMessage when stash push succeeded but a later step failed", async () => {
+		const context = freshContext({});
+		context.sys.mockExec((cmd) => {
+			if (cmd === "git rev-parse HEAD") return HEAD_SHA;
+			if (cmd === "git status --porcelain") return " M package.json\n";
+			if (cmd.startsWith("git stash push")) return "";
+			if (cmd === "git rev-parse stash@{0}") throw new Error("rev-parse failed");
+			throw new Error(`unexpected command: ${cmd}`);
+		});
+
+		await captureRollbackSnapshot(context);
+
+		// Stash exists, so we must remember its message for recovery
+		expect(context.rollback?.stashMessage).toMatch(/^release-script-rollback-/);
+		expect(context.rollback?.stashSha).toBeUndefined();
+		// And cleanAllowedDuringRollback must be true (we have a recoverable backup)
+		expect(context.rollback?.cleanAllowedDuringRollback).toBe(true);
 	});
 
 	it("does nothing when --dryRun is set", async () => {
@@ -89,7 +138,11 @@ describe("finalizeRollback (failure path)", () => {
 
 	it("resets HEAD and cleans untracked files when no tag and no stash", async () => {
 		const context = freshContext({});
-		context.rollback = { originalHead: HEAD_SHA, pushAttempted: false };
+		context.rollback = {
+			originalHead: HEAD_SHA,
+			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
+		};
 		context.sys.mockExec(() => "");
 
 		await finalizeRollback(context, { failed: true });
@@ -102,11 +155,38 @@ describe("finalizeRollback (failure path)", () => {
 		expect(context.sys.exec).toHaveBeenCalledWith("git", ["clean", "-fd"], expect.anything());
 	});
 
+	it("does NOT run git clean when cleanAllowedDuringRollback is false", async () => {
+		const context = freshContext({});
+		context.rollback = {
+			originalHead: HEAD_SHA,
+			pushAttempted: false,
+			cleanAllowedDuringRollback: false,
+		};
+		context.sys.mockExec(() => "");
+
+		await finalizeRollback(context, { failed: true });
+
+		// Reset still runs
+		expect(context.sys.exec).toHaveBeenCalledWith(
+			"git",
+			["reset", "--hard", HEAD_SHA],
+			expect.anything(),
+		);
+		// But clean does not — pre-existing untracked files might be unrecoverable
+		expect(context.sys.exec).not.toHaveBeenCalledWith(
+			"git",
+			["clean", "-fd"],
+			expect.anything(),
+		);
+		expect(context.warnings.some((w) => /untracked files/i.test(w))).toBe(true);
+	});
+
 	it("deletes the release tag only if this run created it", async () => {
 		const context = freshContext({});
 		context.rollback = {
 			originalHead: HEAD_SHA,
 			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
 			createdTag: "v1.2.3",
 		};
 		context.sys.mockExec(() => "");
@@ -122,7 +202,11 @@ describe("finalizeRollback (failure path)", () => {
 
 	it("does NOT delete a pre-existing tag when this run did not create one", async () => {
 		const context = freshContext({});
-		context.rollback = { originalHead: HEAD_SHA, pushAttempted: false };
+		context.rollback = {
+			originalHead: HEAD_SHA,
+			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
+		};
 		// version_new is set but createdTag is not — tag pre-existed.
 		context.setData("version_new", "1.2.3");
 		context.sys.mockExec(() => "");
@@ -143,6 +227,7 @@ describe("finalizeRollback (failure path)", () => {
 			stashSha: STASH_SHA,
 			stashMessage: STASH_MSG,
 			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
 		};
 		context.sys.mockExec((cmd) => {
 			if (cmd === "git stash list --pretty=format:%gd %gs") {
@@ -178,6 +263,7 @@ describe("finalizeRollback (failure path)", () => {
 			stashSha: STASH_SHA,
 			stashMessage: STASH_MSG,
 			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
 		};
 		context.sys.mockExec((cmd) => {
 			if (cmd === `git stash apply ${STASH_SHA}`) {
@@ -206,6 +292,7 @@ describe("finalizeRollback (failure path)", () => {
 			stashSha: STASH_SHA,
 			stashMessage: STASH_MSG,
 			pushAttempted: true,
+			cleanAllowedDuringRollback: true,
 		};
 		context.sys.mockExec((cmd) => {
 			if (cmd === "git stash list --pretty=format:%gd %gs") {
@@ -233,14 +320,22 @@ describe("finalizeRollback (failure path)", () => {
 
 	it("does nothing when --dryRun is set", async () => {
 		const context = freshContext({ argv: { dryRun: true } });
-		context.rollback = { originalHead: HEAD_SHA, pushAttempted: false };
+		context.rollback = {
+			originalHead: HEAD_SHA,
+			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
+		};
 		await finalizeRollback(context, { failed: true });
 		expect(context.sys.exec).not.toHaveBeenCalled();
 	});
 
 	it("does nothing when --no-rollback is set", async () => {
 		const context = freshContext({ argv: { noRollback: true } });
-		context.rollback = { originalHead: HEAD_SHA, pushAttempted: false };
+		context.rollback = {
+			originalHead: HEAD_SHA,
+			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
+		};
 		await finalizeRollback(context, { failed: true });
 		expect(context.sys.exec).not.toHaveBeenCalled();
 	});
@@ -254,6 +349,7 @@ describe("finalizeRollback (success path)", () => {
 			stashSha: STASH_SHA,
 			stashMessage: STASH_MSG,
 			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
 		};
 		context.sys.mockExec((cmd) => {
 			if (cmd === "git stash list --pretty=format:%gd %gs") {
@@ -285,7 +381,11 @@ describe("finalizeRollback (success path)", () => {
 
 	it("is a no-op when no stash was created (clean working tree)", async () => {
 		const context = freshContext({});
-		context.rollback = { originalHead: HEAD_SHA, pushAttempted: false };
+		context.rollback = {
+			originalHead: HEAD_SHA,
+			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
+		};
 		await finalizeRollback(context, { failed: false });
 		expect(context.sys.exec).not.toHaveBeenCalled();
 	});
@@ -297,6 +397,7 @@ describe("finalizeRollback (success path)", () => {
 			stashSha: STASH_SHA,
 			stashMessage: STASH_MSG,
 			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
 		};
 		await finalizeRollback(dry, { failed: false });
 		expect(dry.sys.exec).not.toHaveBeenCalled();
@@ -307,6 +408,7 @@ describe("finalizeRollback (success path)", () => {
 			stashSha: STASH_SHA,
 			stashMessage: STASH_MSG,
 			pushAttempted: false,
+			cleanAllowedDuringRollback: true,
 		};
 		await finalizeRollback(noRb, { failed: false });
 		expect(noRb.sys.exec).not.toHaveBeenCalled();

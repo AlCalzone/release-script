@@ -274,12 +274,6 @@ ${context.getData("changelog_new")}`;
 			return;
 		}
 
-		// Once we start pushing to the remote, we can no longer safely roll back
-		// locally without risking divergence with what the remote has accepted.
-		if (context.rollback && !context.argv.dryRun) {
-			context.rollback.pushAttempted = true;
-		}
-
 		const upstream =
 			(context.argv.remote as string | undefined) || (await getUpstream(context));
 		const [remote, branch] = upstream.split("/", 2);
@@ -300,6 +294,11 @@ ${context.getData("changelog_new")}`;
 		for (const command of commands) {
 			context.cli.logCommand(command);
 			if (!context.argv.dryRun) {
+				// Remember that we attempted to push immediately before the first
+				// actual push command, not during information gathering.
+				if (context.rollback) {
+					context.rollback.pushAttempted = true;
+				}
 				await context.sys.execRaw(command, { cwd: context.cwd });
 			}
 		}
