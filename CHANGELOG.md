@@ -3,7 +3,7 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
-## **WORK IN PROGRESS**
+## 5.2.0 (2026-05-06)
 * Local changes are now snapshotted and restored if the release fails locally (#205)
 * Fix: make `CHANGELOG_OLD.md` rotation more resilient (#202)
 
