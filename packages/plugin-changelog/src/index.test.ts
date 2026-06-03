@@ -65,6 +65,8 @@ stuff
 	readme_olderEntriesFooter: `Older entries are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).`,
 	readme_olderEntriesFooterVariant: `Older entries have been moved to [CHANGELOG_OLD.md](CHANGELOG_OLD.md).`,
 	readme_olderEntriesFooterCustomLabel: `See [the older changelog](CHANGELOG_OLD.md) for previous releases.`,
+	readme_trailingSection: `## License
+MIT License`,
 };
 
 describe("Changelog plugin", () => {
@@ -366,6 +368,43 @@ ${fixtures.changelog_old_testParse2}`,
 			expect(changelogAfter).toBe(`\n\n${fixtures.readme_olderEntriesFooterCustomLabel}`);
 		});
 
+		it("keeps the blank-line separation between the footer and a following section", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+			});
+
+			await testFS.create({
+				"README.md": `${fixtures.readme_testParseHeader}
+${fixtures.readme_testParse1}
+
+${fixtures.readme_testParse2}
+
+${fixtures.readme_testParse3}
+
+${fixtures.readme_olderEntriesFooter}
+
+${fixtures.readme_trailingSection}`,
+				"CHANGELOG_OLD.md": `${fixtures.changelog_old_testParseHeader}
+${fixtures.changelog_old_testParse1}
+
+${fixtures.changelog_old_testParse2}`,
+			});
+
+			await changelogPlugin.executeStage(context, DefaultStages.check);
+			expect(context.errors).toHaveLength(0);
+
+			const entries = context.getData<string[]>("changelog_entries");
+			expect(entries[2]).toBe(fixtures.readme_testParse3);
+
+			// The footer must keep one blank line before the following section
+			const changelogAfter = context.getData<string>("changelog_after");
+			expect(changelogAfter).toBe(
+				`\n\n${fixtures.readme_olderEntriesFooter}\n\n${fixtures.readme_trailingSection}`,
+			);
+		});
+
 		it("correctly handles changelogs with sub-sections", async () => {
 			const changelogPlugin = new ChangelogPlugin();
 			const context = createMockContext({
@@ -606,6 +645,52 @@ ${fixtures.readme_testParse3.slice(1)}
 ${fixtures.changelog_old_testParse1}
 
 ${fixtures.changelog_old_testParse2}`);
+		});
+
+		it("keeps a blank line between the footer and a following section when rotating", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+				argv: {
+					numChangelogEntries: 2,
+				},
+			});
+
+			context.setData("changelog_filename", "README.md");
+			context.setData("changelog_location", "readme");
+			context.setData("changelog_before", fixtures.readme_testParseHeader);
+			context.setData("changelog_entries", [
+				fixtures.readme_testParse1,
+				fixtures.readme_testParse2,
+				fixtures.readme_testParse3,
+				fixtures.changelog_old_testParse1,
+				fixtures.changelog_old_testParse2,
+			]);
+			// As produced by the check stage: footer followed by a trailing section
+			context.setData(
+				"changelog_after",
+				`\n\n${fixtures.readme_olderEntriesFooter}\n\n${fixtures.readme_trailingSection}`,
+			);
+			context.setData("changelog_final_newline", false);
+			context.setData("changelog_old_before", fixtures.changelog_old_testParseHeader);
+			context.setData("changelog_old_after", "");
+			context.setData("changelog_entry_prefix", "###");
+			context.setData("version_new", "2.3.4");
+
+			await changelogPlugin.executeStage(context, DefaultStages.edit);
+
+			const readmeContent = await fs.readFile(path.join(testFSRoot, "README.md"), "utf8");
+
+			// The footer and the following section must each keep one blank line around them
+			expect(readmeContent).toBe(`${fixtures.readme_testParseHeader}
+${fixtures.readme_testReplaced}
+
+${fixtures.readme_testParse2}
+
+${fixtures.readme_olderEntriesFooter}
+
+${fixtures.readme_trailingSection}`);
 		});
 
 		it("removes unnecessary blank linkes from the changelog", async () => {
