@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "5.2.0",
+  "version": "5.2.1",
   "type": "module",
   "description": "Plugin for Al Calzone's release script: changelog",
   "keywords": [],

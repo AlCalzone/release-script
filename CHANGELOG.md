@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## 5.2.1 (2026-06-03)
+* Fix: preserve newlines between `CHANGELOG_OLD.md` link and README footer (#207)
+
 ## 5.2.0 (2026-05-06)
 * Local changes are now snapshotted and restored if the release fails locally (#205)
 * Fix: make `CHANGELOG_OLD.md` rotation more resilient (#202)
