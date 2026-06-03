@@ -168,7 +168,13 @@ class ChangelogPlugin implements Plugin {
 			const footerMatch = olderEntriesFooterRegex.exec(parsed.entries[lastIndex]);
 			if (footerMatch) {
 				parsed.entries[lastIndex] = parsed.entries[lastIndex].slice(0, footerMatch.index);
-				parsed.after = "\n\n" + footerMatch[1] + parsed.after;
+				// Sections following the footer (e.g. a "## License" heading) were
+				// separated from it by a blank line that entry parsing trimmed away.
+				// Restore that separation so the footer doesn't get glued onto the
+				// next section.
+				const trailingSection = parsed.after.trimStart();
+				parsed.after =
+					"\n\n" + footerMatch[1] + (trailingSection ? "\n\n" + trailingSection : "");
 			}
 		}
 
