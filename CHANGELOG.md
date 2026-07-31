@@ -3,6 +3,9 @@
     Placeholder for the next version (at the beginning of the line):
     ## **WORK IN PROGRESS**
 -->
+## 5.2.2 (2026-07-31)
+* `license` plugin: Do not complain about outdated copyright year in GPL and similar licenses (#209)
+
 ## 5.2.1 (2026-06-03)
 * Fix: preserve newlines between `CHANGELOG_OLD.md` link and README footer (#207)
 
