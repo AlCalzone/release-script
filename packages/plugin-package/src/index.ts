@@ -294,40 +294,64 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 				)}`,
 			);
 
-			await deleteStableVersions();
-			const yarnGte4 =
-				context.hasData("yarn_version") &&
-				semver.gte(context.getData<string>("yarn_version"), "4.0.0");
+			const yarnVersion = context.hasData("yarn_version")
+				? context.getData<string>("yarn_version")
+				: undefined;
+			const yarnGte4 = !!yarnVersion && semver.gte(yarnVersion, "4.0.0");
+			const yarnGte418 = !!yarnVersion && semver.gte(yarnVersion, "4.18.0");
 
-			const commands = [
-				publishAll
-					? [
-							"yarn",
-							"workspaces",
-							"foreach",
-							...(yarnGte4 ? ["--all"] : []),
-							"version",
-							newVersion,
-							"--deferred",
-						]
+			// yarn before 4.18.0 mishandles a pre-existing stableVersion field
+			if (!yarnGte418) await deleteStableVersions();
+
+			let commands: string[][];
+			if (yarnGte418) {
+				// yarn 4.18.0 applies bumps immediately and updates dependent ranges itself
+				commands = publishAll
+					? [["yarn", "version", newVersion, "--all", "--immediate"]]
 					: [
-							"yarn",
-							"changed",
-							"foreach",
-							...(yarnGte4 ? ["--all"] : []),
-							`--git-range=v${pack.version}`,
-							"version",
-							newVersion,
-							"--deferred",
-						],
-				["yarn", "version", newVersion, "--deferred"],
-				["yarn", "version", "apply", "--all"],
-			];
+							[
+								"yarn",
+								"changed",
+								"foreach",
+								"--all",
+								`--git-range=v${pack.version}`,
+								"version",
+								newVersion,
+								"--immediate",
+							],
+							["yarn", "version", newVersion, "--immediate"],
+						];
+			} else {
+				commands = [
+					publishAll
+						? [
+								"yarn",
+								"workspaces",
+								"foreach",
+								...(yarnGte4 ? ["--all"] : []),
+								"version",
+								newVersion,
+								"--deferred",
+							]
+						: [
+								"yarn",
+								"changed",
+								"foreach",
+								...(yarnGte4 ? ["--all"] : []),
+								`--git-range=v${pack.version}`,
+								"version",
+								newVersion,
+								"--deferred",
+							],
+					["yarn", "version", newVersion, "--deferred"],
+					["yarn", "version", "apply", "--all"],
+				];
+			}
 			for (const [cmd, ...args] of commands) {
 				context.cli.logCommand(cmd, args);
 				await context.sys.exec(cmd, args, { cwd: context.cwd });
 			}
-			await deleteStableVersions();
+			if (!yarnGte418) await deleteStableVersions();
 		}
 	}
 
