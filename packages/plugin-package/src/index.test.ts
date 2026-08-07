@@ -515,7 +515,7 @@ describe("Package plugin", () => {
 			expect(foo).toHaveProperty("stableVersion", oldVersion);
 		});
 
-		it("bumps changed packages immediately on yarn >= 4.18.0 (no lerna)", async () => {
+		it("keeps deferred bumps for changed packages on yarn >= 4.18.0 (single install)", async () => {
 			const pkgPlugin = new PackagePlugin();
 			const context = createMockContext({
 				plugins: [pkgPlugin],
@@ -559,17 +559,18 @@ describe("Package plugin", () => {
 					`--git-range=v${pack.version}`,
 					"version",
 					newVersion,
-					"--immediate",
+					"--deferred",
 				],
-				["yarn", "version", newVersion, "--immediate"],
+				["yarn", "version", newVersion, "--deferred"],
+				["yarn", "version", "apply", "--all"],
 			];
 			for (const [cmd, ...args] of expectedCommands) {
 				expect(context.sys.exec).toHaveBeenCalledWith(cmd, args, expect.anything());
 			}
-			// The deferred + apply dance is gone on 4.18.0
+			// No per-workspace immediate bump, which would install once per package
 			expect(context.sys.exec).not.toHaveBeenCalledWith(
 				"yarn",
-				["version", "apply", "--all"],
+				expect.arrayContaining(["--immediate"]),
 				expect.anything(),
 			);
 		});

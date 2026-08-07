@@ -304,24 +304,11 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 			if (!yarnGte418) await deleteStableVersions();
 
 			let commands: string[][];
-			if (yarnGte418) {
-				// yarn 4.18.0 applies bumps immediately and updates dependent ranges itself
-				commands = publishAll
-					? [["yarn", "version", newVersion, "--all", "--immediate"]]
-					: [
-							[
-								"yarn",
-								"changed",
-								"foreach",
-								"--all",
-								`--git-range=v${pack.version}`,
-								"version",
-								newVersion,
-								"--immediate",
-							],
-							["yarn", "version", newVersion, "--immediate"],
-						];
+			if (yarnGte418 && publishAll) {
+				// yarn 4.18.0 bumps every workspace and rewrites dependent ranges in one install
+				commands = [["yarn", "version", newVersion, "--all", "--immediate"]];
 			} else {
+				// Deferred bumps avoid one full install per changed workspace
 				commands = [
 					publishAll
 						? [
