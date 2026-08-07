@@ -422,6 +422,206 @@ describe("Package plugin", () => {
 				expect(context.sys.exec).toHaveBeenCalledWith(cmd, args, expect.anything());
 			}
 		});
+
+		it("deletes the stableVersion field from changed packages on yarn < 4.18.0", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+			});
+
+			const oldVersion = "1.2.3";
+			const newVersion = "1.2.4";
+
+			const pack = {
+				name: "test-package",
+				version: oldVersion,
+				workspaces: ["packages/*"],
+			};
+			await testFS.create({
+				"package.json": JSON.stringify(pack, null, 2),
+				".yarnrc.yml": fixtures.yarnrc_complete,
+				"packages/foo/package.json": JSON.stringify({
+					name: "@package/foo",
+					version: oldVersion,
+					stableVersion: oldVersion,
+				}),
+			});
+
+			context.setData("package.json", pack);
+			context.setData("version", oldVersion);
+			context.setData("version_new", newVersion);
+			context.setData("monorepo", "yarn");
+			context.setData("yarn_version", "4.0.0");
+
+			context.sys.mockExec((cmd) =>
+				cmd.includes("changed list")
+					? `{"name":"@package/foo","location":"packages/foo"}`
+					: "",
+			);
+
+			await pkgPlugin.executeStage(context, DefaultStages.edit);
+			expect(context.errors).toHaveLength(0);
+
+			const foo = JSON.parse(
+				await fs.readFile(path.join(testFSRoot, "packages/foo/package.json"), "utf8"),
+			);
+			expect(foo).not.toHaveProperty("stableVersion");
+		});
+
+		it("keeps the stableVersion field on yarn >= 4.18.0", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+			});
+
+			const oldVersion = "1.2.3";
+			const newVersion = "1.2.4";
+
+			const pack = {
+				name: "test-package",
+				version: oldVersion,
+				workspaces: ["packages/*"],
+			};
+			await testFS.create({
+				"package.json": JSON.stringify(pack, null, 2),
+				".yarnrc.yml": fixtures.yarnrc_complete,
+				"packages/foo/package.json": JSON.stringify({
+					name: "@package/foo",
+					version: oldVersion,
+					stableVersion: oldVersion,
+				}),
+			});
+
+			context.setData("package.json", pack);
+			context.setData("version", oldVersion);
+			context.setData("version_new", newVersion);
+			context.setData("monorepo", "yarn");
+			context.setData("yarn_version", "4.18.0");
+
+			context.sys.mockExec((cmd) =>
+				cmd.includes("changed list")
+					? `{"name":"@package/foo","location":"packages/foo"}`
+					: "",
+			);
+
+			await pkgPlugin.executeStage(context, DefaultStages.edit);
+			expect(context.errors).toHaveLength(0);
+
+			const foo = JSON.parse(
+				await fs.readFile(path.join(testFSRoot, "packages/foo/package.json"), "utf8"),
+			);
+			expect(foo).toHaveProperty("stableVersion", oldVersion);
+		});
+
+		it("keeps deferred bumps for changed packages on yarn >= 4.18.0 (single install)", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+			});
+
+			const oldVersion = "1.2.3";
+			const newVersion = "1.2.4";
+
+			const pack = {
+				name: "test-package",
+				version: oldVersion,
+				workspaces: ["packages/*"],
+			};
+			await testFS.create({
+				"package.json": JSON.stringify(pack, null, 2),
+				".yarnrc.yml": fixtures.yarnrc_complete,
+			});
+
+			context.setData("package.json", pack);
+			context.setData("version", oldVersion);
+			context.setData("version_new", newVersion);
+			context.setData("monorepo", "yarn");
+			context.setData("yarn_version", "4.18.0");
+
+			context.sys.mockExec((cmd) =>
+				cmd.includes("changed list")
+					? `{"name":"@package/foo","location":"packages/foo"}`
+					: "",
+			);
+
+			await pkgPlugin.executeStage(context, DefaultStages.edit);
+			expect(context.errors).toHaveLength(0);
+
+			const expectedCommands = [
+				[
+					"yarn",
+					"changed",
+					"foreach",
+					"--all",
+					`--git-range=v${pack.version}`,
+					"version",
+					newVersion,
+					"--deferred",
+				],
+				["yarn", "version", newVersion, "--deferred"],
+				["yarn", "version", "apply", "--all"],
+			];
+			for (const [cmd, ...args] of expectedCommands) {
+				expect(context.sys.exec).toHaveBeenCalledWith(cmd, args, expect.anything());
+			}
+			// No per-workspace immediate bump, which would install once per package
+			expect(context.sys.exec).not.toHaveBeenCalledWith(
+				"yarn",
+				expect.arrayContaining(["--immediate"]),
+				expect.anything(),
+			);
+		});
+
+		it("bumps all workspaces immediately on yarn >= 4.18.0 with --publishAll", async () => {
+			const pkgPlugin = new PackagePlugin();
+			const context = createMockContext({
+				plugins: [pkgPlugin],
+				cwd: testFSRoot,
+				argv: { publishAll: true },
+			});
+
+			const oldVersion = "1.2.3";
+			const newVersion = "1.2.4";
+
+			const pack = {
+				name: "test-package",
+				version: oldVersion,
+				workspaces: ["packages/*"],
+			};
+			await testFS.create({
+				"package.json": JSON.stringify(pack, null, 2),
+				".yarnrc.yml": fixtures.yarnrc_complete,
+			});
+
+			context.setData("package.json", pack);
+			context.setData("version", oldVersion);
+			context.setData("version_new", newVersion);
+			context.setData("monorepo", "yarn");
+			context.setData("yarn_version", "4.18.0");
+
+			context.sys.mockExec((cmd) =>
+				cmd.includes("workspaces list")
+					? `{"name":"@package/foo","location":"packages/foo"}`
+					: "",
+			);
+
+			await pkgPlugin.executeStage(context, DefaultStages.edit);
+			expect(context.errors).toHaveLength(0);
+
+			expect(context.sys.exec).toHaveBeenCalledWith(
+				"yarn",
+				["version", newVersion, "--all", "--immediate"],
+				expect.anything(),
+			);
+			expect(context.sys.exec).not.toHaveBeenCalledWith(
+				"yarn",
+				["version", "apply", "--all"],
+				expect.anything(),
+			);
+		});
 	});
 
 	describe("commit stage", () => {
