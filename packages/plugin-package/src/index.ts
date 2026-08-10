@@ -294,10 +294,14 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 				)}`,
 			);
 
-			await deleteStableVersions();
-			const yarnGte4 =
-				context.hasData("yarn_version") &&
-				semver.gte(context.getData<string>("yarn_version"), "4.0.0");
+			const yarnVersion = context.hasData("yarn_version")
+				? context.getData<string>("yarn_version")
+				: undefined;
+			const yarnGte4 = !!yarnVersion && semver.gte(yarnVersion, "4.0.0");
+			const yarnGte418 = !!yarnVersion && semver.gte(yarnVersion, "4.18.0");
+
+			// yarn before 4.18.0 mishandles a pre-existing stableVersion field
+			if (!yarnGte418) await deleteStableVersions();
 
 			const commands = [
 				publishAll
@@ -327,7 +331,7 @@ Alternatively, you can use ${context.cli.colors.blue("lerna")} to manage the mon
 				context.cli.logCommand(cmd, args);
 				await context.sys.exec(cmd, args, { cwd: context.cwd });
 			}
-			await deleteStableVersions();
+			if (!yarnGte418) await deleteStableVersions();
 		}
 	}
 
