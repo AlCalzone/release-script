@@ -1,0 +1,11 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["github>AlCalzone/renovate-config:library"],
+  "packageRules": [
+    {
+      // Raise together with engines.node in packages/*/package.json
+      "matchPackageNames": ["@types/node"],
+      "allowedVersions": "<19"
+    }
+  ]
+}
