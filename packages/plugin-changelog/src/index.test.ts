@@ -67,6 +67,14 @@ stuff
 	readme_olderEntriesFooterCustomLabel: `See [the older changelog](CHANGELOG_OLD.md) for previous releases.`,
 	readme_trailingSection: `## License
 MIT License`,
+	readme_placeholderCommentHeader: `# README
+stuff
+## Changelog
+
+<!--
+	Placeholder for the next version (at the beginning of the line):
+	### **WORK IN PROGRESS**
+-->`,
 };
 
 describe("Changelog plugin", () => {
@@ -511,11 +519,45 @@ ${fixtures.changelog_old_testParseFooter}
 			const fileContent = await fs.readFile(path.join(testFSRoot, "README.md"), "utf8");
 
 			expect(fileContent).toBe(`${fixtures.readme_testParseHeader}
+
 ${fixtures.readme_testReplaced}
 
 ${fixtures.readme_testParse2}
 
 ${fixtures.readme_testParse3}`);
+		});
+
+		it("separates the first entry from the block before it with a blank line", async () => {
+			// The block before the changelog is often an HTML comment (the ioBroker placeholder
+			// hint). Without a blank line, `--\u003e` and the following heading end up glued
+			// together and Markdown formatters flag the file the release just committed.
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+			});
+
+			context.setData("changelog_filename", "README.md");
+			context.setData("changelog_location", "readme");
+			context.setData("changelog_before", fixtures.readme_placeholderCommentHeader);
+			context.setData("changelog_entries", [
+				fixtures.readme_testParse1,
+				fixtures.readme_testParse2,
+			]);
+			context.setData("changelog_after", "");
+			context.setData("changelog_final_newline", false);
+			context.setData("changelog_entry_prefix", "###");
+			context.setData("version_new", "2.3.4");
+
+			await changelogPlugin.executeStage(context, DefaultStages.edit);
+
+			const fileContent = await fs.readFile(path.join(testFSRoot, "README.md"), "utf8");
+
+			expect(fileContent).toBe(`${fixtures.readme_placeholderCommentHeader}
+
+${fixtures.readme_testReplaced}
+
+${fixtures.readme_testParse2}`);
 		});
 
 		it("updates CHANGELOG.md correctly", async () => {
@@ -543,6 +585,7 @@ ${fixtures.readme_testParse3}`);
 			const fileContent = await fs.readFile(path.join(testFSRoot, "CHANGELOG.md"), "utf8");
 
 			expect(fileContent).toBe(`${fixtures.changelog_testParseHeader}
+
 ${fixtures.changelog_testReplaced}
 
 ${fixtures.changelog_testParse2}
@@ -583,11 +626,13 @@ ${fixtures.changelog_testParse3}`);
 			const oldContent = await fs.readFile(path.join(testFSRoot, "CHANGELOG_OLD.md"), "utf8");
 
 			expect(readmeContent).toBe(`${fixtures.readme_testParseHeader}
+
 ${fixtures.readme_testReplaced}
 
 ${fixtures.readme_testParse2}`);
 
 			expect(oldContent).toBe(`${fixtures.changelog_old_testParseHeader}
+
 ${fixtures.readme_testParse3.slice(1)}
 
 ${fixtures.changelog_old_testParse1}
@@ -631,6 +676,7 @@ ${fixtures.changelog_old_testParse2}`);
 			// Footer must appear in README
 			expect(readmeContent).toContain(fixtures.readme_olderEntriesFooter);
 			expect(readmeContent).toBe(`${fixtures.readme_testParseHeader}
+
 ${fixtures.readme_testReplaced}
 
 ${fixtures.readme_testParse2}
@@ -640,6 +686,7 @@ ${fixtures.readme_olderEntriesFooter}`);
 			// Footer must NOT appear in CHANGELOG_OLD
 			expect(oldContent).not.toContain(fixtures.readme_olderEntriesFooter);
 			expect(oldContent).toBe(`${fixtures.changelog_old_testParseHeader}
+
 ${fixtures.readme_testParse3.slice(1)}
 
 ${fixtures.changelog_old_testParse1}
@@ -684,6 +731,7 @@ ${fixtures.changelog_old_testParse2}`);
 
 			// The footer and the following section must each keep one blank line around them
 			expect(readmeContent).toBe(`${fixtures.readme_testParseHeader}
+
 ${fixtures.readme_testReplaced}
 
 ${fixtures.readme_testParse2}
@@ -718,6 +766,7 @@ ${fixtures.readme_trailingSection}`);
 			const fileContent = await fs.readFile(path.join(testFSRoot, "CHANGELOG.md"), "utf8");
 
 			expect(fileContent).toBe(`${fixtures.changelog_testParseHeader}
+
 ${fixtures.changelog_testReplaced}
 
 ${fixtures.changelog_testParse2}
@@ -761,12 +810,14 @@ ${fixtures.changelog_old_testParseFooter}`);
 			const oldContent = await fs.readFile(path.join(testFSRoot, "CHANGELOG_OLD.md"), "utf8");
 
 			expect(readmeContent).toBe(`${fixtures.readme_testParseHeader}
+
 ${fixtures.readme_testReplaced}
 
 ${fixtures.readme_testParse2}
 `);
 
 			expect(oldContent).toBe(`${fixtures.changelog_old_testParseHeader}
+
 ${fixtures.readme_testParse3.slice(1)}
 
 ${fixtures.changelog_old_testParse1}
@@ -814,6 +865,7 @@ ${fixtures.changelog_old_testParseFooter}`;
 			});
 
 			const expected = `${fixtures.changelog_testParseHeader}
+
 ## **WORK IN PROGRESS**
 
 ${fixtures.changelog_testReplaced}
@@ -829,6 +881,37 @@ ${fixtures.changelog_old_testParseFooter}`;
 			const afterCleanup = await fs.readFile(path.join(testFSRoot, "CHANGELOG.md"), "utf8");
 
 			expect(afterCleanup).toBe(expected);
+		});
+
+		it("surrounds the new placeholder with a blank line on both sides", async () => {
+			const changelogPlugin = new ChangelogPlugin();
+			const context = createMockContext({
+				plugins: [changelogPlugin],
+				cwd: testFSRoot,
+				argv: {
+					addPlaceholder: true,
+				},
+			});
+			context.setData("changelog_entry_prefix", "###");
+			context.setData("changelog_filename", "README.md");
+			context.setData("changelog_location", "readme");
+			context.setData("changelog_before", fixtures.readme_placeholderCommentHeader);
+
+			await testFS.create({
+				"README.md": `${fixtures.readme_placeholderCommentHeader}
+
+${fixtures.readme_testReplaced}`,
+			});
+
+			await changelogPlugin.executeStage(context, DefaultStages.cleanup);
+
+			const afterCleanup = await fs.readFile(path.join(testFSRoot, "README.md"), "utf8");
+
+			expect(afterCleanup).toBe(`${fixtures.readme_placeholderCommentHeader}
+
+### **WORK IN PROGRESS**
+
+${fixtures.readme_testReplaced}`);
 		});
 
 		it("leaves CHANGELOG.md alone if it isn't", async () => {

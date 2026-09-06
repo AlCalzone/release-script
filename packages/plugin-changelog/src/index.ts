@@ -280,14 +280,14 @@ ${changelogPlaceholder}`,
 			context.cli.log(`Updating changelog in ${changelogFilename}`);
 			await fs.writeFile(
 				path.join(context.cwd, changelogFilename),
-				(changelogBefore + "\n" + entriesNew.join("") + changelogAfter).trim() +
+				(changelogBefore + "\n\n" + entriesNew.join("") + changelogAfter).trim() +
 					(changelogHasFinalNewline ? "\n" : ""),
 			);
 
 			context.cli.log(`Updating changelog in CHANGELOG_OLD.md`);
 			await fs.writeFile(
 				path.join(context.cwd, "CHANGELOG_OLD.md"),
-				(changelogOldBefore + "\n" + entriesOld.join("") + changelogOldAfter).trim() +
+				(changelogOldBefore + "\n\n" + entriesOld.join("") + changelogOldAfter).trim() +
 					(changelogOldHasFinalNewline ? "\n" : ""),
 			);
 		} else {
@@ -297,7 +297,7 @@ ${changelogPlaceholder}`,
 			context.cli.log(`Updating changelog in ${changelogFilename}`);
 			await fs.writeFile(
 				path.join(context.cwd, changelogFilename),
-				(changelogBefore + "\n" + normalizedEntries.join("") + changelogAfter).trim() +
+				(changelogBefore + "\n\n" + normalizedEntries.join("") + changelogAfter).trim() +
 					(changelogHasFinalNewline ? "\n" : ""),
 			);
 		}
@@ -309,11 +309,18 @@ ${changelogPlaceholder}`,
 		const prefix = context.getData<string>("changelog_entry_prefix");
 
 		const changelogPath = path.join(context.cwd, changelogFilename);
-		let fileContent = await fs.readFile(changelogPath, "utf8");
-		fileContent = `${fileContent.slice(0, changelogBefore.length)}
+		const fileContent = await fs.readFile(changelogPath, "utf8");
+		// Separate the placeholder from the block before it and from the first entry with a
+		// blank line each - Markdown formatters require one before a heading, and how many
+		// newlines the remainder starts with is not this function's business.
+		const before = fileContent.slice(0, changelogBefore.length);
+		const after = fileContent.slice(changelogBefore.length).replace(/^\n+/, "");
+		const withPlaceholder = `${before}
+
 ${prefix} ${changelogMarkers[0]}
-${fileContent.slice(changelogBefore.length)}`; // The part after the new placeholder contains a leading newline, so we don't need an extra one here
-		await fs.writeFile(changelogPath, fileContent);
+
+${after}`;
+		await fs.writeFile(changelogPath, withPlaceholder);
 	}
 
 	async executeStage(context: Context, stage: Stage): Promise<void> {
