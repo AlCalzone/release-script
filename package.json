@@ -28,7 +28,7 @@
     "commitizen": "^4.3.2",
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-prettier": "^5.5.7",
     "husky": "^7.0.4",
     "prettier": "^3.6.2",
     "source-map-support": "^0.5.21",
