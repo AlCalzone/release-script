@@ -158,7 +158,7 @@ __metadata:
   dependencies:
     "@commitlint/cli": "npm:^20.1.0"
     "@commitlint/config-conventional": "npm:^20.0.0"
-    "@tsconfig/node18": "npm:^18.2.7"
+    "@tsconfig/node20": "npm:^20.1.0"
     "@types/node": "npm:^18.19.129"
     "@types/semver": "npm:^7.7.1"
     "@types/yargs": "npm:^17.0.33"
@@ -1180,10 +1180,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node18@npm:^18.2.7":
-  version: 18.2.7
-  resolution: "@tsconfig/node18@npm:18.2.7"
-  checksum: 10/625d1a390f77b03e8c8d999db76f7ddacf261156a76e906d972e89a4b7fccdafecd44c9d8ed7d51c3cd752f1d15a8deeb459ef0f870c072d7c53094817ab6373
+"@tsconfig/node20@npm:^20.1.0":
+  version: 20.1.10
+  resolution: "@tsconfig/node20@npm:20.1.10"
+  checksum: 10/d57747bc85d3ab0e51d0d3804b2f26acb3c1488bc4bcd396ce8b27a0f83fb0414c58abc9150bb14ff0230f32f3b0546b25d58f43fc05dde15514141a7e23f4ca
   languageName: node
   linkType: hard
 
